@@ -48,10 +48,20 @@ def check_pyproject(root: Path):
         return False, str(e)
 
 
+def _python_exe(root: Path) -> str:
+    """Return the Python executable to use."""
+    # Prefer venv python
+    venv_python = root / ".venv" / "bin" / "python"
+    if venv_python.exists():
+        return str(venv_python)
+    return sys.executable
+
+
 def check_rcb_help(root: Path):
     try:
+        python = _python_exe(root)
         result = subprocess.run(
-            ["rcb", "--help"],
+            [python, "-m", "rarecellbenchmark.cli", "--help"],
             cwd=root,
             capture_output=True,
             text=True,
@@ -64,8 +74,9 @@ def check_rcb_help(root: Path):
 
 def check_create_toy_data(root: Path):
     try:
+        python = _python_exe(root)
         result = subprocess.run(
-            ["python", "scripts/create_toy_data.py"],
+            [python, "scripts/create_toy_data.py"],
             cwd=root,
             capture_output=True,
             text=True,
@@ -78,8 +89,9 @@ def check_create_toy_data(root: Path):
 
 def check_pytest(root: Path):
     try:
+        python = _python_exe(root)
         result = subprocess.run(
-            ["pytest", "-q"],
+            [python, "-m", "pytest", "-q"],
             cwd=root,
             capture_output=True,
             text=True,
