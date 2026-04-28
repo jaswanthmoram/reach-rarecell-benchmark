@@ -45,7 +45,7 @@ manuscript/
 
 ## Source of truth
 
-All figures and tables in this folder were generated from the benchmark pipeline (Phases 11–12) and copied from the original `paper_creation/` workspace. The canonical pipeline outputs live under `data/results/`; this folder provides a curated, submission-ready snapshot.
+All figures and tables in this folder were generated from the benchmark pipeline (Phases 11–12). This directory (`data/results/manuscript/`) is the curated, submission-ready snapshot of manuscript materials.
 
 ---
 

@@ -6,8 +6,8 @@
 - Package: `rarecellbenchmark`
 - CLI: `rcb`
 - License: MIT
-- Zenodo DOI: created by Zenodo after the first GitHub release archive
-- GHCR image: built by the release workflow and published to `ghcr.io/jaswanthmoram/reach-rarecell-benchmark`
+- Zenodo DOI: [10.5281/zenodo.19847108](https://doi.org/10.5281/zenodo.19847108)
+- GHCR image: built and available at `ghcr.io/jaswanthmoram/reach-rarecell-benchmark`
 
 ## Included in Git
 
@@ -32,8 +32,8 @@
 
 ## First Release Checklist
 
-1. Confirm CI passes on `main`.
-2. Publish the first GitHub release.
-3. Let the Docker workflow publish `ghcr.io/jaswanthmoram/reach-rarecell-benchmark:latest` and `ghcr.io/jaswanthmoram/reach-rarecell-benchmark:paper-2026`.
-4. Archive the release on Zenodo.
-5. Add the assigned DOI badge to `README.md` after Zenodo reports it.
+- [x] Confirm CI passes on `main`.
+- [x] Publish the first GitHub release.
+- [x] Let the Docker workflow publish `ghcr.io/jaswanthmoram/reach-rarecell-benchmark:latest` and `ghcr.io/jaswanthmoram/reach-rarecell-benchmark:paper-2026`.
+- [x] Archive the release on Zenodo.
+- [x] Add the assigned DOI badge to `README.md`.

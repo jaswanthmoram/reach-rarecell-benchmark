@@ -25,6 +25,20 @@ large unit-level exports, processed `.h5ad` files, and vector/publication
 exports should be distributed as release archive assets rather than committed
 to Git.
 
+## Manuscript Results Bundle
+
+The `data/results/manuscript/` directory contains the curated, submission-ready
+outputs from the benchmark pipeline (Phases 11–12):
+
+- **`figures/`** — 11 publication-quality PDF figures (Fig0–Fig10)
+- **`tables/`** — 25+ CSV tables, including the leaderboard, calibration metrics,
+  statistical tests, sensitivity analyses, and more
+- **`supplementary/`** — Markdown supplementary materials
+  (`EXCLUDED_METHODS.md`, `SENSITIVITY_ANALYSES.md`, `STATISTICAL_METHODS.md`)
+
+These files provide the canonical manuscript source materials for the REACH
+Benchmark and can be referenced directly in LaTeX or Markdown submissions.
+
 ## Data Access Barriers
 
 The following table classifies each dataset by access level and provides links or instructions for requesting controlled-access raw data where applicable.

@@ -59,7 +59,7 @@ Generated public tables and figures are written under `data/results/` and are tr
 
 ## Data Archives
 
-Zenodo DOI: created by Zenodo after a GitHub release is published.
+Zenodo DOI: [https://doi.org/10.5281/zenodo.19847108](https://doi.org/10.5281/zenodo.19847108)
 
 Planned archive contents:
 
@@ -71,4 +71,4 @@ Planned archive contents:
 | Full results | Full metric tables, reports, publication/vector figures, and release checksums |
 | Code release | Immutable GitHub release snapshot |
 
-After the first archive is published, add the assigned DOI badge to `README.md` and update citation metadata if Zenodo reports a DOI immediately.
+The Zenodo archive is published and the DOI above is active. Add the DOI badge to `README.md` and update citation metadata as needed.

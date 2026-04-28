@@ -1,24 +1,94 @@
 # REACH Benchmark
 
-Rare-cell Evaluation Across Cancer Heterogeneity (REACH) is a reproducible benchmark for rare malignant cell detection in single-cell RNA-seq data.
+> **Rare-cell Evaluation Across Cancer Heterogeneity** — a systematic, reproducible benchmark for detecting rare malignant cells in single-cell RNA sequencing data.
 
 [![CI](https://github.com/jaswanthmoram/reach-rarecell-benchmark/actions/workflows/ci.yml/badge.svg)](https://github.com/jaswanthmoram/reach-rarecell-benchmark/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Docker](https://img.shields.io/badge/docker-ghcr.io-blue)](https://ghcr.io/jaswanthmoram/reach-rarecell-benchmark)
+[![Zenodo DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.19847108-blue)](https://doi.org/10.5281/zenodo.19847108)
 
-## Status
+---
 
-This repository is the clean public source repository for REACH. It contains code, configuration, tests, documentation, toy-data generation, a frozen CSV snapshot for reproducibility checks, and a small public result bundle.
+## At a glance
 
-Release artifacts are pending:
-
-| Artifact | Status |
+| | |
 |---|---|
-| GitHub repository | `jaswanthmoram/reach-rarecell-benchmark` |
-| Zenodo DOI | Enabled for GitHub release archiving; DOI appears after the first release is archived |
-| GHCR Docker image | Built by the Docker workflow when a GitHub release is published |
-| Python package import | `rarecellbenchmark` |
-| CLI | `rcb` |
+| **Datasets** | 10 scRNA-seq cohorts across 8 solid-tumour types and 2 blood malignancies |
+| **Tracks** | 5 (controlled spike-ins · synthetic stress-test · null controls · natural prevalence · noisy labels) |
+| **Methods** | 10 wrappers (6 ranked detectors · 2 baselines · 1 supervised ceiling · 1 exploratory) |
+| **Benchmark units** | 1,110 |
+| **Method–unit evaluations** | 11,100 |
+| **Primary metric** | Average Precision (AP) on P_HC vs B_HC |
+
+---
+
+## What problem it solves
+
+Rare malignant cell detection is critical for understanding tumour heterogeneity, but method comparison is hampered by inconsistent datasets, metrics, and evaluation protocols. REACH provides a standardised, reproducible benchmark with explicit file contracts, fixed random seeds, and comprehensive statistical evaluation.
+
+---
+
+## Architecture
+
+```mermaid
+graph TD
+    A[Datasets<br/>10 GEO datasets] --> B[Preprocessing<br/>Canonical .h5ad]
+    B --> C[Validation<br/>Tier assignment P_HC–B_LC]
+    C --> D[Tracks A–E<br/>1,110 benchmark units]
+    D --> E[Methods<br/>10 wrappers]
+    E --> F[Predictions<br/>11,100 evaluations]
+    F --> G[Metrics & Stats<br/>AP, AUROC, Wilcoxon, CD]
+    G --> H[Figures & Leaderboard<br/>Publication-ready outputs]
+```
+
+See [`docs/architecture.md`](docs/architecture.md) for the full 12-phase design, file contracts, and data-flow diagrams.
+
+---
+
+## Quickstart
+
+### Option 1: Local installation
+
+```bash
+git clone https://github.com/jaswanthmoram/reach-rarecell-benchmark.git
+cd reach-rarecell-benchmark
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+python -m pip install -e '.[dev]'
+rcb create-toy-data
+rcb smoke-test
+```
+
+Both commands should exit with code 0. `create-toy-data` generates ~300 synthetic cells in `data/toy/`; `smoke-test` runs the three naive baselines and prints a mini-leaderboard.
+
+### Option 2: Docker (no installation needed)
+
+```bash
+# Pull the pre-built image
+docker pull ghcr.io/jaswanthmoram/reach-rarecell-benchmark:latest
+
+# Run smoke tests
+docker run --rm ghcr.io/jaswanthmoram/reach-rarecell-benchmark:latest rcb smoke-test
+
+# Run with mounted data directory
+docker run --rm -v $(pwd)/data:/app/data ghcr.io/jaswanthmoram/reach-rarecell-benchmark:latest rcb create-toy-data
+```
+
+### Generate manuscript figures
+
+Schematic figures (pipeline overview, track design, method audit) can be regenerated from the package without any data:
+
+```bash
+python scripts/generate_figures.py --pipeline --track-design --method-audit --output-dir figures/
+# or: make figures
+```
+
+Data-driven figures (leaderboard, runtime, critical-difference) require evaluation results in `data/results/`.
+
+> **Note on full pipeline commands:** `rcb run-phase`, `rcb run-track`, `rcb run-method`, `rcb evaluate`, `rcb figures`, `rcb verify-checksums`, and `rcb freeze-leaderboard` are scaffolded for v1.1. Full end-to-end rerun from raw data requires the archived datasets (Zenodo links below) and the documented environment.
+
+---
 
 ## Result Preview
 
@@ -40,42 +110,9 @@ Regenerate the public result bundle with:
 python scripts/reproduce_from_snapshots.py
 ```
 
-## Quickstart
+---
 
-```bash
-git clone https://github.com/jaswanthmoram/reach-rarecell-benchmark.git
-cd reach-rarecell-benchmark
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install -e '.[dev]'
-rcb create-toy-data
-rcb smoke-test
-```
-
-`rcb create-toy-data` writes a small synthetic dataset to `data/toy/`. The generated `.h5ad`, parquet, and manifest files are intentionally ignored by Git.
-
-To build the container locally before the first GHCR release:
-
-```bash
-docker build -t reach-rarecell-benchmark:local .
-docker run --rm reach-rarecell-benchmark:local rcb smoke-test
-```
-
-## Scope
-
-REACH defines a benchmark framework with:
-
-| Area | Contents |
-|---|---|
-| Datasets | 10 configured scRNA-seq cohorts across solid tumors and blood malignancies |
-| Tracks | A-E: spike-ins, synthetic stress tests, null controls, natural prevalence, noisy labels |
-| Methods | 10 wrappers: ranked detectors, naive baselines, a supervised ceiling, and one exploratory method |
-| Metrics | Average Precision, AUROC, top-k metrics, calibration checks, runtime, and rank summaries |
-| Reproducibility | Fixed configs, file contracts, tests, smoke checks, and snapshot CSVs |
-
-Large processed datasets, track units, predictions, and full unit-level result exports are not committed to this repository. Small public summary tables and PNG previews are tracked for review and reproducibility checks. Large artifacts belong in release archives.
-
-## Repository Layout
+## Repository layout
 
 ```text
 reach-rarecell-benchmark/
@@ -83,58 +120,138 @@ reach-rarecell-benchmark/
 ├── configs/          # Dataset, method, metric, signature, and track configs
 ├── data/             # Directory skeleton, snapshot CSVs, and small public result bundle
 ├── docs/             # Architecture, installation, reproducibility, and extension guides
+├── figures/          # Manuscript and schematic figures
+├── logs/             # Runtime logs and execution records
 ├── requirements/     # Split dependency lists
 ├── scripts/          # Toy data, validation, orchestration, and snapshot utilities
 ├── setup/            # Optional environment setup notes
-├── src/              # Python package: rarecellbenchmark
+├── src/
+│   └── rarecellbenchmark/
+│       ├── ingest/       # Phase 1–2 data ingestion
+│       ├── preprocess/   # Phase 2 preprocessing
+│       ├── validate/     # Phase 3 validation and tier assignment
+│       ├── tracks/       # Phases 4–8 track generation
+│       ├── methods/      # Phase 9 wrappers
+│       ├── evaluate/     # Phase 11 evaluation
+│       ├── figures/      # Phase 12 figure generation
+│       ├── execute/      # Pipeline execution helpers
+│       ├── reports/      # Summary reports
+│       ├── io/           # File I/O utilities
+│       └── shared/       # Shared constants and schemas
 ├── tables/           # Notes for generated table outputs
-└── tests/            # Unit and smoke tests
+├── tests/            # Unit and smoke tests
+├── pyproject.toml    # Python package metadata
+├── Dockerfile        # Container image
+├── docker-compose.yml
+├── Makefile          # Common development tasks
+├── Snakefile         # Snakemake workflow scaffold
+├── dvc.yaml          # DVC data-versioning pipeline
+└── environment.yml   # Conda environment specification
 ```
 
-## Tracks
+---
 
-| Track | Name | Purpose |
-|---|---|---|
-| A | Controlled real spike-ins | Primary controlled benchmark with rare malignant cells spiked into background cells |
-| B | Synthetic stress test | Synthetic units for stress testing prevalence and separability |
-| C | Null controls | Background-only units for false-positive calibration |
-| D | Natural prevalence | Blood/CTC-style natural-prevalence units |
-| E | Noisy-label robustness | Label-corruption stress tests for methods that use labels |
+## Benchmark tracks
 
-## Methods
+| Track | Name | Description |
+|-------|------|-------------|
+| A | Controlled Real Spike-ins | Primary track: real P_HC cells spiked into real B_HC background at controlled prevalence (T1–T4) |
+| B | Synthetic Splatter Stress-Test | Secondary track: synthetic data generated with Splatter; realism-audited |
+| C | Null Controls | Diagnostic track: background-only units to test false-positive calibration |
+| D | Natural Blood/CTC Prevalence | Primary track: natural prevalence in blood-origin datasets without artificial spike-ins |
+| E | Noisy-Label Robustness | Restricted track: label corruption while expression is held constant (supervised methods only) |
 
-The repository includes wrappers or baselines for `FiRE`, `DeepScena`, `RareQ`, `cellsius`, `scCAD`, `scMalignantFinder`, `CaSee`, `random_baseline`, `expr_threshold`, and `hvg_logreg`.
+---
 
-External methods may require their original R/Python packages or model assets. See [docs/METHODS.md](docs/METHODS.md) and [docs/EXTENDING_METHODS.md](docs/EXTENDING_METHODS.md).
+## Data availability
 
-## Data Policy
+All raw datasets are publicly available from GEO (accessions listed below). Processed datasets, track units, predictions, and frozen results are archived on Zenodo.
 
-Git tracks source files, configuration, docs, tests, directory placeholders, the `data/results/snapshots/paper_v1/` CSV snapshot, and the curated public result bundle under `data/results/tables/phase11/` and `data/results/figures/phase12/`. Git does not track generated or large artifacts such as:
+**What lives where:**
 
-- raw or processed `.h5ad` files
-- parquet predictions and labels
-- generated toy data
-- full track units and full benchmark outputs beyond the curated public summary bundle
-- logs, caches, virtual environments, and local assistant/tooling state
+| What | Where |
+|------|-------|
+| Code, configs, docs, toy data | This GitHub repository |
+| Processed `.h5ad` datasets (7.3 GB) | Zenodo [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX) |
+| Track Units A–C (18 GB) | Zenodo [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX) |
+| Track Units D–E + Predictions (3.9 GB) | Zenodo [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX) |
+| Frozen metrics & results (18 MB) | Zenodo [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX) |
 
-See [data/README.md](data/README.md) and [docs/reproducibility.md](docs/reproducibility.md) for expected data locations and regeneration notes.
+Code releases are archived automatically via the GitHub–Zenodo integration. The concept DOI [10.5281/zenodo.19847108](https://doi.org/10.5281/zenodo.19847108) always resolves to the latest version.
 
-## Development
+---
 
-```bash
-python -m pip install -e '.[dev]'
-pytest -q
-ruff check src tests scripts
-rcb create-toy-data
-rcb smoke-test
-```
+## Datasets
 
-The GitHub CI workflow runs linting, unit tests, and the CLI smoke test.
+| Dataset | Cancer type | Cells | Platform | Accession |
+|---|---|---|---|---|
+| hnscc_puram | Head & neck SCC | 5,902 | SMART-seq2 | GSE103322 |
+| ov_izar_tirosh | Ovarian cancer (ascites) | 9,482 | 10x Chromium | GSE146026 |
+| hcc_wei | Hepatocellular carcinoma | 19,382 | 10x Chromium | GSE149614 |
+| luad_laughney | Lung adenocarcinoma | 33,782 | 10x Chromium | GSE123902 |
+| rcc_multi | Renal cell carcinoma | 33,574 | 10x Chromium | GSE159115 |
+| pdac_peng | Pancreatic ductal adenocarcinoma | 123,488 | 10x Chromium | GSE202051 |
+| crc_lee | Colorectal cancer | 55,551 | 10x Chromium | GSE132465 |
+| bcc_yost | Basal cell carcinoma | ~47,000 | 10x Chromium | GSE123813 |
+| mm_ledergor | Multiple myeloma | 31,181 | 10x Chromium | GSE161801 |
+| breast_ctc_szczerba | Breast cancer CTCs | 357 | SMART-seq2 | GSE109761 |
+
+---
+
+## Included methods
+
+| Method | Status | Track(s) | Notes |
+|---|---|---|---|
+| FiRE | Full | A,B,C,D,E | R package |
+| DeepScena | Full | A,B,C,D,E | GPU optional |
+| RareQ | Full | A,B,C,D,E | Quantile-based rarity |
+| cellsius | Full | A,B,C,D,E | R-based rarity statistic |
+| scCAD | Full | A,B,C,D,E | Anomaly-based scorer |
+| scMalignantFinder | Full | A,B,C,D,E | Fast Python scorer |
+| CaSee | Exploratory | A,B,C,D,E | Faithful method (Yu et al., 2022) |
+| random_baseline | Baseline | A,B,C,D,E | Random floor |
+| expr_threshold | Baseline | A,B,C,D,E | Naive biological signal |
+| hvg_logreg | Ceiling | A,B,C,E | Supervised in-sample oracle |
+
+---
+
+## Metrics and leaderboard rules
+
+- **Primary metric:** Average Precision (AP) on P_HC vs B_HC, fallback-filtered.
+- **Secondary metric:** AUROC.
+- **Operational metrics:** F1@top-k, Precision@k, Recall@k, Balanced Accuracy, Runtime.
+- **Stratification:** Results are stratified by prevalence tier (T1–T4) and platform (SMART-seq2 vs 10x Chromium).
+- **Statistical tests:** Friedman + Iman-Davenport correction; Wilcoxon signed-rank with Benjamini-Hochberg FDR; bootstrap 95 % CIs on ranks.
+- **Visualisation:** Critical Difference (CD) diagrams.
+
+See [`docs/metrics.md`](docs/metrics.md) for full definitions and formulas.
+
+---
+
+## How to regenerate the benchmark
+
+See [`docs/benchmark_regeneration.md`](docs/benchmark_regeneration.md) for step-by-step instructions to reproduce the full pipeline from raw data through figures.
+
+---
+
+## How to add a new method
+
+See [`docs/adding_new_method.md`](docs/adding_new_method.md) for the wrapper interface, smoke-test protocol, and evaluation steps.
+
+---
 
 ## Citation
 
-Citation metadata is provided in [CITATION.cff](CITATION.cff). Zenodo archiving is enabled for the GitHub repository; the DOI badge can be added after the first release is archived by Zenodo.
+If you use REACH in your research, please cite it using the metadata in [`CITATION.cff`](CITATION.cff):
 
-## License
+```
+Moram, V. S. J. (2026). REACH: A Reproducible Benchmark for Rare Malignant Cell Detection
+in scRNA-seq Data. https://github.com/jaswanthmoram/reach-rarecell-benchmark.
+DOI: 10.5281/zenodo.19847108
+```
 
-REACH is released under the [MIT License](LICENSE). Contributions are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md).
+---
+
+## License and contributions
+
+REACH is released under the [MIT License](LICENSE). Contributions are welcome — please see [`CONTRIBUTING.md`](CONTRIBUTING.md) for guidelines.

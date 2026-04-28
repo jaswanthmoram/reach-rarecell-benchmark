@@ -1,5 +1,7 @@
 # REACH Documentation
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19847108.svg)](https://doi.org/10.5281/zenodo.19847108)
+
 Welcome to the REACH benchmark documentation. This site covers everything from getting started to advanced topics like adding new methods, tracks, and datasets.
 
 ## Getting Started
