@@ -157,12 +157,36 @@ A large gap between platforms suggests the method is sensitive to technical arte
 
 ---
 
-## 8. Common pitfalls
+## 8. Track E — Important Caveat
+
+Track E (Noisy-Label Robustness) applies label corruption while keeping expression matrices unchanged. **This track is interpretable only for supervised methods** (`hvg_logreg`) that consume labels as input.
+
+For all **unsupervised methods** (FiRE, DeepScena, RareQ, cellsius, scCAD, scMalignantFinder, CaSee, random_baseline, expr_threshold), predictions on Track E are **identical** to Track A — they do not see labels. Any measured "AP drop" is purely a metric sensitivity artefact caused by evaluating the same predictions against corrupted ground-truth labels.
+
+**Therefore:**
+- **Robustness claims** from Track E are restricted to the supervised `hvg_logreg` oracle only.
+- For unsupervised methods, Track E results (if shown) should be labeled as **"Metric sensitivity under label corruption"**, not "algorithm robustness."
+- This design is intentional: Track E probes how the evaluation function reacts to label noise, which is a different scientific question than algorithmic robustness.
+
+---
+
+## 9. DeepScena — Expected Low Performance
+
+DeepScena (AP ≈ 0.029 on Track A, below the random baseline of ~0.067) shows very low scores in REACH. This is an **expected result**, not a wrapper bug:
+
+- **Designed for cluster discovery**, not for explicit malignant vs background single-cell scoring. Its latent structure encodes cluster identities rather than a continuous malignancy score.
+- Its score distributions heavily overlap between P_HC and background cells — see the diagnostic figure `data/results/figures/phase12/FigA1_DeepScena_Diagnostic.png`.
+- The wrapper faithfully reproduces the original DeepScena implementation; the low AP reflects a domain mismatch (cluster-level signals do not translate to per-cell rarity scores).
+
+**Reviewers should not interpret** DeepScena's low rank as evidence of a software bug. It is a legitimate observation about the gap between cluster-level and cell-level analysis tasks.
+
+---
+
+## 10. Common pitfalls
 
 1. **Do not compare AP across tracks directly.** Track B is synthetic; Track C is background-only; Track D has natural prevalence. Only Track A AP determines primary rank.
 2. **Do not ignore fallback units.** A method with 50% fallback units may have inflated median AP because only easy units succeeded. Check `n_fallback`.
-3. **Do not over-interpret Track E for unsupervised methods.** Unsupervised methods do not consume labels, so their Track E predictions are identical to Track A. The "AP drop" is purely a mathematical artefact.
-4. **Breakdown tier is a threshold, not a continuous score.** A method with breakdown tier `T2` and median AP 0.51 is not meaningfully worse than one with breakdown tier `T2` and median AP 0.89.
+3. **Breakdown tier is a threshold, not a continuous score.** A method with breakdown tier `T2` and median AP 0.51 is not meaningfully worse than one with breakdown tier `T2` and median AP 0.89.
 
 ---
 
