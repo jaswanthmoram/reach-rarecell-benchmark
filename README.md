@@ -138,7 +138,37 @@ python scripts/generate_figures.py --pipeline --track-design --method-audit --ou
 
 Data-driven figures (leaderboard, runtime, critical-difference) require evaluation results in `data/results/`.
 
-> **Note on full pipeline commands:** `rcb run-phase`, `rcb run-track`, `rcb run-method`, `rcb evaluate`, `rcb figures`, `rcb verify-checksums`, and `rcb freeze-leaderboard` are scaffolded for v1.1. Full end-to-end rerun from raw data requires the archived datasets (Zenodo links below) and the documented environment.
+### Running methods on track units
+
+Once you have toy data, run any method directly:
+
+```bash
+# List available methods
+python -c "from rarecellbenchmark.methods.registry import list_methods; print(list_methods())"
+
+# Run a baseline on toy data
+rcb run-method --method expr_threshold --unit-id toy_test \
+    --input data/toy/toy_expression.h5ad
+
+# Check output
+cat data/predictions/expr_threshold/toy_test_predictions.csv | head -5
+```
+
+All CLI commands:
+
+| Command | Purpose |
+|---------|---------|
+| `rcb create-toy-data` | Generate synthetic benchmark data |
+| `rcb smoke-test` | Verify installation (imports, configs, metrics) |
+| `rcb run-method --method X --unit-id Y --input Z` | Run one method on one unit |
+| `rcb run-track --track a --processed-h5ad P` | Generate track units from processed data |
+| `rcb evaluate --track a --predictions-dir D` | Compute metrics from predictions |
+| `rcb figures --all --output-dir O` | Generate publication figures |
+| `rcb run-phase --phase N` | Execute pipeline phases (requires Zenodo data) |
+| `rcb verify-checksums` | Verify snapshot integrity |
+| `rcb freeze-leaderboard` | Lock current leaderboard |
+
+> **Full pipeline:** `rcb run-phase`, `rcb run-track`, `rcb run-method`, `rcb evaluate`, and `rcb figures` work with local data. End-to-end rerun from raw GEO data requires archived datasets from Zenodo — see [Data availability](#data-availability).
 
 ---
 
@@ -282,13 +312,37 @@ See [`docs/metrics.md`](docs/metrics.md) for full definitions and formulas.
 
 ## How to regenerate the benchmark
 
-See [`docs/benchmark_regeneration.md`](docs/benchmark_regeneration.md) for step-by-step instructions to reproduce the full pipeline from raw data through figures.
+```bash
+# Quick: reproduce Phase 11-12 from frozen snapshots (no data needed)
+python scripts/reproduce_from_snapshots.py
+
+# Full: download processed data from Zenodo, then run tracks → methods → evaluate → figures
+# See docs/benchmark_regeneration.md for step-by-step instructions.
+```
 
 ---
 
 ## How to add a new method
 
-See [`docs/adding_new_method.md`](docs/adding_new_method.md) for the wrapper interface, smoke-test protocol, and evaluation steps.
+See [`docs/adding_new_method.md`](docs/adding_new_method.md) for the full wrapper interface. Quick summary:
+
+```bash
+# 1. Copy the template
+cp src/rarecellbenchmark/methods/TEMPLATE_new_method.py \
+   src/rarecellbenchmark/methods/naive/my_method.py
+cp configs/methods/TEMPLATE_new_method.yaml \
+   configs/methods/my_method.yaml
+
+# 2. Edit method_id, name, _compute_scores() in the Python file
+# 3. Register in registry.py:
+#    from .naive.my_method import MyMethodWrapper
+#    register(MyMethodWrapper)
+
+# 4. Test on toy data
+rcb create-toy-data
+rcb run-method --method my_method --unit-id test01 \
+    --input data/toy/toy_expression.h5ad
+```
 
 ---
 
