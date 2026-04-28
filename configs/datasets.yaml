@@ -1,270 +1,252 @@
-version: "1.0.0"
-# ---
-# checksum_raw / checksum_processed are intentionally null.
-# SHA-256 checksums are computed at runtime via `rcb verify-checksums`
-# because:
-#   - Raw GEO downloads may have variable metadata (dates, headers)
-#   - Processed .h5ad files are distributed via Zenodo, which provides
-#     its own integrity verification.
-#   - Hardcoding checksums in configs would break with any reprocessing.
-# ---
+version: 1.0.0
 datasets:
-  - dataset_id: hnscc_puram
-    cancer_type: head_and_neck_scc
-    modality: scRNA-seq
-    accession: GSE103322
-    raw_source_url: "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE103322"
-    loader: rarecellbenchmark.data.loaders.load_h5ad
-    organism: human
-    genome: GRCh38
-    platform: SMARTseq2
-    n_cells_expected: 5902
-    positive_label_column: cell_type
-    positive_label_values:
-      - Malignant cells
-    background_label_values:
-      - T cells
-      - B cells
-      - Macrophages
-      - Fibroblasts
-      - Endothelial
-      - Mast cells
-    checksum_raw: null
-    checksum_processed: null
-    enabled: true
-    data_access: public
-    terms_url: "https://www.ncbi.nlm.nih.gov/geo/info/disclaimer.html"
-    notes: "Raw data unavailable due to privacy"
-
-  - dataset_id: bcc_yost
-    cancer_type: basal_cell_carcinoma
-    modality: scRNA-seq
-    accession: GSE123813
-    raw_source_url: "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE123813"
-    loader: rarecellbenchmark.data.loaders.load_h5ad
-    organism: human
-    genome: GRCh38
-    platform: 10x_chromium
-    n_cells_expected: 47000
-    positive_label_column: cell_type
-    positive_label_values:
-      - Tumor cells
-    background_label_values:
-      - T cells
-      - B cells
-      - Macrophages
-      - NK cells
-      - Plasmacytoid DCs
-    checksum_raw: null
-    checksum_processed: null
-    enabled: true
-    data_access: public
-    terms_url: "https://www.ncbi.nlm.nih.gov/geo/info/disclaimer.html"
-    notes: ""
-
-  - dataset_id: hcc_wei
-    cancer_type: hepatocellular_carcinoma
-    modality: scRNA-seq
-    accession: GSE149614
-    raw_source_url: "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE149614"
-    loader: rarecellbenchmark.data.loaders.load_h5ad
-    organism: human
-    genome: GRCh38
-    platform: 10x_chromium
-    n_cells_expected: 19382
-    positive_label_column: cell_type
-    positive_label_values:
-      - Malignant hepatocytes
-    background_label_values:
-      - T cells
-      - B cells
-      - NK cells
-      - Macrophages
-      - Normal hepatocytes
-    checksum_raw: null
-    checksum_processed: null
-    enabled: true
-    data_access: public_processed_controlled_raw
-    terms_url: "https://www.ncbi.nlm.nih.gov/geo/info/disclaimer.html"
-    notes: "Raw via EGA EGAS00001004468"
-
-  - dataset_id: luad_laughney
-    cancer_type: lung_adenocarcinoma
-    modality: scRNA-seq
-    accession: GSE123902
-    raw_source_url: "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE123902"
-    loader: rarecellbenchmark.data.loaders.load_h5ad
-    organism: human
-    genome: GRCh38
-    platform: 10x_chromium
-    n_cells_expected: 33782
-    positive_label_column: cell_type
-    positive_label_values:
-      - Cancer cells
-    background_label_values:
-      - T cells
-      - B cells
-      - Macrophages
-      - Fibroblasts
-      - Endothelial
-      - Club cells
-    checksum_raw: null
-    checksum_processed: null
-    enabled: true
-    data_access: public
-    terms_url: "https://www.ncbi.nlm.nih.gov/geo/info/disclaimer.html"
-    notes: ""
-
-  - dataset_id: pdac_peng
-    cancer_type: pancreatic_ductal_adenocarcinoma
-    modality: scRNA-seq
-    accession: GSE202051
-    raw_source_url: "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE202051"
-    loader: rarecellbenchmark.data.loaders.load_h5ad
-    organism: human
-    genome: GRCh38
-    platform: 10x_chromium
-    n_cells_expected: 123488
-    positive_label_column: cell_type
-    positive_label_values:
-      - Ductal cells
-    background_label_values:
-      - T cells
-      - B cells
-      - Macrophages
-      - PSCs
-      - Endothelial
-      - Ductal-B
-    checksum_raw: null
-    checksum_processed: null
-    enabled: true
-    data_access: public
-    terms_url: "https://www.ncbi.nlm.nih.gov/geo/info/disclaimer.html"
-    notes: ""
-
-  - dataset_id: crc_lee
-    cancer_type: colorectal_cancer
-    modality: scRNA-seq
-    accession: GSE132465
-    raw_source_url: "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE132465"
-    loader: rarecellbenchmark.data.loaders.load_h5ad
-    organism: human
-    genome: GRCh38
-    platform: 10x_chromium
-    n_cells_expected: 55551
-    positive_label_column: cell_type
-    positive_label_values:
-      - Epithelial cells
-    background_label_values:
-      - T cells
-      - B cells
-      - Mast cells
-      - Stromal cells
-      - Endothelial
-    checksum_raw: null
-    checksum_processed: null
-    enabled: true
-    data_access: public
-    terms_url: "https://www.ncbi.nlm.nih.gov/geo/info/disclaimer.html"
-    notes: "Raw unavailable due to privacy"
-
-  - dataset_id: rcc_multi
-    cancer_type: renal_cell_carcinoma
-    modality: scRNA-seq
-    accession: GSE159115
-    raw_source_url: "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE159115"
-    loader: rarecellbenchmark.data.loaders.load_h5ad
-    organism: human
-    genome: GRCh38
-    platform: 10x_chromium
-    n_cells_expected: 33574
-    positive_label_column: cell_type
-    positive_label_values:
-      - Tumor cells
-    background_label_values:
-      - T cells
-      - B cells
-      - NK cells
-      - Myeloid
-      - Endothelial
-      - Normal epithelial
-    checksum_raw: null
-    checksum_processed: null
-    enabled: true
-    data_access: public
-    terms_url: "https://www.ncbi.nlm.nih.gov/geo/info/disclaimer.html"
-    notes: "Raw intended for dbGaP"
-
-  - dataset_id: ov_izar_tirosh
-    cancer_type: ovarian_cancer
-    modality: scRNA-seq
-    accession: GSE146026
-    raw_source_url: "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE146026"
-    loader: rarecellbenchmark.data.loaders.load_h5ad
-    organism: human
-    genome: GRCh38
-    platform: 10x_chromium
-    n_cells_expected: 9482
-    positive_label_column: cell_type
-    positive_label_values:
-      - Cancer cells
-    background_label_values:
-      - T cells
-      - B cells
-      - NK cells
-      - Macrophages
-      - Fibroblasts
-    checksum_raw: null
-    checksum_processed: null
-    enabled: true
-    data_access: public
-    terms_url: "https://www.ncbi.nlm.nih.gov/geo/info/disclaimer.html"
-    notes: "DUOS/Broad route for raw"
-
-  - dataset_id: mm_ledergor
-    cancer_type: multiple_myeloma
-    modality: scRNA-seq
-    accession: GSE161801
-    raw_source_url: "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE161801"
-    loader: rarecellbenchmark.data.loaders.load_h5ad
-    organism: human
-    genome: GRCh38
-    platform: 10x_chromium
-    n_cells_expected: 31181
-    positive_label_column: cell_type
-    positive_label_values:
-      - Plasma cells
-    background_label_values:
-      - T cells
-      - B cells
-      - NK cells
-      - Monocytes
-      - Normal plasma cells
-    checksum_raw: null
-    checksum_processed: null
-    enabled: true
-    data_access: public_processed_controlled_raw
-    terms_url: "https://www.ncbi.nlm.nih.gov/geo/info/disclaimer.html"
-    notes: "Raw via EGA EGAS00001004805"
-
-  - dataset_id: breast_ctc_szczerba
-    cancer_type: breast_cancer_ctc
-    modality: scRNA-seq
-    accession: GSE109761
-    raw_source_url: "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE109761"
-    loader: rarecellbenchmark.data.loaders.load_h5ad
-    organism: human
-    genome: GRCh38
-    platform: SMARTseq2
-    n_cells_expected: 357
-    positive_label_column: cell_type
-    positive_label_values:
-      - CTCs
-    background_label_values:
-      - WBCs
-    checksum_raw: null
-    checksum_processed: null
-    enabled: true
-    data_access: public
-    terms_url: "https://www.ncbi.nlm.nih.gov/geo/info/disclaimer.html"
-    notes: ""
+- dataset_id: hnscc_puram
+  cancer_type: head_and_neck_scc
+  modality: scRNA-seq
+  accession: GSE103322
+  raw_source_url: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE103322
+  loader: rarecellbenchmark.data.loaders.load_h5ad
+  organism: human
+  genome: GRCh38
+  platform: SMARTseq2
+  n_cells_expected: 5902
+  positive_label_column: cell_type
+  positive_label_values:
+  - Malignant cells
+  background_label_values:
+  - T cells
+  - B cells
+  - Macrophages
+  - Fibroblasts
+  - Endothelial
+  - Mast cells
+  checksum_raw: null
+  checksum_processed: sha256:99d0199fa50010fe945968aa14518781b49fbac4e611b9718787e1603a9f6d2d
+  enabled: true
+  data_access: public
+  terms_url: https://www.ncbi.nlm.nih.gov/geo/info/disclaimer.html
+  notes: Raw data unavailable due to privacy
+- dataset_id: bcc_yost
+  cancer_type: basal_cell_carcinoma
+  modality: scRNA-seq
+  accession: GSE123813
+  raw_source_url: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE123813
+  loader: rarecellbenchmark.data.loaders.load_h5ad
+  organism: human
+  genome: GRCh38
+  platform: 10x_chromium
+  n_cells_expected: 47000
+  positive_label_column: cell_type
+  positive_label_values:
+  - Tumor cells
+  background_label_values:
+  - T cells
+  - B cells
+  - Macrophages
+  - NK cells
+  - Plasmacytoid DCs
+  checksum_raw: null
+  checksum_processed: sha256:bf1e5f2ce4b3fd45e6043a2562a107dc71939b88d56eb8dad6f8181bd030b30c
+  enabled: true
+  data_access: public
+  terms_url: https://www.ncbi.nlm.nih.gov/geo/info/disclaimer.html
+  notes: ''
+- dataset_id: hcc_wei
+  cancer_type: hepatocellular_carcinoma
+  modality: scRNA-seq
+  accession: GSE149614
+  raw_source_url: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE149614
+  loader: rarecellbenchmark.data.loaders.load_h5ad
+  organism: human
+  genome: GRCh38
+  platform: 10x_chromium
+  n_cells_expected: 19382
+  positive_label_column: cell_type
+  positive_label_values:
+  - Malignant hepatocytes
+  background_label_values:
+  - T cells
+  - B cells
+  - NK cells
+  - Macrophages
+  - Normal hepatocytes
+  checksum_raw: null
+  checksum_processed: sha256:e548e85f3f03fbd7ed4c5c5618655573f536b306b097c3ca6c2e00d379544576
+  enabled: true
+  data_access: public_processed_controlled_raw
+  terms_url: https://www.ncbi.nlm.nih.gov/geo/info/disclaimer.html
+  notes: Raw via EGA EGAS00001004468
+- dataset_id: luad_laughney
+  cancer_type: lung_adenocarcinoma
+  modality: scRNA-seq
+  accession: GSE123902
+  raw_source_url: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE123902
+  loader: rarecellbenchmark.data.loaders.load_h5ad
+  organism: human
+  genome: GRCh38
+  platform: 10x_chromium
+  n_cells_expected: 33782
+  positive_label_column: cell_type
+  positive_label_values:
+  - Cancer cells
+  background_label_values:
+  - T cells
+  - B cells
+  - Macrophages
+  - Fibroblasts
+  - Endothelial
+  - Club cells
+  checksum_raw: null
+  checksum_processed: sha256:64c268dbf16e6e7fab22007acb0b25089cb6f43d4449ba41edf65c94ca5966c5
+  enabled: true
+  data_access: public
+  terms_url: https://www.ncbi.nlm.nih.gov/geo/info/disclaimer.html
+  notes: ''
+- dataset_id: pdac_peng
+  cancer_type: pancreatic_ductal_adenocarcinoma
+  modality: scRNA-seq
+  accession: GSE202051
+  raw_source_url: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE202051
+  loader: rarecellbenchmark.data.loaders.load_h5ad
+  organism: human
+  genome: GRCh38
+  platform: 10x_chromium
+  n_cells_expected: 123488
+  positive_label_column: cell_type
+  positive_label_values:
+  - Ductal cells
+  background_label_values:
+  - T cells
+  - B cells
+  - Macrophages
+  - PSCs
+  - Endothelial
+  - Ductal-B
+  checksum_raw: null
+  checksum_processed: sha256:73d4629fce8133c72e96d3705b3eac9930f4aa8f13875d7f1f7fd0bc7e0885ec
+  enabled: true
+  data_access: public
+  terms_url: https://www.ncbi.nlm.nih.gov/geo/info/disclaimer.html
+  notes: ''
+- dataset_id: crc_lee
+  cancer_type: colorectal_cancer
+  modality: scRNA-seq
+  accession: GSE132465
+  raw_source_url: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE132465
+  loader: rarecellbenchmark.data.loaders.load_h5ad
+  organism: human
+  genome: GRCh38
+  platform: 10x_chromium
+  n_cells_expected: 55551
+  positive_label_column: cell_type
+  positive_label_values:
+  - Epithelial cells
+  background_label_values:
+  - T cells
+  - B cells
+  - Mast cells
+  - Stromal cells
+  - Endothelial
+  checksum_raw: null
+  checksum_processed: sha256:3d0984f1c07404dc24ad457ffa9673a359891163ab368ceb5bf2e0010ff338cc
+  enabled: true
+  data_access: public
+  terms_url: https://www.ncbi.nlm.nih.gov/geo/info/disclaimer.html
+  notes: Raw unavailable due to privacy
+- dataset_id: rcc_multi
+  cancer_type: renal_cell_carcinoma
+  modality: scRNA-seq
+  accession: GSE159115
+  raw_source_url: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE159115
+  loader: rarecellbenchmark.data.loaders.load_h5ad
+  organism: human
+  genome: GRCh38
+  platform: 10x_chromium
+  n_cells_expected: 33574
+  positive_label_column: cell_type
+  positive_label_values:
+  - Tumor cells
+  background_label_values:
+  - T cells
+  - B cells
+  - NK cells
+  - Myeloid
+  - Endothelial
+  - Normal epithelial
+  checksum_raw: null
+  checksum_processed: sha256:770a235aa45027e8fdca57353c13bc46dcc6ee57d8494642de88fb9e2c604b1f
+  enabled: true
+  data_access: public
+  terms_url: https://www.ncbi.nlm.nih.gov/geo/info/disclaimer.html
+  notes: Raw intended for dbGaP
+- dataset_id: ov_izar_tirosh
+  cancer_type: ovarian_cancer
+  modality: scRNA-seq
+  accession: GSE146026
+  raw_source_url: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE146026
+  loader: rarecellbenchmark.data.loaders.load_h5ad
+  organism: human
+  genome: GRCh38
+  platform: 10x_chromium
+  n_cells_expected: 9482
+  positive_label_column: cell_type
+  positive_label_values:
+  - Cancer cells
+  background_label_values:
+  - T cells
+  - B cells
+  - NK cells
+  - Macrophages
+  - Fibroblasts
+  checksum_raw: null
+  checksum_processed: sha256:b4d3cc28fc2b8b53d07e868ff3d1766f9f8549b75c7a130c1f67a7f035bda393
+  enabled: true
+  data_access: public
+  terms_url: https://www.ncbi.nlm.nih.gov/geo/info/disclaimer.html
+  notes: DUOS/Broad route for raw
+- dataset_id: mm_ledergor
+  cancer_type: multiple_myeloma
+  modality: scRNA-seq
+  accession: GSE161801
+  raw_source_url: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE161801
+  loader: rarecellbenchmark.data.loaders.load_h5ad
+  organism: human
+  genome: GRCh38
+  platform: 10x_chromium
+  n_cells_expected: 31181
+  positive_label_column: cell_type
+  positive_label_values:
+  - Plasma cells
+  background_label_values:
+  - T cells
+  - B cells
+  - NK cells
+  - Monocytes
+  - Normal plasma cells
+  checksum_raw: null
+  checksum_processed: sha256:618a3a792e6ce0be5edc285cd70938cb0e02c3de26a9de2f4e74d881fdf343a9
+  enabled: true
+  data_access: public_processed_controlled_raw
+  terms_url: https://www.ncbi.nlm.nih.gov/geo/info/disclaimer.html
+  notes: Raw via EGA EGAS00001004805
+- dataset_id: breast_ctc_szczerba
+  cancer_type: breast_cancer_ctc
+  modality: scRNA-seq
+  accession: GSE109761
+  raw_source_url: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE109761
+  loader: rarecellbenchmark.data.loaders.load_h5ad
+  organism: human
+  genome: GRCh38
+  platform: SMARTseq2
+  n_cells_expected: 357
+  positive_label_column: cell_type
+  positive_label_values:
+  - CTCs
+  background_label_values:
+  - WBCs
+  checksum_raw: null
+  checksum_processed: sha256:9b73c6cfdbaf2f6cd7ba321f307608496a1ac1f7203ab3e12be61d0ab192cda1
+  enabled: true
+  data_access: public
+  terms_url: https://www.ncbi.nlm.nih.gov/geo/info/disclaimer.html
+  notes: ''

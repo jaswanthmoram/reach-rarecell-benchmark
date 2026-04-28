@@ -185,6 +185,60 @@ brier = np.mean((y_prob - y_true) ** 2)
 
 ---
 
+## Effect Size Metrics
+
+With 160 units per track, statistical power is high — even trivially small differences can reach significance. Effect sizes quantify the practical *magnitude* of differences.
+
+### Cliff's delta (d)
+
+Non-parametric effect size for two independent groups. No distribution assumptions. Range `[-1, 1]`.
+
+```
+        #(x > y) - #(x < y)
+d = ─────────────────────────
+              n₁ · n₂
+```
+
+| |d| | Interpretation |
+|------|----------------|
+| < 0.147 | Negligible |
+| < 0.33  | Small |
+| < 0.474 | Medium |
+| ≥ 0.474 | Large |
+
+### Rank-biserial correlation (r)
+
+Paired version matching the Wilcoxon signed-rank test. Proportion of favorable pairs minus unfavorable pairs. Range `[-1, 1]`.
+
+```
+r = 1 - (4R) / (n(n+1))
+```
+
+Where *R* is the smaller of the sum of positive and negative signed ranks.
+
+Same magnitude thresholds as Cliff's delta.
+
+### Cohen's d
+
+Parametric standardized mean difference. Range unbounded. Assumes normality.
+
+```
+        μ₁ - μ₂
+d = ──────────────
+        s_pooled
+```
+
+| |d| | Interpretation |
+|------|----------------|
+| < 0.2  | Negligible |
+| < 0.5  | Small |
+| < 0.8  | Medium |
+| ≥ 0.8  | Large |
+
+> **Note:** With 160 units per track, many pairwise comparisons will be statistically significant even for minuscule differences. Rely on effect sizes to distinguish *practically meaningful* differences from statistically significant but negligible ones.
+
+---
+
 ## Summary Table
 
 | Metric | Primary? | Threshold-independent? | Probability required? |

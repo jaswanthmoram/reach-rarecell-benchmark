@@ -61,14 +61,11 @@ Generated public tables and figures are written under `data/results/` and are tr
 
 Zenodo DOI: [https://doi.org/10.5281/zenodo.19847108](https://doi.org/10.5281/zenodo.19847108)
 
-Planned archive contents:
+Published archives:
 
-| Archive | Contents |
+| Archive | DOI |
 |---|---|
-| Processed datasets | Canonical `.h5ad` files and provenance metadata |
-| Track units | Generated benchmark units for tracks A-E |
-| Predictions | Per-method prediction outputs |
-| Full results | Full metric tables, reports, publication/vector figures, and release checksums |
-| Code release | Immutable GitHub release snapshot |
-
-The Zenodo archive is published and the DOI above is active. Add the DOI badge to `README.md` and update citation metadata as needed.
+| Processed datasets | [10.5281/zenodo.19850652](https://doi.org/10.5281/zenodo.19850652) |
+| Track units A–C | [10.5281/zenodo.19850972](https://doi.org/10.5281/zenodo.19850972) |
+| Track units D–E | [10.5281/zenodo.19851287](https://doi.org/10.5281/zenodo.19851287) |
+| Complete results | [10.5281/zenodo.19851710](https://doi.org/10.5281/zenodo.19851710) |
