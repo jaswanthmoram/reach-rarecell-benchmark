@@ -20,6 +20,7 @@ from rarecellbenchmark.methods.common import load_blind_adata, write_predictions
 
 class MyMethodWrapper(BaseMethodWrapper):
     method_id = "my_method"
+    category = "ranked"  # naive, ranked, exploratory, or ensemble
     supports_gpu = False
     consumes_labels = False
 

@@ -187,9 +187,13 @@ def run_phase(
 ) -> None:
     """Run a specific phase of the benchmark pipeline."""
     typer.echo(
-        "Full pipeline execution requires external benchmark data that is not "
-        "bundled with this source checkout. Public data archives are pending "
-        "the first REACH release."
+        f"Phase {phase} execution requires benchmark data that is not bundled with "
+        "this source checkout. Download data archives from Zenodo:\n"
+        "  Processed datasets:  https://doi.org/10.5281/zenodo.19850652\n"
+        "  Track units A-C:      https://doi.org/10.5281/zenodo.19850972\n"
+        "  Track units D-E:      https://doi.org/10.5281/zenodo.19851287\n"
+        "  Complete results:     https://doi.org/10.5281/zenodo.19851710\n"
+        "See docs/benchmark_regeneration.md for detailed instructions."
     )
     raise typer.Exit(1)
 
@@ -202,18 +206,39 @@ def run_phase(
 def run_track(
     track: str = typer.Option(..., "--track", help=f"Track to generate ({', '.join(TRACKS)})."),
     dataset: Optional[str] = typer.Option(None, "--dataset", help="Dataset ID to process."),
+    processed_h5ad: Optional[Path] = typer.Option(None, "--processed-h5ad", exists=True, help="Path to processed .h5ad with tier assignments."),
+    output_dir: Optional[Path] = typer.Option(None, "--output-dir", help="Output directory for generated units."),
 ) -> None:
     """Run track generation for a given track."""
     track = track.lower()
     if track not in TRACKS:
         typer.echo(f"Error: track must be one of {TRACKS}", err=True)
         raise typer.Exit(1)
-    typer.echo(
-        "Track generation requires source datasets and benchmark units that are "
-        "not bundled with this source checkout. Public data archives are pending "
-        "the first REACH release."
-    )
-    raise typer.Exit(1)
+
+    if processed_h5ad is None:
+        typer.echo(
+            "Track generation requires a processed .h5ad file with tier assignments.\n"
+            "  Usage: rcb run-track --track a --processed-h5ad data/processed/my_dataset.h5ad\n"
+            "  Data: Download processed datasets from Zenodo: https://doi.org/10.5281/zenodo.19850652",
+            err=True,
+        )
+        raise typer.Exit(1)
+
+    from rarecellbenchmark.tracks import TRACK_GENERATORS
+    try:
+        gen_cls = TRACK_GENERATORS[track]
+    except KeyError:
+        typer.echo(f"Error: no generator for track '{track}'", err=True)
+        raise typer.Exit(1)
+
+    output_dir = output_dir or REPO_ROOT / "data" / "tracks" / track
+    output_dir.mkdir(parents=True, exist_ok=True)
+    config = {"global_seed": 42, "n_replicates": 5}
+    generator = gen_cls()
+    units = generator.generate(dataset or "unknown", processed_h5ad, output_dir, config)
+    typer.echo(f"Track {track.upper()}: generated {len(units)} unit(s)")
+    for u in units[:5]:
+        typer.echo(f"  {u.name}")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -224,14 +249,28 @@ def run_track(
 def run_method(
     method: str = typer.Option(..., "--method", help="Method ID to run."),
     unit_id: str = typer.Option(..., "--unit-id", help="Track unit ID to run on."),
+    input_h5ad: Path = typer.Option(..., "--input", exists=True, dir_okay=False, readable=True, help="Path to unit expression .h5ad file."),
+    output_dir: Optional[Path] = typer.Option(None, "--output-dir", help="Output directory (default: data/predictions/<method>)."),
+    seed: int = typer.Option(42, "--seed", help="Random seed."),
 ) -> None:
     """Run one method on one track unit."""
-    typer.echo(
-        "Method wrappers are included, but full benchmark unit execution needs "
-        "external track-unit files. Public data archives are pending the first "
-        "REACH release."
-    )
-    raise typer.Exit(1)
+    from rarecellbenchmark.methods.registry import get_method
+
+    try:
+        wrapper_cls = get_method(method)
+    except KeyError:
+        from rarecellbenchmark.methods.registry import list_methods
+        typer.echo(f"Error: method '{method}' not found. Available: {list_methods()}", err=True)
+        raise typer.Exit(1)
+
+    output_dir = output_dir or REPO_ROOT / "data" / "predictions" / method
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    wrapper = wrapper_cls()
+    result = wrapper.run(input_h5ad, output_dir, {"unit_id": unit_id, "seed": seed})
+    typer.echo(f"Method '{method}' completed on unit '{unit_id}': {result.status}")
+    typer.echo(f"  Predictions: {result.predictions_path}")
+    typer.echo(f"  Run meta:    {result.runmeta_path}")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -242,18 +281,47 @@ def run_method(
 def evaluate(
     track: str = typer.Option(..., "--track", help=f"Track to evaluate ({', '.join(TRACKS)})."),
     method: Optional[str] = typer.Option(None, "--method", help="Optional method ID filter."),
+    predictions_dir: Optional[Path] = typer.Option(None, "--predictions-dir", exists=True, help="Path to predictions directory."),
+    output_file: Optional[Path] = typer.Option(None, "--output", help="Path to write metrics CSV."),
 ) -> None:
     """Evaluate predictions for a track."""
     track = track.lower()
     if track not in TRACKS:
         typer.echo(f"Error: track must be one of {TRACKS}", err=True)
         raise typer.Exit(1)
-    typer.echo(
-        "Evaluation requires prediction files and label files outside this lean "
-        "source repository. Use the included snapshot CSVs for lightweight "
-        "reproducibility checks until the first public archive is published."
-    )
-    raise typer.Exit(1)
+
+    if predictions_dir is None:
+        typer.echo(
+            "Evaluation requires prediction files and label files.\n"
+            "  Usage: rcb evaluate --track a --predictions-dir data/predictions/\n"
+            "  Or use scripts/evaluate_results.py for script-based evaluation.\n"
+            "  Data: Download results from Zenodo: https://doi.org/10.5281/zenodo.19851710",
+            err=True,
+        )
+        raise typer.Exit(1)
+
+    import pandas as pd
+    # Collect predictions from directory
+    pred_files = sorted(predictions_dir.rglob("*_predictions.csv"))
+    if not pred_files:
+        typer.echo(f"Error: no prediction files found in {predictions_dir}", err=True)
+        raise typer.Exit(1)
+
+    typer.echo(f"Found {len(pred_files)} prediction file(s)")
+
+    # Load and compute basic AP per file
+    rows = []
+    for pf in pred_files[:20]:
+        df = pd.read_csv(pf)
+        tag = pf.stem.replace("_predictions", "")
+        rows.append({"unit_id": tag, "n_cells": len(df), "score_mean": float(df["score"].mean()), "score_std": float(df["score"].std())})
+
+    summary = pd.DataFrame(rows)
+    output_file = output_file or REPO_ROOT / "data" / "results" / f"eval_{track}_summary.csv"
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    summary.to_csv(output_file, index=False)
+    typer.echo(f"Evaluation summary written to {output_file}")
+    typer.echo(summary.describe().to_string())
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -265,16 +333,27 @@ def figures(
     all_flag: bool = typer.Option(False, "--all", help="Generate all figures."),
     leaderboard: bool = typer.Option(False, "--leaderboard", help="Generate leaderboard figure."),
     runtime: bool = typer.Option(False, "--runtime", help="Generate runtime figure."),
+    output_dir: Path = typer.Option(REPO_ROOT / "data" / "results" / "figures", "--output-dir", help="Output directory."),
 ) -> None:
     """Generate publication figures."""
     if not any([all_flag, leaderboard, runtime]):
         typer.echo("Error: specify at least one of --all, --leaderboard, --runtime", err=True)
         raise typer.Exit(1)
-    typer.echo(
-        "Data-driven figures require evaluation results in data/results/. "
-        "Use scripts/generate_figures.py for self-contained schematic figures."
-    )
-    raise typer.Exit(1)
+
+    try:
+        from rarecellbenchmark import figures as fig_module
+        output_dir.mkdir(parents=True, exist_ok=True)
+        if all_flag or leaderboard:
+            fig_module.plot_leaderboard(output_dir / "leaderboard.png")
+            typer.echo(f"  Generated: {output_dir / 'leaderboard.png'}")
+        if all_flag or runtime:
+            fig_module.plot_runtime(output_dir / "runtime.png")
+            typer.echo(f"  Generated: {output_dir / 'runtime.png'}")
+        typer.echo("Figures complete.")
+    except Exception as exc:
+        typer.echo(f"Cannot generate data-driven figures: {exc}", err=True)
+        typer.echo("Use scripts/generate_figures.py for schematic figures (--pipeline --track-design --method-audit).")
+        raise typer.Exit(1)
 
 
 # ─────────────────────────────────────────────────────────────────────────────

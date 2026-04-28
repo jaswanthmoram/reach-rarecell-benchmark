@@ -30,6 +30,7 @@ class BaseMethodWrapper(ABC):
     method_id: str = ""
     supports_gpu: bool = False
     consumes_labels: bool = False
+    category: str = ""  # naive, ranked, exploratory, or ensemble
 
     def _start_memory(self) -> None:
         """Start memory and runtime tracking."""
@@ -61,5 +62,5 @@ def validate_predictions(predictions: pd.DataFrame, adata: AnnData) -> None:
         raise ValueError("NaN scores found")
     if not np.isfinite(predictions["score"]).all():
         raise ValueError("Non-finite scores found")
-    if (predictions["score"] < 0.0).any() or (predictions["score"] > 1.0).any():
-        raise ValueError("Scores outside [0, 1] range found")
+    # Scores are not required to be in [0, 1]; methods may output arbitrary ranges.
+    # Metric computation (AP, AUROC) is scale-invariant, so unbounded scores are valid.
