@@ -174,8 +174,8 @@ All raw datasets are publicly available from GEO (accessions listed below). Proc
 | Code, configs, docs, toy data | This GitHub repository |
 | Processed `.h5ad` datasets (7.3 GB) | Zenodo [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19850652.svg)](https://doi.org/10.5281/zenodo.19850652) |
 | Track Units A–C (9.7 GB) | Zenodo [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19850972.svg)](https://doi.org/10.5281/zenodo.19850972) |
-| Track Units D–E + Predictions (2.2 GB) | Zenodo [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19851287.svg)](https://doi.org/10.5281/zenodo.19851287) |
-| Frozen metrics & results (5.2 MB) | Zenodo [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19850646.svg)](https://doi.org/10.5281/zenodo.19850646) |
+| Track Units D–E (2.2 GB) | Zenodo [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19851287.svg)](https://doi.org/10.5281/zenodo.19851287) |
+| Complete results & predictions — all 10 methods × 1,110 units (425 MB) | Zenodo [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19851710.svg)](https://doi.org/10.5281/zenodo.19851710) |
 
 Code releases are archived automatically via the GitHub–Zenodo integration. The concept DOI [10.5281/zenodo.19847108](https://doi.org/10.5281/zenodo.19847108) always resolves to the latest version.
 
