@@ -1,4 +1,13 @@
 version: "1.0.0"
+# ---
+# checksum_raw / checksum_processed are intentionally null.
+# SHA-256 checksums are computed at runtime via `rcb verify-checksums`
+# because:
+#   - Raw GEO downloads may have variable metadata (dates, headers)
+#   - Processed .h5ad files are distributed via Zenodo, which provides
+#     its own integrity verification.
+#   - Hardcoding checksums in configs would break with any reprocessing.
+# ---
 datasets:
   - dataset_id: hnscc_puram
     cancer_type: head_and_neck_scc
