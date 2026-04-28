@@ -51,6 +51,8 @@ To regenerate the figure from this prompt:
 3. **Manual (Inkscape / Illustrator):**
    Use the Mermaid diagram in `architecture.mmd` as a structural guide, then apply the colour and icon specifications from the prompt.
 
-## Placeholder Note
+## Figure Generation Status
 
-If `architecture.svg` and `architecture.png` need to be refreshed, regenerate them using one of the methods above and keep the rendered files small.
+The `architecture.png` and `architecture.svg` are **properly rendered** using `scripts/generate_architecture_figure.py` (matplotlib). The Mermaid source in `architecture.mmd` serves as the structural reference for the diagram's layout, while the script produces publication-quality PNG and vector SVG outputs.
+
+To regenerate: `python scripts/generate_architecture_figure.py`
