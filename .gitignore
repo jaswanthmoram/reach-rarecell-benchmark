@@ -73,7 +73,13 @@ env/
 !/data/predictions/.gitkeep
 !/data/toy/.gitkeep
 !/data/results/tables/.gitkeep
+!/data/results/tables/**/
+!/data/results/tables/**/*.csv
+!/data/results/tables/**/README.md
 !/data/results/figures/.gitkeep
+!/data/results/figures/**/
+!/data/results/figures/**/*.png
+!/data/results/figures/**/README.md
 !/data/results/snapshots/.gitkeep
 !/data/results/snapshots/**/
 !/data/results/snapshots/**/*.csv

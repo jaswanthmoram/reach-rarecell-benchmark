@@ -27,8 +27,7 @@ jobs:
         with:
           images: ghcr.io/jaswanthmoram/reach-rarecell-benchmark
           tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
+            type=ref,event=tag
             type=raw,value=latest
             type=raw,value=paper-2026
 

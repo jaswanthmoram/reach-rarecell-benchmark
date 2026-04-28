@@ -1,6 +1,7 @@
 # Benchmark Result Tables
 
-This directory is a placeholder for generated table outputs.
+This directory describes generated table outputs. The committed public tables
+live under `data/results/tables/phase11/`.
 
 Tracked snapshot CSVs live in:
 
@@ -8,4 +9,6 @@ Tracked snapshot CSVs live in:
 data/results/snapshots/paper_v1/
 ```
 
-Generated leaderboards, statistical summaries, and sensitivity tables should be written under `data/results/tables/`. Those generated outputs are ignored by default unless they are intentionally added as release artifacts.
+Curated leaderboards, statistical summaries, and sensitivity tables are tracked
+under `data/results/tables/phase11/`. Large unit-level exports remain outside
+Git and should be attached to release archives when needed.

@@ -1,6 +1,6 @@
 {
-  "title": "REACH Benchmark v1.1.0",
-  "description": "REACH (Rare-cell Evaluation Across Cancer Heterogeneity) is a systematic, reproducible benchmark for computational methods that detect rare malignant cells in single-cell RNA sequencing data. The public source repository includes code, configs, tests, documentation, toy-data generation, and small reproducibility snapshot files.",
+  "title": "REACH Benchmark",
+  "description": "REACH (Rare-cell Evaluation Across Cancer Heterogeneity) is a systematic, reproducible benchmark for computational methods that detect rare malignant cells in single-cell RNA sequencing data. The public source repository includes code, configs, tests, documentation, toy-data generation, frozen CSV snapshots, and curated public Phase 11/12 result tables and figures.",
   "creators": [
     {"name": "Moram, Venkata Satya Jaswanth", "affiliation": ""}
   ],

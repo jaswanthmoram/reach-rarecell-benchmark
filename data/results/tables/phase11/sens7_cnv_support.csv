@@ -1,0 +1,11 @@
+method_id,method_fidelity,mean_ap,n_units
+CaSee,faithful,0.4412085757836396,160
+DeepScena,faithful,0.029159479413028214,140
+FiRE,Official FiRE R package (CRAN) — princethewinner/FiRE,0.38502815423827064,160
+RareQ,faithful,0.25618712586459846,160
+cellsius,faithful,0.27034137575673617,160
+expr_threshold,faithful,0.36089223995932534,160
+hvg_logreg,faithful,0.9087879667557551,160
+random_baseline,faithful,0.03727604082331375,160
+scCAD,faithful,0.22614526681028216,140
+scMalignantFinder,faithful,0.31933091268968616,160

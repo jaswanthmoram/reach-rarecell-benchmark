@@ -17,6 +17,7 @@ Welcome to the REACH benchmark documentation. This site covers everything from g
 - **[Benchmark Regeneration](benchmark_regeneration.md)** - Step-by-step workflow to regenerate the full benchmark from scratch.
 - **[Metrics](metrics.md)** - Definitions and formulas for AP, AUROC, F1@k, precision@k, recall@k, balanced accuracy, ECE, Wilcoxon tests, and critical difference diagrams.
 - **[Results Interpretation](results_interpretation.md)** - How to read leaderboard.csv, interpret prevalence stratification, tier breakdown, and statistical significance stars.
+- **Public Result Bundle** - Phase 11 CSV tables in `data/results/tables/phase11/` and Phase 12 PNG figures in `data/results/figures/phase12/`.
 
 ## Extending the Benchmark
 
@@ -31,5 +32,4 @@ Welcome to the REACH benchmark documentation. This site covers everything from g
 
 ---
 
-**Version:** 1.1.0  
 **Last updated:** 2026-04-28

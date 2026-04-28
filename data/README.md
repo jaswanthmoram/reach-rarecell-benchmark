@@ -15,10 +15,15 @@ This directory contains all data assets for the REACH project.
 - `data/tracks/d/` - Track D natural prevalence units
 - `data/tracks/e/` - Track E noisy-label robustness units
 - `data/predictions/` - method predictions; DVC/external only
-- `data/results/tables/` - regenerated metrics/leaderboards; ignored by default
-- `data/results/figures/` - regenerated figures; ignored by default
+- `data/results/tables/phase11/` - curated public Phase 11 CSV summary tables
+- `data/results/figures/phase12/` - curated public Phase 12 PNG figure previews
 - `data/results/snapshots/` - frozen result snapshots
 - `data/toy/` - generated toy data used for tests and examples; ignored by default
+
+The committed result bundle is intentionally small. Full prediction files,
+large unit-level exports, processed `.h5ad` files, and vector/publication
+exports should be distributed as release archive assets rather than committed
+to Git.
 
 ## Data Access Barriers
 

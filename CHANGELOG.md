@@ -1,5 +1,16 @@
 # Changelog
 
+## Public result bundle - 2026-04-28
+
+### Added
+- Curated Phase 11 CSV summary tables under `data/results/tables/phase11/`.
+- Curated Phase 12 PNG figure previews under `data/results/figures/phase12/`.
+- README result preview and result-bundle regeneration instructions.
+- Snapshot reproduction script now writes the public Phase 11/12 bundle.
+
+### Changed
+- Release notes now describe Zenodo and GHCR as release-triggered services rather than pending placeholders.
+
 ## [1.1.0] - 2026-04-28
 
 ### Added

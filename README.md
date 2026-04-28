@@ -8,17 +8,37 @@ Rare-cell Evaluation Across Cancer Heterogeneity (REACH) is a reproducible bench
 
 ## Status
 
-This repository is the clean public source repository for REACH. It contains code, configuration, tests, documentation, toy-data generation, and a small frozen CSV snapshot for reproducibility checks.
+This repository is the clean public source repository for REACH. It contains code, configuration, tests, documentation, toy-data generation, a frozen CSV snapshot for reproducibility checks, and a small public result bundle.
 
 Release artifacts are pending:
 
 | Artifact | Status |
 |---|---|
 | GitHub repository | `jaswanthmoram/reach-rarecell-benchmark` |
-| Zenodo DOI | Pending first archive |
-| GHCR Docker image | Pending first GitHub release |
+| Zenodo DOI | Enabled for GitHub release archiving; DOI appears after the first release is archived |
+| GHCR Docker image | Built by the Docker workflow when a GitHub release is published |
 | Python package import | `rarecellbenchmark` |
 | CLI | `rcb` |
+
+## Result Preview
+
+The public repository includes lightweight Phase 11 summary tables and Phase 12 PNG figures generated from the frozen CSV snapshot.
+
+![Phase 11 method-by-dataset AP heatmap](data/results/figures/phase12/Fig0_Phase11_Summary_Heatmap.png)
+
+Key result paths:
+
+| Path | Contents |
+|---|---|
+| `data/results/snapshots/paper_v1/` | Frozen CSV snapshot used for public reproducibility checks |
+| `data/results/tables/phase11/` | Leaderboard, dataset summaries, rank tests, sensitivity summaries, and related Phase 11 CSV tables |
+| `data/results/figures/phase12/` | GitHub-friendly PNG previews for leaderboard, sensitivity, null controls, runtime, pipeline, track design, and method audit |
+
+Regenerate the public result bundle with:
+
+```bash
+python scripts/reproduce_from_snapshots.py
+```
 
 ## Quickstart
 
@@ -53,7 +73,7 @@ REACH defines a benchmark framework with:
 | Metrics | Average Precision, AUROC, top-k metrics, calibration checks, runtime, and rank summaries |
 | Reproducibility | Fixed configs, file contracts, tests, smoke checks, and snapshot CSVs |
 
-Large processed datasets, track units, predictions, and full result tables are not committed to this repository. They will be archived separately after the first public release.
+Large processed datasets, track units, predictions, and full unit-level result exports are not committed to this repository. Small public summary tables and PNG previews are tracked for review and reproducibility checks. Large artifacts belong in release archives.
 
 ## Repository Layout
 
@@ -61,7 +81,7 @@ Large processed datasets, track units, predictions, and full result tables are n
 reach-rarecell-benchmark/
 ├── .github/          # CI, smoke, docs, and release workflows
 ├── configs/          # Dataset, method, metric, signature, and track configs
-├── data/             # Directory skeleton plus small snapshot CSVs
+├── data/             # Directory skeleton, snapshot CSVs, and small public result bundle
 ├── docs/             # Architecture, installation, reproducibility, and extension guides
 ├── requirements/     # Split dependency lists
 ├── scripts/          # Toy data, validation, orchestration, and snapshot utilities
@@ -89,12 +109,12 @@ External methods may require their original R/Python packages or model assets. S
 
 ## Data Policy
 
-Git tracks source files, configuration, docs, tests, directory placeholders, and the small `data/results/snapshots/paper_v1/` CSV snapshot. Git does not track generated or large artifacts such as:
+Git tracks source files, configuration, docs, tests, directory placeholders, the `data/results/snapshots/paper_v1/` CSV snapshot, and the curated public result bundle under `data/results/tables/phase11/` and `data/results/figures/phase12/`. Git does not track generated or large artifacts such as:
 
 - raw or processed `.h5ad` files
 - parquet predictions and labels
 - generated toy data
-- full track units and full benchmark outputs
+- full track units and full benchmark outputs beyond the curated public summary bundle
 - logs, caches, virtual environments, and local assistant/tooling state
 
 See [data/README.md](data/README.md) and [docs/reproducibility.md](docs/reproducibility.md) for expected data locations and regeneration notes.
@@ -113,7 +133,7 @@ The GitHub CI workflow runs linting, unit tests, and the CLI smoke test.
 
 ## Citation
 
-Citation metadata is provided in [CITATION.cff](CITATION.cff). A DOI will be added after the first Zenodo archive is published.
+Citation metadata is provided in [CITATION.cff](CITATION.cff). Zenodo archiving is enabled for the GitHub repository; the DOI badge can be added after the first release is archived by Zenodo.
 
 ## License
 
