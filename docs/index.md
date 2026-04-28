@@ -13,6 +13,7 @@ Welcome to the REACH benchmark documentation. This site covers everything from g
 
 - **[Architecture](architecture.md)** - 12-phase system architecture, file contracts, track descriptions, and design principles.
 - **[Data Contracts](data_contracts.md)** - Specifications for processed AnnData, track units, predictions, and failure records.
+- **[Fairness of Comparison](fairness.md)** - Why no method has an unfair advantage: uniform blind input, per-unit evaluation, and modality matching.
 
 ## Benchmarking
 

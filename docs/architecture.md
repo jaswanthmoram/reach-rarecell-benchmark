@@ -444,4 +444,17 @@ Label corruption while expression is held constant. Valid only for supervised me
 
 ---
 
+### 9.5 Fairness of Comparison
+
+- **Uniform input contract:** Every method receives the same blind `expression.h5ad` file with ground-truth labels stripped. `load_blind_adata()` raises an error if labels are accidentally present.
+- **No modality mixing:** All methods operate on gene expression (log-normalised counts). CNV-based methods (CopyKAT, Numbat) are acknowledged but excluded because they access a fundamentally different data layer.
+- **Supervised ceiling excluded from ranking:** `hvg_logreg` sees labels but is not a competitor — it calibrates the upper bound of what is learnable from expression data.
+- **Per-unit evaluation:** All metrics are computed per benchmark unit (N=1,110 independent observations), avoiding pseudoreplication.
+- **Fallback transparency:** Failed and degenerate runs are documented in `data/results/snapshots/paper_v1/degenerate_predictions_report.csv`.
+- **Seed determinism:** All track seeds are derived deterministically from a single global seed (`42`), ensuring reproducibility across runs.
+
+See also: [`docs/fairness.md`](fairness.md) for a detailed explanation.
+
+---
+
 *End of REACH Full System Architecture*

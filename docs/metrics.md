@@ -1,5 +1,7 @@
 # Metrics
 
+> **Important:** All metrics are computed **per benchmark unit** (one spike-in experiment), not per cell. Each of the 1,110 units contributes one independent observation to statistical tests and leaderboard rankings. This avoids pseudoreplication — pooling predictions across cells inflates sample size and makes tiny differences falsely "significant."
+
 REACH computes a suite of metrics for every method-unit pair. This page documents their definitions, formulas, and interpretation.
 
 ---

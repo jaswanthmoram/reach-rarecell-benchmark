@@ -19,7 +19,7 @@
 | **Methods** | 10 wrappers (6 ranked detectors · 2 baselines · 1 supervised ceiling · 1 exploratory) |
 | **Benchmark units** | 1,110 |
 | **Method–unit evaluations** | 11,100 |
-| **Primary metric** | Average Precision (AP) on P_HC vs B_HC |
+| **Primary metric** | Average Precision (AUPRC) on P_HC vs B_HC |
 
 ---
 
@@ -299,7 +299,7 @@ Code releases are archived automatically via the GitHub–Zenodo integration. Th
 
 ## Metrics and leaderboard rules
 
-- **Primary metric:** Average Precision (AP) on P_HC vs B_HC, fallback-filtered.
+- **Primary metric:** Average Precision / AUPRC (Area Under the Precision-Recall Curve) on P_HC vs B_HC, fallback-filtered. AUPRC is preferred over AUROC for rare-cell tasks because it doesn't inflate with class imbalance.
 - **Secondary metric:** AUROC.
 - **Operational metrics:** F1@top-k, Precision@k, Recall@k, Balanced Accuracy, Runtime.
 - **Stratification:** Results are stratified by prevalence tier (T1–T4) and platform (SMART-seq2 vs 10x Chromium).
