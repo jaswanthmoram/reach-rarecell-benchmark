@@ -16,7 +16,7 @@ The **`.parquet` file (`all_metrics.parquet`) is NOT tracked in Git** because it
    ```bash
    dvc pull data/results/snapshots/paper_v1/all_metrics.parquet
    ```
-2. **Zenodo release:** A public archive is pending the first repository release.
+2. **Zenodo release:** Download from the REACH Zenodo community: https://doi.org/10.5281/zenodo.19851710 (complete results archive).
 3. **Regenerate:** Run the full benchmark pipeline (Phases 10-11) to reproduce `data/results/all_metrics.parquet` from scratch.
 
 The `.csv` snapshots have been copied to `data/results/snapshots/paper_v1/` and are tracked in Git.

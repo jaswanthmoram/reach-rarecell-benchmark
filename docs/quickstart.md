@@ -37,7 +37,14 @@ rcb smoke-test
 
 ## Local Docker Build
 
-The public GHCR image is pending the first GitHub release. Until then, build locally:
+A pre-built GHCR image is available. Pull and run directly:
+
+```bash
+docker pull ghcr.io/jaswanthmoram/reach-rarecell-benchmark:latest
+docker run --rm ghcr.io/jaswanthmoram/reach-rarecell-benchmark:latest rcb smoke-test
+```
+
+Or build locally:
 
 ```bash
 docker build -t reach-rarecell-benchmark:local .

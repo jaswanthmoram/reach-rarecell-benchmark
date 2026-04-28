@@ -34,7 +34,14 @@ Use the conda environment if you prefer conda-forge binaries for scientific Pyth
 
 ## Docker
 
-The GHCR image is pending the first GitHub release. Build the same container locally:
+A pre-built GHCR image is available:
+
+```bash
+docker pull ghcr.io/jaswanthmoram/reach-rarecell-benchmark:latest
+docker run --rm ghcr.io/jaswanthmoram/reach-rarecell-benchmark:latest rcb smoke-test
+```
+
+Or build locally:
 
 ```bash
 docker build -t reach-rarecell-benchmark:local .

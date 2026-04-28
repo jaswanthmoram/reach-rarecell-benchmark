@@ -102,7 +102,7 @@ fatal: 'labels' does not appear to be a git repository
 **Resolution:**
 Place regenerated or archived track-unit files under `data/tracks/`.
 
-If you are only running the toy-data workflow, you do not need label archives. Public large-data archives are pending the first REACH release.
+If you are only running the toy-data workflow, you do not need label archives. Public large-data archives are available on Zenodo; see the README for DOI links.
 
 ---
 
