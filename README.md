@@ -32,14 +32,66 @@ Rare malignant cell detection is critical for understanding tumour heterogeneity
 ## Architecture
 
 ```mermaid
-graph TD
-    A[Datasets<br/>10 GEO datasets] --> B[Preprocessing<br/>Canonical .h5ad]
-    B --> C[Validation<br/>Tier assignment P_HC–B_LC]
-    C --> D[Tracks A–E<br/>1,110 benchmark units]
-    D --> E[Methods<br/>10 wrappers]
-    E --> F[Predictions<br/>11,100 evaluations]
-    F --> G[Metrics & Stats<br/>AP, AUROC, Wilcoxon, CD]
-    G --> H[Figures & Leaderboard<br/>Publication-ready outputs]
+%%{init: {"theme":"base","themeVariables":{"fontFamily":"Helvetica, Arial, sans-serif","fontSize":"14px","lineColor":"#334155"},"flowchart":{"nodeSpacing":35,"rankSpacing":55,"curve":"basis","htmlLabels":false}}}%%
+flowchart LR
+
+  subgraph PREP["DATA PREPARATION (Phases 0-3)"]
+    direction TB
+    P0["Phase 0 · Environment Setup"]
+    P1["Phase 1 · Dataset Ingestion<br/>10 GEO accessions"]
+    P2["Phase 2 · Preprocessing<br/>QC · log1p · 2,000 HVGs · 50-PC PCA"]
+    P3["Phase 3 · Validation and Tier Assignment<br/>source · CNV · signature · kNN"]
+    P0 --> P1 --> P2 --> P3
+  end
+
+  subgraph TRACKS["TRACK CONSTRUCTION (Phases 4-8)"]
+    direction TB
+    TA["Track A · Real Spike-ins<br/>160 units · primary"]
+    TB["Track B · Splatter Stress<br/>120 units · secondary"]
+    TC["Track C · Null Controls<br/>160 units · diagnostic"]
+    TD["Track D · Natural Blood/CTC<br/>30 units · primary"]
+    TE["Track E · Label Noise<br/>640 units · primary"]
+  end
+
+  P9["Phase 9 · Method Wrappers<br/>10 included methods · run() contract"]
+  P10["Phase 10 · Prediction Execution<br/>11,100 method-unit runs"]
+
+  subgraph EVAL["ANALYSIS (Phases 11-12)"]
+    direction TB
+    P11["Phase 11 · Evaluation and Statistics<br/>AP · nAP · AUROC · MCC at k<br/>Friedman · Wilcoxon · bootstrap rank CIs"]
+    P12["Phase 12 · Figure Generation"]
+    P11 --> P12
+  end
+
+  P3 --> TA
+  P3 --> TB
+  P3 --> TC
+  P3 --> TD
+  P3 --> TE
+  TA --> P9
+  TB --> P9
+  TC --> P9
+  TD --> P9
+  TE --> P9
+  P9 --> P10 --> P11
+
+  classDef prep    fill:#e0f2fe,stroke:#0369a1,stroke-width:1.6px,color:#0f172a;
+  classDef primary fill:#bfdbfe,stroke:#1d4ed8,stroke-width:1.8px,color:#0f172a;
+  classDef second  fill:#bbf7d0,stroke:#15803d,stroke-width:1.8px,stroke-dasharray:6 4,color:#0f172a;
+  classDef diag    fill:#fed7aa,stroke:#c2410c,stroke-width:1.8px,stroke-dasharray:2 4,color:#0f172a;
+  classDef method  fill:#e2e8f0,stroke:#334155,stroke-width:1.6px,color:#0f172a;
+  classDef exec    fill:#fee2e2,stroke:#b91c1c,stroke-width:1.6px,color:#0f172a;
+  classDef eval    fill:#ede9fe,stroke:#6d28d9,stroke-width:1.6px,color:#0f172a;
+  classDef figs    fill:#fae8ff,stroke:#a21caf,stroke-width:1.6px,color:#0f172a;
+
+  class P0,P1,P2,P3 prep;
+  class TA,TD,TE primary;
+  class TB second;
+  class TC diag;
+  class P9 method;
+  class P10 exec;
+  class P11 eval;
+  class P12 figs;
 ```
 
 See [`docs/architecture.md`](docs/architecture.md) for the full 12-phase design, file contracts, and data-flow diagrams.
