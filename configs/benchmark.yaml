@@ -1,0 +1,3 @@
+version: "1.0.0"
+global_seed: 42
+project_name: REACH

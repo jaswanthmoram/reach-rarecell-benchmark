@@ -1,0 +1,13 @@
+method_id: RareQ
+name: RareQ
+category: ranked
+language: python
+wrapper: rarecellbenchmark.methods.ranked.rareq.RareQWrapper
+consumes_labels: false
+supports_gpu: false
+requires_raw_counts: false
+requires_gene_positions: false
+score_direction: higher_is_positive
+citation: "RareQ: quantile-based rarity scoring for single-cell transcriptomics."
+license: "MIT"
+expected_runtime: "unknown"

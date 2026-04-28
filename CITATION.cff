@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use REACH in your research, please cite it as below."
+type: software
+title: "REACH: A Reproducible Benchmark for Rare Malignant Cell Detection in Single-Cell RNA Sequencing"
+authors:
+  - family-names: Moram
+    given-names: Venkata Satya Jaswanth
+    email: jaswanthmoram@gmail.com
+repository-code: "https://github.com/jaswanthmoram/reach-rarecell-benchmark"
+license: MIT
+version: 1.1.0
+date-released: 2026-04-28

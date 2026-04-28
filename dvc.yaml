@@ -1,0 +1,100 @@
+# DVC pipeline for REACH
+# =============================================================================
+# DVC is used here for DATA VERSIONING - not as the primary execution engine.
+# The primary workflow orchestrator is Snakemake (see Snakefile).
+# Use DVC to track large binary outputs (parquet, h5ad, PDF) and to pull/push
+# them from remote storage without committing them to Git.
+# =============================================================================
+
+stages:
+  preprocess:
+    cmd: python run_all.py --phase preprocess
+    deps:
+      - configs/datasets.yaml
+      - src/preprocess/
+    outs:
+      - data/processed/:
+          cache: true
+      - data/interim/:
+          cache: true
+
+  validate:
+    cmd: python run_all.py --phase validate
+    deps:
+      - data/processed/
+      - src/validate/
+    outs:
+      - data/validation/:
+          cache: true
+
+  track_a:
+    cmd: python run_all.py --phase track_a
+    deps:
+      - data/validation/
+      - src/tracks/track_a_generator.py
+    outs:
+      - data/tracks/a/:
+          cache: true
+
+  track_b:
+    cmd: python run_all.py --phase track_b
+    deps:
+      - data/validation/
+      - src/tracks/track_b_generator.py
+    outs:
+      - data/tracks/b/:
+          cache: true
+
+  track_c:
+    cmd: python run_all.py --phase track_c
+    deps:
+      - data/validation/
+      - src/tracks/track_c_generator.py
+    outs:
+      - data/tracks/c/:
+          cache: true
+
+  track_d:
+    cmd: python run_all.py --phase track_d
+    deps:
+      - data/validation/
+      - src/tracks/track_d_generator.py
+    outs:
+      - data/tracks/d/:
+          cache: true
+
+  track_e:
+    cmd: python run_all.py --phase track_e
+    deps:
+      - data/validation/
+      - src/tracks/track_e_generator.py
+    outs:
+      - data/tracks/e/:
+          cache: true
+
+  evaluate:
+    cmd: python run_all.py --phase evaluate
+    deps:
+      - results/
+      - data/tracks/
+      - src/evaluate/
+    outs:
+      - data/results/all_metrics.parquet:
+          cache: true
+      - data/results/leaderboard.csv:
+          cache: true
+      - data/results/leaderboard_faithful.csv:
+          cache: true
+      - data/results/phase11/:
+          cache: true
+      - data/results/sensitivity_analyses/:
+          cache: true
+
+  figures:
+    cmd: python run_all.py --phase figures
+    deps:
+      - data/results/all_metrics.parquet
+      - src/figures/
+    outs:
+      - data/results/figures/phase11/:
+          cache: true

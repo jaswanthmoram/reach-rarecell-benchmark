@@ -1,0 +1,13 @@
+method_id: DeepScena
+name: DeepScena
+category: ranked
+language: python
+wrapper: rarecellbenchmark.methods.ranked.deepscena.DeepScenaWrapper
+consumes_labels: false
+supports_gpu: true
+requires_raw_counts: false
+requires_gene_positions: false
+score_direction: higher_is_positive
+citation: "Yu et al., 2022"
+license: "MIT"
+expected_runtime: "~5min"

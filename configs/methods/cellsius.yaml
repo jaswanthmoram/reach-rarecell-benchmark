@@ -1,0 +1,13 @@
+method_id: cellsius
+name: CellSIUS
+category: ranked
+language: python
+wrapper: rarecellbenchmark.methods.ranked.cellsius.CellsiusWrapper
+consumes_labels: false
+supports_gpu: false
+requires_raw_counts: false
+requires_gene_positions: false
+score_direction: higher_is_positive
+citation: "cellsius: robust detection of rare cell types in single-cell RNA-seq data."
+license: "MIT"
+expected_runtime: "unknown"

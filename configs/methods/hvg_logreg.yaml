@@ -1,0 +1,13 @@
+method_id: hvg_logreg
+name: HVG Logistic Regression (Supervised Ceiling)
+category: naive
+language: python
+wrapper: rarecellbenchmark.methods.naive.hvg_logreg.HVGLogRegWrapper
+consumes_labels: true
+supports_gpu: false
+requires_raw_counts: false
+requires_gene_positions: false
+score_direction: higher_is_positive
+citation: "N/A - supervised ceiling baseline"
+license: MIT
+expected_runtime: "<5s"

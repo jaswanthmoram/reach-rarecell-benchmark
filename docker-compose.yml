@@ -1,0 +1,9 @@
+services:
+  reach-rarecell-benchmark:
+    build: .
+    volumes:
+      - ./data:/app/data
+      - ./results:/app/results
+    environment:
+      - RCB_GLOBAL_SEED=42
+    command: rcb smoke-test

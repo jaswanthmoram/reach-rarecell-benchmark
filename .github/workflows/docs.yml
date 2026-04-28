@@ -1,0 +1,19 @@
+name: Docs
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+jobs:
+  docs:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check markdown links
+        uses: lycheeverse/lychee-action@v1
+        with:
+          args: --no-progress docs/
+      - name: Check Mermaid syntax (basic)
+        run: |
+          # Basic check: ensure .mmd files exist
+          test -f docs/assets/architecture.mmd

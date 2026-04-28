@@ -1,0 +1,19 @@
+# Template for adding a new method to REACH Benchmark
+# Copy this file, rename it to <method_id>.yaml, and fill in all fields.
+
+method_id: TEMPLATE_new_method  # Unique machine-readable identifier (snake_case recommended)
+name: "Template New Method"     # Human-readable name
+category: ranked                # Category: naive, ranked, exploratory, or ensemble
+language: python                # Implementation language: python, r, etc.
+wrapper: rarecellbenchmark.methods.ranked.TEMPLATE_new_method.TemplateWrapper
+                                # Fully-qualified Python path to the wrapper class
+consumes_labels: false          # Whether the method requires ground-truth labels at fit/predict time
+supports_gpu: false             # Whether the method can leverage GPU acceleration
+requires_raw_counts: false      # Whether the method requires raw count matrix (not log-normalised)
+requires_gene_positions: false  # Whether the method requires genomic coordinates per gene
+score_direction: higher_is_positive
+                                # How to interpret the output score: higher_is_positive or lower_is_positive
+citation: "Author et al., Journal Year"
+                                # Biblio reference for the method
+license: "MIT"                  # SPDX license identifier or "TODO"
+expected_runtime: "~1min"       # Approximate runtime on a single unit (e.g., <1s, ~30s, ~5min)

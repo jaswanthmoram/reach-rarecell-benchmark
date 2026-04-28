@@ -1,0 +1,31 @@
+# Core dependencies
+numpy
+pandas
+scipy
+scikit-learn
+anndata>=0.10,<0.12
+scanpy
+pyarrow
+matplotlib
+typer>=0.9
+pydantic>=2
+pyyaml
+loguru
+rich
+
+# Development tools
+pytest
+pytest-cov
+ruff
+mypy
+pre-commit
+
+# GPU support
+torch
+
+# R integration
+rpy2
+
+# Documentation
+mkdocs
+mkdocs-material

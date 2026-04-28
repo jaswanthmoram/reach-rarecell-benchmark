@@ -1,0 +1,13 @@
+numpy
+pandas
+scipy
+scikit-learn
+anndata>=0.10,<0.12
+scanpy
+pyarrow
+matplotlib
+typer>=0.9
+pydantic>=2
+pyyaml
+loguru
+rich

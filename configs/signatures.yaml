@@ -1,0 +1,352 @@
+version: benchmark_v1
+scoring_method: aucell
+signature_high_threshold: 0.15
+fallback_scoring_method: mean_expr
+signatures:
+  pan_cancer_proliferation:
+    genes:
+    - MKI67
+    - TOP2A
+    - PCNA
+    - MCM2
+    - MCM4
+    - MCM6
+    - CCNB1
+    - CCNB2
+    - CCND1
+    - CDK1
+    - STMN1
+    notes: G2/M and S-phase markers; elevated in actively cycling tumour cells
+  pan_cancer_emt:
+    genes:
+    - VIM
+    - FN1
+    - CDH2
+    - SNAI1
+    - SNAI2
+    - TWIST1
+    - TWIST2
+    - ZEB1
+    - ZEB2
+    - MMP2
+    - MMP9
+    notes: EMT markers; elevated in invasive malignant cells
+  pan_cancer_stemness:
+    genes:
+    - CD44
+    - ALDH1A1
+    - SOX2
+    - NANOG
+    - PROM1
+    - ITGA6
+    - ABCG2
+    notes: Stem-like/progenitor markers; broad malignancy support
+  epithelial_malignant:
+    genes:
+    - EPCAM
+    - KRT8
+    - KRT18
+    - KRT19
+    - CDH1
+    - KRT7
+    - KRT17
+    - CDX2
+    notes: Epithelial markers; negative in mesenchymal-shifted tumours
+    applicable_cancers:
+    - breast
+    - luad
+    - crc
+    - gastric
+    - pdac
+    - hcc
+    - hnscc
+    - ovarian
+    - rcc
+  melanoma_malignant:
+    genes:
+    - MLANA
+    - PMEL
+    - TYRP1
+    - DCT
+    - SOX10
+    - MITF
+    - GPR143
+    - TYR
+    notes: Melanocyte lineage markers; strong positive support for melanoma_tirosh
+    applicable_cancers:
+    - melanoma
+  glioma_malignant:
+    genes:
+    - EGFR
+    - PDGFRA
+    - IDH1
+    - GFAP
+    - SOX2
+    - OLIG2
+    - CHI3L1
+    - PTEN
+    notes: Glioma lineage; used for oligo_tirosh, gbm_patel, glioma_diaz
+    applicable_cancers:
+    - glioma
+    - glioblastoma
+  myeloma_malignant:
+    genes:
+    - SDC1
+    - MZB1
+    - IGHA1
+    - IGHG1
+    - IGHG4
+    - IGKC
+    - IGLC2
+    - XBP1
+    - IRF4
+    - PRDM1
+    notes: Plasma cell/myeloma markers; strong support for mm_ledergor
+    applicable_cancers:
+    - myeloma
+  breast_malignant:
+    genes:
+    - ERBB2
+    - ESR1
+    - PGR
+    - BRCA1
+    - BRCA2
+    - FOXA1
+    - GATA3
+    - KRT5
+    - KRT14
+    notes: Breast cancer markers; subtype-agnostic
+    applicable_cancers:
+    - breast
+    - breast_ctc
+  lung_malignant:
+    genes:
+    - NKX2-1
+    - NAPSA
+    - SFTPC
+    - SFTPB
+    - TTF1
+    - SFTA3
+    - MUC5B
+    notes: LUAD lineage markers (surfactant-producing AT2-like); luad_laughney, luad_kim
+    applicable_cancers:
+    - luad
+  hnscc_malignant:
+    genes:
+    - KRT4
+    - KRT5
+    - KRT6A
+    - KRT14
+    - TP63
+    - SOX2
+    - EGFR
+    notes: Squamous lineage markers; hnscc_puram
+    applicable_cancers:
+    - hnscc
+  pdac_malignant:
+    genes:
+    - KRT19
+    - KRT17
+    - MUC1
+    - MUC5AC
+    - CEACAM5
+    - ONECUT2
+    - GATA6
+    notes: Ductal cell markers; malignant ductal-A in pdac_peng
+    applicable_cancers:
+    - pdac
+  hcc_malignant:
+    genes:
+    - AFP
+    - ALB
+    - TTR
+    - APOB
+    - GPC3
+    - EPCAM
+    - KRT19
+    notes: Hepatocyte/HCC markers; hcc_wei
+    applicable_cancers:
+    - hcc
+  crc_malignant:
+    genes:
+    - CDX1
+    - CDX2
+    - KRT20
+    - CEACAM5
+    - OLFM4
+    - LGR5
+    - MUC2
+    notes: Colorectal epithelial/tumour markers; crc_lee
+    applicable_cancers:
+    - crc
+  gastric_malignant:
+    genes:
+    - MUC5AC
+    - MUC6
+    - TFF1
+    - TFF2
+    - CLDN18
+    - EPCAM
+    - CDH17
+    notes: Gastric tumour markers; gastric_li
+    applicable_cancers:
+    - gastric
+  ovarian_malignant:
+    genes:
+    - PAX8
+    - WT1
+    - TP53
+    - EPCAM
+    - KRT7
+    - FOLR1
+    - MUC16
+    notes: HGSOC markers; ov_izar_tirosh, ov_meta
+    applicable_cancers:
+    - ovarian
+  rcc_malignant:
+    genes:
+    - CA9
+    - VHL
+    - BNIP3L
+    - VEGFA
+    - KIM1
+    - CD70
+    - EPAS1
+    notes: ccRCC clear cell markers; rcc_multi
+    applicable_cancers:
+    - rcc
+  ctc_malignant:
+    genes:
+    - EPCAM
+    - KRT8
+    - KRT18
+    - KRT19
+    - ERBB2
+    - MKI67
+    - CDH1
+    notes: Epithelial CTC markers for blood datasets
+    applicable_cancers:
+    - breast_ctc
+    - prostate_ctc
+  negative_control_tcell:
+    genes:
+    - CD3D
+    - CD3E
+    - CD3G
+    - CD4
+    - CD8A
+    - CD8B
+    - TRAC
+    - TRBC1
+    notes: T cell markers - high expression indicates misclassification risk
+  negative_control_bcell:
+    genes:
+    - CD19
+    - MS4A1
+    - CD79A
+    - CD79B
+    - BLNK
+    notes: B cell markers
+  negative_control_myeloid:
+    genes:
+    - CD14
+    - LYZ
+    - CST3
+    - FCGR3A
+    - CD68
+    - S100A8
+    - S100A9
+    notes: Monocyte/macrophage markers
+  negative_control_stromal:
+    genes:
+    - ACTA2
+    - FAP
+    - PDPN
+    - DCN
+    - COL1A1
+    - COL6A1
+    notes: CAF/fibroblast markers
+  negative_control_endothelial:
+    genes:
+    - PECAM1
+    - VWF
+    - CDH5
+    - ENG
+    - CLDN5
+    notes: Endothelial markers
+  negative_control_nk:
+    genes:
+    - NCAM1
+    - GNLY
+    - GZMB
+    - NKG7
+    - KLRD1
+    notes: NK cell markers
+dataset_primary_signatures:
+  melanoma_tirosh:
+  - melanoma_malignant
+  - pan_cancer_proliferation
+  oligo_tirosh:
+  - glioma_malignant
+  - pan_cancer_proliferation
+  gbm_patel:
+  - glioma_malignant
+  - pan_cancer_proliferation
+  - pan_cancer_stemness
+  breast_chung:
+  - breast_malignant
+  - epithelial_malignant
+  - pan_cancer_proliferation
+  hnscc_puram:
+  - hnscc_malignant
+  - epithelial_malignant
+  - pan_cancer_emt
+  bcc_yost:
+  - epithelial_malignant
+  - pan_cancer_proliferation
+  - pan_cancer_emt
+  luad_laughney:
+  - lung_malignant
+  - epithelial_malignant
+  - pan_cancer_proliferation
+  pdac_peng:
+  - pdac_malignant
+  - epithelial_malignant
+  - pan_cancer_proliferation
+  hcc_wei:
+  - hcc_malignant
+  - pan_cancer_proliferation
+  crc_lee:
+  - crc_malignant
+  - epithelial_malignant
+  - pan_cancer_proliferation
+  luad_kim:
+  - lung_malignant
+  - epithelial_malignant
+  - pan_cancer_proliferation
+  ov_izar_tirosh:
+  - ovarian_malignant
+  - epithelial_malignant
+  - pan_cancer_proliferation
+  gastric_li:
+  - gastric_malignant
+  - epithelial_malignant
+  - pan_cancer_proliferation
+  ov_meta:
+  - ovarian_malignant
+  - epithelial_malignant
+  - pan_cancer_proliferation
+  rcc_multi:
+  - rcc_malignant
+  - pan_cancer_proliferation
+  glioma_diaz:
+  - glioma_malignant
+  - pan_cancer_proliferation
+  - pan_cancer_stemness
+  mm_ledergor:
+  - myeloma_malignant
+  - pan_cancer_proliferation
+  breast_ctc_szczerba:
+  - ctc_malignant
+  - breast_malignant
+  - pan_cancer_proliferation

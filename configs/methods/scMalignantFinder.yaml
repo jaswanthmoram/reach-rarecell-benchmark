@@ -1,0 +1,13 @@
+method_id: scMalignantFinder
+name: scMalignantFinder
+category: ranked
+language: python
+wrapper: rarecellbenchmark.methods.ranked.scmalignantfinder.ScMalignantFinderWrapper
+consumes_labels: false
+supports_gpu: false
+requires_raw_counts: false
+requires_gene_positions: false
+score_direction: higher_is_positive
+citation: "scMalignantFinder: a Python-based method for malignant cell detection in scRNA-seq data."
+license: "MIT"
+expected_runtime: "unknown"

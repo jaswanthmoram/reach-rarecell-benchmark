@@ -1,0 +1,6 @@
+global_seed: 42
+max_runtime_s: 3600
+max_memory_mb: 32768
+n_replicates: 5
+timeout_action: fail_and_record
+parallel_jobs: 8

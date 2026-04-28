@@ -1,0 +1,32 @@
+metrics:
+  primary:
+    - name: average_precision
+      description: "Average Precision (AP) per unit, macro-averaged across units."
+      function: sklearn.metrics.average_precision_score
+      higher_is_better: true
+  secondary:
+    - name: auroc
+      description: "Area Under ROC Curve."
+      function: sklearn.metrics.roc_auc_score
+      higher_is_better: true
+    - name: f1_at_k
+      description: "F1 score at top-k, where k = true positives."
+      higher_is_better: true
+    - name: precision_at_k
+      description: "Precision at top-k."
+      higher_is_better: true
+    - name: recall_at_k
+      description: "Recall at top-k."
+      higher_is_better: true
+    - name: balanced_accuracy
+      description: "Balanced accuracy for binary classifiers."
+      higher_is_better: true
+  calibration:
+    - name: expected_calibration_error
+      description: "ECE with 10 bins."
+      higher_is_better: false
+  statistical_tests:
+    - name: wilcoxon_signed_rank
+      description: "Paired Wilcoxon signed-rank test, Bonferroni-corrected."
+    - name: critical_difference
+      description: "Demšar 2006 critical difference diagram."

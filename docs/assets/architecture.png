@@ -1,0 +1,20 @@
+# Placeholder: architecture.png
+
+This file should be generated from `docs/assets/architecture.mmd` or from the master spec prompt in `docs/assets/README_figure_prompt.md`.
+
+## Generation commands
+
+```bash
+# Option 1: Mermaid CLI
+bash scripts/render_mermaid.sh docs/assets/architecture.mmd docs/assets/architecture.png
+
+# Option 2: Manual conversion from SVG
+inkscape docs/assets/architecture.svg --export-filename=docs/assets/architecture.png --export-dpi=300
+
+# Option 3: AI image generation
+# Paste the prompt from README_figure_prompt.md into DALL-E 3 / Midjourney.
+```
+
+## Why a placeholder?
+
+Rendered PNG files are large binary assets. The repository ships only the source Mermaid diagram and the generation prompt to keep the git history lightweight. CI can render the PNG on release.

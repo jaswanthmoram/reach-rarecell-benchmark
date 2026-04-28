@@ -1,0 +1,13 @@
+method_id: scCAD
+name: scCAD
+category: ranked
+language: python
+wrapper: rarecellbenchmark.methods.ranked.sccad.ScCADWrapper
+consumes_labels: false
+supports_gpu: false
+requires_raw_counts: true
+requires_gene_positions: false
+score_direction: higher_is_positive
+citation: "scCAD: single-cell anomaly detection for cancer scRNA-seq data."
+license: "MIT"
+expected_runtime: "unknown"

@@ -1,0 +1,87 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rarecellbenchmark"
+version = "1.1.0"
+description = "A benchmarking framework for rare cell type identification in single-cell transcriptomics."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Moram Venkata Satya Jaswanth", email = "jaswanthmoram@gmail.com"},
+]
+dependencies = [
+    "numpy",
+    "pandas",
+    "scipy",
+    "scikit-learn",
+    "anndata>=0.10,<0.12",
+    "scanpy",
+    "pyarrow",
+    "matplotlib",
+    "typer>=0.9",
+    "pydantic>=2",
+    "pyyaml",
+    "loguru",
+    "rich",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "ruff",
+    "mypy",
+    "pre-commit",
+]
+full = [
+    "numpy",
+    "pandas",
+    "scipy",
+    "scikit-learn",
+    "anndata>=0.10,<0.12",
+    "scanpy",
+    "pyarrow",
+    "matplotlib",
+    "typer>=0.9",
+    "pydantic>=2",
+    "pyyaml",
+    "loguru",
+    "rich",
+]
+gpu = [
+    "torch",
+]
+r = [
+    "rpy2",
+]
+docs = [
+    "mkdocs",
+    "mkdocs-material",
+]
+
+[project.scripts]
+rcb = "rarecellbenchmark.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/jaswanthmoram/reach-rarecell-benchmark"
+Repository = "https://github.com/jaswanthmoram/reach-rarecell-benchmark"
+"Bug Tracker" = "https://github.com/jaswanthmoram/reach-rarecell-benchmark/issues"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --tb=short"
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+strict = false

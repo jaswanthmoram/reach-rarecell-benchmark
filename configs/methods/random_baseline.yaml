@@ -1,0 +1,13 @@
+method_id: random_baseline
+name: Random Baseline
+category: naive
+language: python
+wrapper: rarecellbenchmark.methods.naive.random_baseline.RandomBaselineWrapper
+consumes_labels: false
+supports_gpu: false
+requires_raw_counts: false
+requires_gene_positions: false
+score_direction: higher_is_positive
+citation: "N/A - baseline"
+license: MIT
+expected_runtime: "<1s"

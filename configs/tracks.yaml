@@ -1,0 +1,26 @@
+tracks:
+  - track_id: a
+    name: "Track A: Controlled Real Spike-ins"
+    description: "Malignant cells are downsampled to exact prevalence targets."
+    tiers: [T1, T2, T3, T4]
+    prevalence_range: [0.001, 0.05]
+  - track_id: b
+    name: "Track B: Synthetic Splatter Stress-test"
+    description: "Fully synthetic datasets with rare populations."
+    tiers: [T1, T2, T3, T4]
+    prevalence_range: [0.001, 0.05]
+  - track_id: c
+    name: "Track C: Null Controls"
+    description: "No true positives; measures false-positive rate."
+    tiers: [T1, T2, T3, T4]
+    prevalence_range: [0.0, 0.0]
+  - track_id: d
+    name: "Track D: Natural Blood/CTC Prevalence"
+    description: "Natural prevalence of CTCs or rare blood populations."
+    tiers: [T1, T2, T3, T4]
+    prevalence_range: [0.001, 0.01]
+  - track_id: e
+    name: "Track E: Noisy-label Robustness"
+    description: "Systematic label noise injection."
+    tiers: [T1, T2, T3, T4]
+    prevalence_range: [0.001, 0.05]

@@ -1,0 +1,13 @@
+method_id: CaSee
+name: CaSee
+category: exploratory
+language: python
+wrapper: rarecellbenchmark.methods.exploratory.casee.CaSeeWrapper
+consumes_labels: false
+supports_gpu: false
+requires_raw_counts: false
+requires_gene_positions: false
+score_direction: higher_is_positive
+citation: "Yu et al. (2022). CaSee: a novel method for rare cell detection in single-cell RNA-seq data based on autoencoder and isolation forest."
+license: "MIT"
+expected_runtime: "unknown"

@@ -1,0 +1,10 @@
+{
+  "R": {
+    "Version": "4.3.0",
+    "Repositories": []
+  },
+  "Packages": {},
+  "Bioconductor": {
+    "note": "Please create this file from your local R environment after installing required Bioconductor packages. See README.md in this directory for instructions."
+  }
+}

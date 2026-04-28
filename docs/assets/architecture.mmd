@@ -1,0 +1,48 @@
+graph TD
+    P0[Phase 0: Environment Setup] --> P1[Phase 1: Dataset Ingestion]
+    P1 --> P2[Phase 2: Preprocessing]
+    P2 --> P3[Phase 3: Validation & Tier Assignment]
+    P3 --> P4[Phase 4: Track A<br/>Controlled Real Spike-ins]
+    P3 --> P5[Phase 5: Track B<br/>Synthetic Splatter]
+    P3 --> P6[Phase 6: Track C<br/>Null Controls]
+    P3 --> P7[Phase 7: Track D<br/>Natural Blood/CTC]
+    P3 --> P8[Phase 8: Track E<br/>Noisy-Label Robustness]
+    P4 --> P9[Phase 9: Method Wrappers]
+    P5 --> P9
+    P6 --> P9
+    P7 --> P9
+    P8 --> P9
+    P9 --> P10[Phase 10: Prediction Execution]
+    P10 --> P11[Phase 11: Evaluation & Statistics]
+    P11 --> P12[Phase 12: Figure Generation]
+
+    subgraph DataStores["Data Stores"]
+        D1[configs/datasets.yaml]
+        D2[data/processed/*.h5ad]
+        D3[data/validation/*_tiers.parquet]
+        D4[data/tracks/*/*_expression.h5ad]
+        D5[results/*/*/predictions.csv]
+        D6[data/results/all_metrics.parquet]
+        D7[data/results/figures/*.pdf]
+    end
+
+    P1 --> D1
+    P2 --> D2
+    P3 --> D3
+    P4 --> D4
+    P5 --> D4
+    P6 --> D4
+    P7 --> D4
+    P8 --> D4
+    P10 --> D5
+    P11 --> D6
+    P12 --> D7
+
+    style P0 fill:#e1f5fe
+    style P1 fill:#e1f5fe
+    style P2 fill:#e1f5fe
+    style P3 fill:#e1f5fe
+    style P9 fill:#fff3e0
+    style P10 fill:#fff3e0
+    style P11 fill:#f3e5f5
+    style P12 fill:#f3e5f5

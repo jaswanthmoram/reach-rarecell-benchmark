@@ -1,0 +1,13 @@
+method_id: FiRE
+name: FiRE (Finder of Rare Entities)
+category: ranked
+language: r
+wrapper: rarecellbenchmark.methods.ranked.fire.FiREWrapper
+consumes_labels: false
+supports_gpu: false
+requires_raw_counts: false
+requires_gene_positions: false
+score_direction: higher_is_positive
+citation: "Jindal et al., Bioinformatics 2018"
+license: "GPL-3.0+"
+expected_runtime: "~30s"

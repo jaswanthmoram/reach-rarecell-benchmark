@@ -1,0 +1,20 @@
+name: Smoke Benchmark
+on:
+  workflow_dispatch:
+jobs:
+  smoke:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e '.[dev]'
+      - run: rcb create-toy-data
+      - run: rcb smoke-test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: smoke-outputs
+          path: |
+            data/toy/
+            data/results/figures/
