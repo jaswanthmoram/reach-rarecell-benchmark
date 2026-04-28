@@ -1,0 +1,11 @@
+method_id,calibration_applicable,calibration_reason,n_units,n_calibration_units,score_min,score_max,pct_units_in_probability_range,pct_degenerate_units
+DeepScena,False,score-only detector output; calibration not interpreted as probability,985,0,0.0,1.0,100.0,0.0
+cellsius,False,score-only detector output; calibration not interpreted as probability,1106,0,0.0,1.0,100.0,0.0
+scCAD,False,score-only detector output; calibration not interpreted as probability,990,0,0.0,1.0,100.0,0.0
+scMalignantFinder,False,score-only detector output; calibration not interpreted as probability,1110,0,3.4814343812525735e-13,0.9999958200551244,100.0,21.62162162162162
+FiRE,False,score-only detector output; calibration not interpreted as probability,1110,0,0.0,1.0,100.0,0.9009009009009009
+RareQ,False,score-only detector output; calibration not interpreted as probability,1110,0,0.0,1.0,100.0,0.6306306306306306
+random_baseline,True,random uniform probability baseline,1110,1110,1.3168556207476811e-05,0.9999937332940072,100.0,0.0
+expr_threshold,False,score-only detector output; calibration not interpreted as probability,1110,0,0.0,1.0,100.0,0.0
+CaSee,False,score-only anomaly output; calibration not interpreted as probability,1110,0,0.0,1.0,100.0,10.81081081081081
+hvg_logreg,True,supervised logistic probability output,1110,1110,0.0,1.0,100.0,0.0

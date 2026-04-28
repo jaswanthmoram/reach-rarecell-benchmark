@@ -83,6 +83,10 @@ env/
 !/data/results/snapshots/.gitkeep
 !/data/results/snapshots/**/
 !/data/results/snapshots/**/*.csv
+!/data/results/manuscript/**/
+!/data/results/manuscript/**/*.pdf
+!/data/results/manuscript/**/*.csv
+!/data/results/manuscript/**/*.md
 !/data/**/README.md
 
 # DVC

@@ -1,0 +1,11 @@
+method_id,total_units,fallback_units,pct_fallback,degenerate_units,pct_degenerate,constant_score_units,missing_score_units
+CaSee,1110,0,0.0,120,10.81081081081081,120,0
+DeepScena,1110,125,11.26126126126126,0,0.0,0,0
+FiRE,1110,0,0.0,10,0.9009009009009009,10,0
+RareQ,1110,0,0.0,7,0.6306306306306306,7,0
+cellsius,1110,4,0.36036036036036034,0,0.0,0,0
+expr_threshold,1110,0,0.0,0,0.0,0,0
+hvg_logreg,1110,0,0.0,0,0.0,0,0
+random_baseline,1110,0,0.0,0,0.0,0,0
+scCAD,1110,120,10.81081081081081,0,0.0,0,0
+scMalignantFinder,1110,0,0.0,240,21.62162162162162,240,0
