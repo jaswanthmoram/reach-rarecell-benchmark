@@ -18,8 +18,8 @@ Error in library(FiRE): there is no package called 'FiRE'
 sudo apt-get install r-base r-base-dev  # Ubuntu/Debian
 brew install r                          # macOS
 
-# Install benchmark R packages
-Rscript setup/setup_r_packages.R
+# Install benchmark R packages from renv lockfile
+Rscript -e 'install.packages("renv"); renv::restore(lockfile = "setup/renv/renv.lock")'
 ```
 
 If a specific package fails to compile, ensure you have build tools:
@@ -81,10 +81,10 @@ Checksums are sensitive to:
 - OS-level random seed differences
 
 **Do not panic.** The benchmark is designed to tolerate minor checksum shifts:
-1. Check that your environment matches `setup/frozen-requirements.txt`.
+1. Check that your environment matches the installed package versions (run `python -m pip freeze` to inspect).
 2. If you intentionally changed preprocessing, delete the old checksum in `configs/datasets.yaml` and run:
    ```bash
-   python scripts/run_preprocess3.py --config configs/datasets.yaml
+   python scripts/run_phase.py --phase 2
    ```
 3. The new checksum will be written automatically.
 
@@ -153,7 +153,7 @@ ValueError: No prediction CSVs found for method='FiRE'
   ```
 - If you only want to evaluate a subset, pass `--methods`:
   ```bash
-  python scripts/evaluate.py --methods random_baseline expr_threshold hvg_logreg
+  python scripts/evaluate_results.py --methods random_baseline expr_threshold hvg_logreg
   ```
 
 ---

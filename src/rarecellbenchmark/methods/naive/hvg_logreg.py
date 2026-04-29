@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 class HVGLogRegWrapper(BaseMethodWrapper):
     method_id = "hvg_logreg"
-    category = "naive"
+    category = "supervised"
     supports_gpu = False
     consumes_labels = True
 

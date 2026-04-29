@@ -137,7 +137,7 @@ GENERATORS = {
 
 ## 4. Update evaluation logic
 
-Edit `src/rarecellbenchmark/evaluate/evaluate.py`:
+Edit `src/rarecellbenchmark/evaluate/metrics.py`:
 
 Find the track loop (usually around the metric computation) and add `"f"` to the list of evaluated tracks:
 
@@ -169,11 +169,7 @@ TRACK_ORDER = ["a", "b", "c", "d", "e", "f"]
 ## 6. Generate the track
 
 ```bash
-python scripts/run_track_f.py \
-    --processed_dir data/processed/ \
-    --tier_file data/validation/tier_assignments.parquet \
-    --output_dir data/tracks/f/ \
-    --config configs/tracks.yaml
+python scripts/run_phase.py --phase 8 --dataset <dataset>
 ```
 
 Verify a unit:
@@ -189,8 +185,8 @@ ls data/tracks/f/bcc_yost/
 
 ```bash
 python scripts/run_methods.py --config configs/protocol_version.yaml --tracks F
-python scripts/evaluate.py
-python scripts/plot_leaderboard.py
+python scripts/evaluate_results.py
+python scripts/generate_figures.py
 ```
 
 ---
@@ -200,7 +196,7 @@ python scripts/plot_leaderboard.py
 - [ ] `BaseTrackGenerator` subclass in `src/tracks/`
 - [ ] Entry in `configs/tracks.yaml`
 - [ ] Registered in `src/tracks/__init__.py`
-- [ ] Evaluation updated in `src/evaluate/evaluate.py`
+- [ ] Evaluation updated in `src/rarecellbenchmark/evaluate/metrics.py`
 - [ ] Figures updated in `scripts/generate_figures.py` (add any new track to data-driven figure logic)
 - [ ] Sample unit passes smoke test
 - [ ] Re-evaluation and figures regenerate cleanly

@@ -177,9 +177,9 @@ python scripts/run_methods.py \
 Then regenerate evaluation and figures:
 
 ```bash
-python scripts/evaluate.py
+python scripts/evaluate_results.py
 python scripts/phase11_statistics.py --n-boot 2000
-python scripts/plot_leaderboard.py
+python scripts/generate_figures.py
 ```
 
 If your method improves median AP on Track A for ≥3 datasets relative to the current best published method, highlight this in your PR description.

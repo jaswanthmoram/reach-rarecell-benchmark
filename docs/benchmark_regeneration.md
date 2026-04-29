@@ -45,7 +45,7 @@ The complete pipeline from raw GEO downloads to Phase 12 figures is organised in
 python -m venv .venv
 source .venv/bin/activate
 pip install -e '.[dev]'
-Rscript setup/setup_r_packages.R
+Rscript -e 'install.packages("renv"); renv::restore(lockfile = "setup/renv/renv.lock")'
 bash setup/setup_external_methods.sh
 ```
 

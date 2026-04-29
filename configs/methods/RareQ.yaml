@@ -1,7 +1,7 @@
 method_id: RareQ
 name: RareQ
 category: ranked
-language: python
+language: r
 wrapper: rarecellbenchmark.methods.ranked.rareq.RareQWrapper
 consumes_labels: false
 supports_gpu: false

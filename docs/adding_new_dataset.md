@@ -109,18 +109,15 @@ signatures:
 ## 5. Run validation
 
 ```bash
-python src/rarecellbenchmark/ingest/download_dataset.py \
-    --dataset_id glioma_zhang --outdir data/raw/
+python scripts/download_dataset.py \
+    --dataset glioma_zhang
 
 python src/rarecellbenchmark/preprocess/preprocess_dataset.py \
     --input data/raw/glioma_zhang/ \
     --output data/processed/glioma_zhang.h5ad \
     --dataset_id glioma_zhang
 
-python scripts/run_validate3.py \
-    --processed_dir data/processed/ \
-    --output_dir data/validation/ \
-    --config configs/datasets.yaml \
+python scripts/run_phase.py --phase 3 \
     --dataset glioma_zhang
 ```
 
@@ -147,9 +144,9 @@ You need at least **50 P_HC** and **200 B_HC** cells to generate Track A units.
 ## 6. Generate tracks
 
 ```bash
-python scripts/run_track_a.py --processed_dir data/processed/ --tier_file data/validation/tier_assignments.parquet --output_dir data/tracks/a/ --config configs/protocol_version.yaml --dataset glioma_zhang
-python scripts/run_track_b.py --processed_dir data/processed/ --tier_file data/validation/tier_assignments.parquet --output_dir data/tracks/b/ --config configs/protocol_version.yaml --dataset glioma_zhang
-python scripts/run_track_c.py --processed_dir data/processed/ --tier_file data/validation/tier_assignments.parquet --output_dir data/tracks/c/ --config configs/protocol_version.yaml --dataset glioma_zhang
+python scripts/run_phase.py --phase 4 --dataset glioma_zhang
+python scripts/run_phase.py --phase 5 --dataset glioma_zhang
+python scripts/run_phase.py --phase 6 --dataset glioma_zhang
 ```
 
 ---

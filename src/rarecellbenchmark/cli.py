@@ -538,7 +538,35 @@ def smoke_test(
         _check(name, fn)
 
     if method:
-        typer.echo(f"\nNote: per-method smoke testing for '{method}' not yet implemented in CLI.")
+        from rarecellbenchmark.methods.registry import get_method
+
+        logger.info("")
+
+        def _test_method_exists():
+            get_method(method)
+
+        _check(f"Method '{method}' in registry", _test_method_exists)
+
+        def _test_method_run():
+            import shutil
+
+            wrapper_cls = get_method(method)
+            toy_h5ad = Path("/tmp/rcb_smoke_toy/toy_expression.h5ad")
+            if not toy_h5ad.exists():
+                create_toy_data(n_cells=100, n_genes=50, n_positive=20,
+                                out_dir=Path("/tmp/rcb_smoke_toy"), seed=42)
+            out_dir = Path("/tmp/rcb_smoke_toy/predictions") / method
+            if out_dir.exists():
+                shutil.rmtree(out_dir)
+            out_dir.mkdir(parents=True)
+            wrapper = wrapper_cls()
+            result = wrapper.run(toy_h5ad, out_dir,
+                                {"unit_id": "smoke_toy", "seed": 42})
+            assert result.status == "completed", f"Status: {result.status}"
+            assert result.predictions_path.exists()
+            assert result.runmeta_path.exists()
+
+        _check(f"Run method '{method}' on toy data", _test_method_run)
 
     typer.echo("\n" + "=" * 60)
     typer.echo(f"RESULTS: {len(passed)} passed, {len(failed)} failed, {len(skipped)} skipped")

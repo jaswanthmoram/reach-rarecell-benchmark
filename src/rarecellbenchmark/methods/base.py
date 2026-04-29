@@ -30,7 +30,7 @@ class BaseMethodWrapper(ABC):
     method_id: str = ""
     supports_gpu: bool = False
     consumes_labels: bool = False
-    category: str = ""  # naive, ranked, exploratory, or ensemble
+    category: str = ""  # naive, ranked, exploratory, or supervised
 
     def _start_memory(self) -> None:
         """Start memory and runtime tracking."""

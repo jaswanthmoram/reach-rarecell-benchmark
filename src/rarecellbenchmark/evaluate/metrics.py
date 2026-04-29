@@ -93,6 +93,60 @@ def average_precision(y_true: np.ndarray, scores: np.ndarray) -> float:
     return float(average_precision_score(y_true, scores))
 
 
+def normalized_ap(y_true: np.ndarray, scores: np.ndarray) -> float:
+    """Compute Normalised Average Precision (nAP).
+
+    Normalises AP by subtracting chance-level AP (prevalence) and dividing
+    by the maximum possible improvement over chance: nAP = (AP - π) / (1 - π),
+    where π is the positive class prevalence.
+
+    Parameters
+    ----------
+    y_true : np.ndarray
+        Binary ground-truth labels (1 = positive, 0 = background).
+    scores : np.ndarray
+        Continuous scores (higher = more likely positive).
+
+    Returns
+    -------
+    float
+        Normalised average precision. Returns 0.0 if no positives or
+        all positives (no discriminable signal).
+    """
+    y_true = np.asarray(y_true)
+    scores = np.asarray(scores)
+    n_pos = y_true.sum()
+    n_total = len(y_true)
+    if n_pos == 0 or n_pos == n_total:
+        return 0.0
+    prevalence = n_pos / n_total
+    ap = average_precision(y_true, scores)
+    if prevalence >= 1.0:
+        return 0.0
+    return float((ap - prevalence) / (1.0 - prevalence))
+
+
+def ap_above_chance(y_true: np.ndarray, scores: np.ndarray) -> float:
+    """Compute AP minus prevalence (chance-level AP).
+
+    This is a simpler alternative to nAP that subtracts prevalence
+    without normalising by the maximum possible range.
+
+    Returns
+    -------
+    float
+        AP above chance. Negative values indicate worse-than-random.
+    """
+    y_true = np.asarray(y_true)
+    scores = np.asarray(scores)
+    n_pos = y_true.sum()
+    if n_pos == 0:
+        return 0.0
+    prevalence = n_pos / len(y_true)
+    ap = average_precision(y_true, scores)
+    return float(ap - prevalence)
+
+
 def auroc(y_true: np.ndarray, scores: np.ndarray) -> float:
     """Compute AUROC.
 
@@ -213,6 +267,33 @@ def expected_calibration_error(
     return float(ece)
 
 
+def brier_score(y_true: np.ndarray, scores: np.ndarray) -> float:
+    """Compute Brier score (mean squared error of probabilistic predictions).
+
+    Brier = (1/n) * Σ(p_i - y_i)², where p_i is the predicted score
+    and y_i is the binary ground-truth label.
+
+    Lower is better. Range [0, 1].
+
+    Parameters
+    ----------
+    y_true : np.ndarray
+        Binary ground-truth labels (1 = positive, 0 = background).
+    scores : np.ndarray
+        Predicted probabilities or scores. Should be in [0, 1] for
+        proper calibration interpretation. Non-probability scores
+        will produce scores >1 if range exceeds [0, 1].
+
+    Returns
+    -------
+    float
+        Brier score.
+    """
+    y_true = np.asarray(y_true, dtype=np.float64)
+    scores = np.asarray(scores, dtype=np.float64)
+    return float(np.mean((scores - y_true) ** 2))
+
+
 def compute_metrics(
     y_true: np.ndarray,
     scores: np.ndarray,
@@ -249,6 +330,9 @@ def compute_metrics(
         "recall_at_k": recall_at_k(y_true, scores, k),
         "balanced_accuracy_top_k": balanced_accuracy(y_true, y_pred_top_k),
         "ece": expected_calibration_error(y_true, scores, n_bins),
+        "nap": normalized_ap(y_true, scores),
+        "ap_above_chance": ap_above_chance(y_true, scores),
+        "brier": brier_score(y_true, scores),
     }
 
 
@@ -316,6 +400,9 @@ def evaluate_unit(
             "recall_at_k": float("nan"),
             "balanced_accuracy_top_k": float("nan"),
             "ece": float("nan"),
+            "nap": float("nan"),
+            "ap_above_chance": float("nan"),
+            "brier": float("nan"),
             "n_cells": len(y_true),
             "n_positive": 0,
             "warning": "no_positives",
@@ -396,6 +483,9 @@ def evaluate_predictions(
             "recall_at_k": float("nan"),
             "balanced_accuracy_top_k": float("nan"),
             "ece": float("nan"),
+            "nap": float("nan"),
+            "ap_above_chance": float("nan"),
+            "brier": float("nan"),
             "n_cells": n_total,
             "n_positive": 0,
             "n_background": n_total,

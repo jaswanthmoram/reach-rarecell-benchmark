@@ -172,9 +172,9 @@ python scripts/run_methods.py \
 Then regenerate evaluation and figures:
 
 ```bash
-python scripts/evaluate.py
+python scripts/evaluate_results.py
 python scripts/phase11_statistics.py --n-boot 2000
-python scripts/plot_leaderboard.py
+python scripts/generate_figures.py
 ```
 
 ---
