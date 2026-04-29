@@ -105,6 +105,7 @@ class CellSIUSWrapper(BaseMethodWrapper):
     """Wrapper for the CellSIUS R package."""
 
     method_id = "cellsius"
+    category = "ranked"
     supports_gpu = False
     consumes_labels = False
 
@@ -133,8 +134,8 @@ class CellSIUSWrapper(BaseMethodWrapper):
                 "from https://github.com/Novartis/CellSIUS"
             ) from exc
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmpdir = Path(tmpdir)
+        with tempfile.TemporaryDirectory() as tmpdir_name:
+            tmpdir = Path(tmpdir_name)
             counts_csv = tmpdir / "counts.csv"
             scores_csv = tmpdir / "scores.csv"
             script_path = tmpdir / "cellsius_run.R"

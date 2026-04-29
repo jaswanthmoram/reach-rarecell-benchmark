@@ -11,10 +11,12 @@ import json
 import logging
 import re
 from pathlib import Path
+from typing import Callable
 
 import numpy as np
 import pandas as pd
 import scanpy as sc
+import scipy.sparse as sp
 from anndata import AnnData
 
 from rarecellbenchmark.io import validate_anndata_contract, write_h5ad
@@ -31,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 def _load_text_matrix(raw_dir: Path) -> AnnData:
     """Generic text-matrix loader (GEO supplementary .txt.gz / .csv)."""
-    candidates = []
+    candidates: list[Path] = []
     for pattern in ["*.txt.gz", "*.txt", "*.tsv.gz", "*.tsv", "*.csv.gz", "*.csv"]:
         candidates.extend(raw_dir.glob(pattern))
     if not candidates:
@@ -91,8 +93,7 @@ def _load_text_matrix(raw_dir: Path) -> AnnData:
     var = pd.DataFrame(index=df.columns.astype(str))
     var["gene_name"] = var.index.astype(str)
 
-    adata = AnnData(X=scipy.sparse.csr_matrix(matrix) if hasattr(scipy.sparse, "csr_matrix") else matrix,
-                    obs=obs, var=var)
+    adata = AnnData(X=sp.csr_matrix(matrix), obs=obs, var=var)
     return adata
 
 
@@ -118,7 +119,7 @@ def _load_10x_mtx(raw_dir: Path) -> AnnData:
         except Exception:
             continue
 
-    mtx_files = []
+    mtx_files: list[Path] = []
     for pattern in ["matrix.mtx.gz", "matrix.mtx", "*/matrix.mtx.gz", "*/matrix.mtx", "**/matrix.mtx.gz", "**/matrix.mtx"]:
         mtx_files.extend(raw_dir.glob(pattern))
     if not mtx_files:
@@ -130,7 +131,7 @@ def _load_10x_mtx(raw_dir: Path) -> AnnData:
         adata.var_names_make_unique()
         return adata
 
-    adatas = []
+    adatas: list[AnnData] = []
     for mtx_dir in mtx_dirs:
         try:
             a = sc.read_10x_mtx(str(mtx_dir), var_names="gene_symbols", cache=False)
@@ -167,7 +168,7 @@ def _try_10x_load(raw_dir: Path) -> AnnData:
 
 
 # Simplified loader registry
-_DATASET_LOADERS: dict[str, callable] = {
+_DATASET_LOADERS: dict[str, Callable[[Path], AnnData]] = {
     "melanoma_tirosh": _load_text_matrix,
     "oligo_tirosh": _load_text_matrix,
     "gbm_patel": _load_text_matrix,

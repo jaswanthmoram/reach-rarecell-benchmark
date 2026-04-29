@@ -82,12 +82,11 @@ Phase 10: Execution ─────────► results/<method_id>/<unit_id>
     │                              predictions.csv + runmeta.json
     │
     ▼
-Phase 11: Evaluation ────────► data/results/all_metrics.parquet
-    │                          data/results/leaderboard*.csv
-    │                          data/results/phase11/*.csv
+Phase 11: Evaluation ────────► data/results/tables/phase11/*.csv
+    │                          data/results/phase11/*.csv (compatibility copy)
     │
     ▼
-Phase 12: Figure Generation ─► data/results/figures/phase11/*.pdf
+Phase 12: Figure Generation ─► data/results/figures/phase12/*.png
 ```
 
 Phases 4-8 are independent of each other once Phase 3 completes. Phase 10 can run in parallel across methods and units, subject to resource constraints. Phase 11 depends only on Phase 10 outputs and the hidden label files from Phases 4-8. Phase 12 depends only on Phase 11 outputs.
@@ -155,10 +154,10 @@ Predictions (CSV)
     │      - Aggregate per method/dataset/track
     │
     ▼
-Results (parquet + CSV)
-    ├── all_metrics.parquet         ← 11,100 rows
-    ├── leaderboard.csv             ← primary ranking
-    └── sensitivity_analyses/*.csv  ← 7 analyses
+Results (CSV)
+    ├── data/results/tables/phase11/leaderboard.csv
+    ├── data/results/tables/phase11/unit_metrics_sample.csv
+    └── data/results/tables/phase11/*.csv
 ```
 
 ---
@@ -281,10 +280,9 @@ Results (parquet + CSV)
   - Pairwise: Wilcoxon signed-rank test with Benjamini-Hochberg FDR (α = 0.05).
   - Rank stability: Bootstrap 95% CIs on median-AP ranks.
 - **Outputs:**
-  - `data/results/all_metrics.parquet` (11,100 rows × 27 columns)
-  - `data/results/leaderboard.csv` and `leaderboard_faithful.csv`
-  - `data/results/phase11/*.csv` (statistical_ranking, pairwise_tests, rank_ci, global_tests, rarity_analysis, calibration_metrics, track_e_robustness, metric_applicability)
-  - `data/results/sensitivity_analyses/*.csv` (7 sensitivity tables)
+  - `data/results/tables/phase11/*.csv` (canonical public Phase 11 tables)
+  - `data/results/phase11/*.csv` (compatibility copy)
+  - Large complete per-unit metrics and prediction archives are external release assets.
 
 ### Phase 12 - Figure Generation
 - **Purpose:** Produce publication-quality vector PDFs.
@@ -392,8 +390,8 @@ Label corruption while expression is held constant. Valid only for supervised me
 | Phase 2 → Phase 3 | `data/processed/{dataset_id}.h5ad` | `data/validation/{dataset_id}_tier_assignments.parquet`, `{dataset_id}_validation_report.json` |
 | Phase 3 → Phases 4-8 | `data/validation/{dataset_id}_tier_assignments.parquet` | `data/tracks/{track}/{dataset_id}/{tier}/{unit_id}_expression.h5ad`, `{unit_id}_labels.parquet`, `{unit_id}_manifest.json` |
 | Phases 4-8 → Phase 10 | `data/tracks/{track}/{dataset_id}/{tier}/{unit_id}_expression.h5ad` | `results/{method_id}/{unit_id}/predictions.csv`, `runmeta.json` |
-| Phase 10 → Phase 11 | `results/*/*/predictions.csv`, `data/tracks/*/*/*_labels.parquet` | `data/results/all_metrics.parquet`, `leaderboard*.csv`, `phase11/*.csv`, `sensitivity_analyses/*.csv` |
-| Phase 11 → Phase 12 | `data/results/all_metrics.parquet`, `sensitivity_analyses/*.csv` | `data/results/figures/phase11/*.pdf` |
+| Phase 10 → Phase 11 | `data/predictions/{method_id}/{unit_id}_predictions.csv`, `data/tracks/**/{unit_id}_labels.parquet` | `data/results/tables/phase11/*.csv`, `data/results/phase11/*.csv` |
+| Phase 11 → Phase 12 | `data/results/tables/phase11/*.csv`, `data/results/snapshots/paper_v1/*.csv` | `data/results/figures/phase12/*.png` |
 
 ---
 

@@ -50,7 +50,7 @@ def plot_rank_forest(rank_ci_df: pd.DataFrame, out_path: Path) -> None:
             xerr=[df["rank"] - df["ci_lo"], df["ci_hi"] - df["rank"]],
             fmt="o",
             color="black",
-            ecolor=colors,
+            ecolor=colors,  # type: ignore[arg-type]
             capsize=4,
             markersize=6,
         )

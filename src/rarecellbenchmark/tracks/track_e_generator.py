@@ -12,7 +12,7 @@ import hashlib
 import json
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, TypedDict
 
 import numpy as np
 import pandas as pd
@@ -22,7 +22,13 @@ from rarecellbenchmark.tracks.seeding import MAX_SEED, get_track_seed
 
 logger = logging.getLogger(__name__)
 
-NOISE_CONDITIONS = {
+
+class NoiseCondition(TypedDict):
+    type: str
+    rate: float
+
+
+NOISE_CONDITIONS: dict[str, NoiseCondition] = {
     "noise10": {"type": "symmetric", "rate": 0.10},
     "noise20": {"type": "symmetric", "rate": 0.20},
     "asym_pos": {"type": "positive_only", "rate": 0.30},

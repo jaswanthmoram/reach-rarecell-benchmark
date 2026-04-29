@@ -1,47 +1,66 @@
 #!/usr/bin/env python3
-"""Master orchestrator stub for the REACH pipeline."""
+"""Run supported public REACH reproduction workflows."""
+
+from __future__ import annotations
+
 import argparse
+import subprocess
+import sys
+from pathlib import Path
 
 
-def run_cmd(cmd: str):
-    print(f">>> {cmd}")
-    # In a real implementation:
-    # subprocess.run(cmd, shell=True, check=True)
+def _run(cmd: list[str]) -> None:
+    print("$ " + " ".join(cmd))
+    subprocess.run(cmd, check=True)
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Run full benchmark pipeline")
-    parser.add_argument("--toy", action="store_true", help="Run toy pipeline end-to-end")
-    args = parser.parse_args()
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run REACH reproduction workflows")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--toy", action="store_true", help="Run a small local toy workflow")
+    mode.add_argument("--from-snapshots", action="store_true", help="Regenerate public tables/figures from tracked snapshots")
+    mode.add_argument("--full-data", action="store_true", help="Run full-data checks after external archives are restored")
+    parser.add_argument("--work-dir", type=Path, default=Path("data/toy"))
+    parser.add_argument("--output-dir", type=Path, default=Path("data/results"))
+    return parser.parse_args()
 
-    if args.toy:
-        print("=== Toy Pipeline ===")
-        run_cmd("python scripts/create_toy_data.py")
-        run_cmd("echo 'Running toy methods (stub)...'")
-        run_cmd(
-            "python scripts/evaluate_results.py --track a --method dummy "
-            "--output-dir data/results/tables"
-        )
-        run_cmd(
-            "python scripts/generate_figures.py --pipeline --track-design --method-audit --output-dir data/results/figures"
-        )
-        run_cmd(
-            "python scripts/generate_figures.py --leaderboard --runtime --output-dir data/results/figures"
-        )
-        print("Toy pipeline complete.")
-    else:
-        print("=== Full Benchmark Pipeline ===")
-        steps = [
-            "python scripts/download_dataset.py --dataset <DATASET>",
-            "python scripts/run_phase.py --phase 1 --dataset <DATASET>",
-            "python scripts/run_phase.py --phase 2 --dataset <DATASET>",
-            "python scripts/run_phase.py --phase 3 --dataset <DATASET>",
-            "python scripts/run_phase.py --phase 4 --dataset <DATASET>",
-        ]
-        for step in steps:
-            run_cmd(step)
-        print("Full pipeline sequence printed. Run each step manually or implement automation.")
+
+def main() -> int:
+    args = parse_args()
+    try:
+        if args.toy:
+            _run([sys.executable, "scripts/create_toy_data.py", "--out-dir", str(args.work_dir)])
+            _run([sys.executable, "-m", "rarecellbenchmark.cli", "smoke-test"])
+            return 0
+
+        if args.from_snapshots or not any([args.toy, args.full_data]):
+            _run([sys.executable, "scripts/phase11_statistics.py", "--from-snapshots"])
+            _run([sys.executable, "scripts/reproduce_from_snapshots.py"])
+            return 0
+
+        if args.full_data:
+            required = [
+                Path("data/processed"),
+                Path("data/tracks"),
+                Path("data/predictions"),
+            ]
+            missing = [str(path) for path in required if not path.exists() or not any(path.iterdir())]
+            if missing:
+                print(
+                    "ERROR: full-data reproduction requires external archives. "
+                    f"Missing or empty: {', '.join(missing)}",
+                    file=sys.stderr,
+                )
+                print("See docs/benchmark_regeneration.md for Zenodo download links.", file=sys.stderr)
+                return 1
+            _run([sys.executable, "scripts/run_phase.py", "--phase", "11"])
+            _run([sys.executable, "scripts/run_phase.py", "--phase", "12"])
+            return 0
+    except subprocess.CalledProcessError as exc:
+        return int(exc.returncode)
+
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

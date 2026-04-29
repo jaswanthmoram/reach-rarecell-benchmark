@@ -44,18 +44,35 @@ The larger parquet snapshot and full benchmark outputs are excluded from Git. Th
 
 ```text
 data/results/tables/phase11/
+data/results/phase11/
 data/results/figures/phase12/
 ```
 
-These files are summary-sized CSV and PNG outputs generated from the frozen snapshot. Large data and prediction artifacts belong in release archives.
+`data/results/tables/phase11/` is the canonical table path. `data/results/phase11/` is a compatibility copy for older notes and downstream scripts. These files are summary-sized CSV and PNG outputs generated from the frozen snapshot. Large data and prediction artifacts belong in release archives.
 
-To regenerate lightweight tables from the tracked CSV snapshots:
+To regenerate lightweight tables and figures from the tracked CSV snapshots:
 
 ```bash
+python scripts/phase11_statistics.py --from-snapshots
 python scripts/reproduce_from_snapshots.py
+snakemake -n --cores 1
+dvc repro --dry
 ```
 
 Generated public tables and figures are written under `data/results/` and are tracked only for the curated Phase 11/12 bundle.
+
+## Reproduction Modes
+
+| Mode | Command | External archives |
+|---|---|---|
+| Toy smoke | `python scripts/run_all.py --toy` | No |
+| Snapshot tables/figures | `python scripts/run_all.py --from-snapshots` | No |
+| Snakemake dry-run | `snakemake -n --cores 1` | No |
+| DVC dry-run | `dvc repro --dry` | No |
+| Full prediction evaluation | `python scripts/run_phase.py --phase 11` | Yes, predictions and track-unit labels |
+| Full figure regeneration | `python scripts/run_phase.py --phase 12` | Yes, complete Phase 11 tables/results |
+
+The Git repository alone does not contain enough data to rerun all 11,100 method-unit predictions or rebuild raw-data-derived track units.
 
 ## Data Archives
 

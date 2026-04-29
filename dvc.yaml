@@ -1,100 +1,58 @@
-# DVC pipeline for REACH
-# =============================================================================
-# DVC is used here for DATA VERSIONING - not as the primary execution engine.
-# The primary workflow orchestrator is Snakemake (see Snakefile).
-# Use DVC to track large binary outputs (parquet, h5ad, PDF) and to pull/push
-# them from remote storage without committing them to Git.
-# =============================================================================
+# DVC data-versioning pipeline for REACH.
+#
+# Public stages run from tracked lightweight snapshots. Full-data stages are
+# intentionally explicit about their external archive dependencies.
 
 stages:
-  preprocess:
-    cmd: python run_all.py --phase preprocess
+  public_phase11:
+    cmd: python scripts/phase11_statistics.py --from-snapshots --output-dir data/results/tables/phase11
     deps:
-      - configs/datasets.yaml
-      - src/preprocess/
+      - scripts/phase11_statistics.py
+      - data/results/snapshots/paper_v1/results_per_unit.csv
+      - data/results/snapshots/paper_v1/results_per_method.csv
+      - data/results/snapshots/paper_v1/results_per_dataset.csv
+      - data/results/snapshots/paper_v1/degenerate_predictions_report.csv
     outs:
-      - data/processed/:
-          cache: true
-      - data/interim/:
-          cache: true
+      - data/results/tables/phase11/leaderboard.csv:
+          cache: false
+      - data/results/tables/phase11/rank_ci.csv:
+          cache: false
+      - data/results/tables/phase11/global_tests.csv:
+          cache: false
 
-  validate:
-    cmd: python run_all.py --phase validate
+  public_phase12:
+    cmd: python scripts/reproduce_from_snapshots.py
     deps:
-      - data/processed/
-      - src/validate/
+      - scripts/reproduce_from_snapshots.py
+      - data/results/snapshots/paper_v1/results_per_unit.csv
+      - data/results/snapshots/paper_v1/results_per_method.csv
+      - data/results/snapshots/paper_v1/results_per_dataset.csv
+      - data/results/tables/phase11/leaderboard.csv
     outs:
-      - data/validation/:
-          cache: true
+      - data/results/figures/phase12/Fig1_Leaderboard.png:
+          cache: false
+      - data/results/figures/phase12/Fig6_Runtime_Scalability_Pareto.png:
+          cache: false
 
-  track_a:
-    cmd: python run_all.py --phase track_a
+  toy_smoke:
+    cmd: python scripts/run_all.py --toy
     deps:
-      - data/validation/
-      - src/tracks/track_a_generator.py
+      - scripts/run_all.py
+      - scripts/create_toy_data.py
+      - src/rarecellbenchmark
     outs:
-      - data/tracks/a/:
-          cache: true
+      - data/toy/toy_expression.h5ad:
+          cache: false
+      - data/toy/toy_labels.parquet:
+          cache: false
 
-  track_b:
-    cmd: python run_all.py --phase track_b
+  full_data_phase11:
+    cmd: python scripts/run_phase.py --phase 11
     deps:
-      - data/validation/
-      - src/tracks/track_b_generator.py
+      - scripts/run_phase.py
+      - scripts/evaluate_results.py
+      - data/predictions/.gitkeep
+      - data/tracks/.gitkeep
     outs:
-      - data/tracks/b/:
-          cache: true
-
-  track_c:
-    cmd: python run_all.py --phase track_c
-    deps:
-      - data/validation/
-      - src/tracks/track_c_generator.py
-    outs:
-      - data/tracks/c/:
-          cache: true
-
-  track_d:
-    cmd: python run_all.py --phase track_d
-    deps:
-      - data/validation/
-      - src/tracks/track_d_generator.py
-    outs:
-      - data/tracks/d/:
-          cache: true
-
-  track_e:
-    cmd: python run_all.py --phase track_e
-    deps:
-      - data/validation/
-      - src/tracks/track_e_generator.py
-    outs:
-      - data/tracks/e/:
-          cache: true
-
-  evaluate:
-    cmd: python run_all.py --phase evaluate
-    deps:
-      - results/
-      - data/tracks/
-      - src/evaluate/
-    outs:
-      - data/results/all_metrics.parquet:
-          cache: true
-      - data/results/leaderboard.csv:
-          cache: true
-      - data/results/leaderboard_faithful.csv:
-          cache: true
-      - data/results/phase11/:
-          cache: true
-      - data/results/sensitivity_analyses/:
-          cache: true
-
-  figures:
-    cmd: python run_all.py --phase figures
-    deps:
-      - data/results/all_metrics.parquet
-      - src/figures/
-    outs:
-      - data/results/figures/phase11/:
-          cache: true
+      - data/results/full_data_phase11.requires_archives:
+          cache: false

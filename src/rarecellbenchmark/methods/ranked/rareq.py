@@ -35,6 +35,7 @@ class RareQWrapper(BaseMethodWrapper):
     """Wrapper for the RareQ R package."""
 
     method_id = "RareQ"
+    category = "ranked"
     supports_gpu = False
     consumes_labels = False
 
@@ -114,8 +115,8 @@ write.csv(data.frame(cell=rownames(X), cluster=cluster), "{output_csv_r}", row.n
             X = X.toarray()
         X = np.array(X, dtype=np.float32)
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmpdir = Path(tmpdir)
+        with tempfile.TemporaryDirectory() as tmpdir_name:
+            tmpdir = Path(tmpdir_name)
             input_csv = tmpdir / "input.csv"
             output_csv = tmpdir / "output.csv"
             r_script = tmpdir / "run_rareq.R"
@@ -127,11 +128,11 @@ write.csv(data.frame(cell=rownames(X), cluster=cluster), "{output_csv_r}", row.n
             log_file = tmpdir / "rareq.log"
             kwargs = {}
             if os.name == "nt":
-                si = subprocess.STARTUPINFO()
-                si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-                si.wShowWindow = subprocess.SW_HIDE
+                si = subprocess.STARTUPINFO()  # type: ignore[attr-defined]
+                si.dwFlags |= subprocess.STARTF_USESHOWWINDOW  # type: ignore[attr-defined]
+                si.wShowWindow = subprocess.SW_HIDE  # type: ignore[attr-defined]
                 kwargs["startupinfo"] = si
-                kwargs["creationflags"] = subprocess.CREATE_NO_WINDOW
+                kwargs["creationflags"] = subprocess.CREATE_NO_WINDOW  # type: ignore[attr-defined]
 
             try:
                 with open(log_file, "w") as lf:

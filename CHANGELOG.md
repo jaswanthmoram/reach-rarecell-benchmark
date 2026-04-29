@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.2.0] - 2026-04-29
+
+### Added
+- Registered all 10 included method wrappers and added interface tests for ranked and exploratory wrappers.
+- Added label-based CLI/script evaluation from prediction CSVs plus label parquet files.
+- Added `scripts/run_methods.py` and `scripts/phase11_statistics.py` for batch method execution and Phase 11 snapshot/statistics regeneration.
+- Added executable public Snakemake and DVC workflows for toy and snapshot reproduction.
+- Added `data/results/phase11/` as a compatibility copy of the canonical `data/results/tables/phase11/` bundle.
+- Added repository-level `paper.md` publication summary.
+
+### Changed
+- Bumped package and citation metadata to `v1.2.0`.
+- Updated reproducibility docs to distinguish Git-tracked toy/snapshot outputs from external Zenodo/GitHub release archives.
+- Updated Docker/GHCR release workflow metadata for release, `latest`, and `paper-2026` tags on published releases.
+
 ## Public result bundle - 2026-04-28
 
 ### Added

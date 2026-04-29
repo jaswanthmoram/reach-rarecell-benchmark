@@ -90,8 +90,10 @@ env/
 !/data/**/README.md
 
 # DVC
-.dvc
-.dvcignore
+!.dvc
+!.dvc/config
+.dvc/cache
+.dvc/tmp
 
 # pytest
 .pytest_cache/

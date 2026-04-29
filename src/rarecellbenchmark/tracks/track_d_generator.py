@@ -39,7 +39,7 @@ MIN_CTC_FOR_TIER = {
 N_REPLICATES = 5
 PBMC_BANK_PROVENANCE_FILENAME = "pbmc_bank.provenance.json"
 
-PBMC_BANK_REGISTRY = {
+PBMC_BANK_REGISTRY: dict[str, Any] = {
     "source": "10x Genomics",
     "dataset_name": "10k Human PBMCs, 3' v3.1, Chromium X",
     "download_url": "https://www.10xgenomics.com/datasets/10k-human-pbmcs-3-v3-1-chromium-x-3-1-standard",
@@ -216,6 +216,7 @@ class TrackDGenerator(BaseTrackGenerator):
             n_total_bg_avail = 0
             n_ctc_use = n_ctc
         else:
+            assert target_prevalence is not None
             if pbmc_bank is None:
                 logger.warning(
                     f"[{unit_id}] PBMC bank not available for {tier} dilution. Skipping."
@@ -473,7 +474,7 @@ class TrackDGenerator(BaseTrackGenerator):
                 indices = rng.choice(adata.n_obs, size=n_cells, replace=False)
                 adata = adata[indices].copy()
 
-            _expected = PBMC_BANK_REGISTRY["expected_cell_count_approx"]
+            _expected = int(PBMC_BANK_REGISTRY["expected_cell_count_approx"])
             _tolerance = 0.3
             _lo = int(_expected * (1 - _tolerance))
             _hi = int(_expected * (1 + _tolerance))

@@ -225,8 +225,10 @@ def run_track(
         raise typer.Exit(1)
 
     from rarecellbenchmark.tracks import TRACK_GENERATORS
+
+    generator_key = track.upper()
     try:
-        gen_cls = TRACK_GENERATORS[track]
+        gen_cls = TRACK_GENERATORS[generator_key]
     except KeyError:
         typer.echo(f"Error: no generator for track '{track}'", err=True)
         raise typer.Exit(1)
@@ -282,6 +284,7 @@ def evaluate(
     track: str = typer.Option(..., "--track", help=f"Track to evaluate ({', '.join(TRACKS)})."),
     method: Optional[str] = typer.Option(None, "--method", help="Optional method ID filter."),
     predictions_dir: Optional[Path] = typer.Option(None, "--predictions-dir", exists=True, help="Path to predictions directory."),
+    labels_dir: Optional[Path] = typer.Option(None, "--labels-dir", exists=True, file_okay=False, dir_okay=True, help="Path to label parquet files."),
     output_file: Optional[Path] = typer.Option(None, "--output", help="Path to write metrics CSV."),
 ) -> None:
     """Evaluate predictions for a track."""
@@ -300,28 +303,91 @@ def evaluate(
         )
         raise typer.Exit(1)
 
+    if labels_dir is None:
+        typer.echo(
+            "Evaluation requires label files.\n"
+            "  Usage: rcb evaluate --track a --predictions-dir data/predictions/ --labels-dir data/tracks/a/\n"
+            "  Labels are stored externally with track units in the Zenodo archives.",
+            err=True,
+        )
+        raise typer.Exit(1)
+
+    import json
+
     import pandas as pd
+
+    from rarecellbenchmark.evaluate.metrics import evaluate_predictions
+
+    def _unit_id_from_prediction(path: Path) -> str:
+        return path.stem.removesuffix("_predictions")
+
+    def _method_id_from_prediction(path: Path) -> str:
+        if method is not None:
+            return method
+        if path.parent != predictions_dir:
+            return path.parent.name
+        return "unknown"
+
+    def _find_labels(unit_id: str) -> Path:
+        candidates = [
+            labels_dir / f"{unit_id}_labels.parquet",
+            labels_dir / f"{unit_id}.parquet",
+        ]
+        for candidate in candidates:
+            if candidate.exists():
+                return candidate
+        recursive_matches = sorted(labels_dir.rglob(f"{unit_id}_labels.parquet"))
+        if recursive_matches:
+            return recursive_matches[0]
+        raise FileNotFoundError(f"No labels parquet found for unit '{unit_id}' in {labels_dir}")
+
+    def _load_run_meta(prediction_path: Path, unit_id: str) -> dict:
+        candidates = [
+            prediction_path.with_name(f"{unit_id}_runmeta.json"),
+            prediction_path.with_name(f"{unit_id}_run_meta.json"),
+        ]
+        for candidate in candidates:
+            if candidate.exists():
+                return json.loads(candidate.read_text())
+        return {}
+
     # Collect predictions from directory
     pred_files = sorted(predictions_dir.rglob("*_predictions.csv"))
+    if method is not None:
+        pred_files = [
+            path for path in pred_files
+            if path.parent.name == method or path.stem.startswith(f"{method}_")
+        ]
     if not pred_files:
         typer.echo(f"Error: no prediction files found in {predictions_dir}", err=True)
         raise typer.Exit(1)
 
     typer.echo(f"Found {len(pred_files)} prediction file(s)")
 
-    # Load and compute basic AP per file
     rows = []
-    for pf in pred_files[:20]:
-        df = pd.read_csv(pf)
-        tag = pf.stem.replace("_predictions", "")
-        rows.append({"unit_id": tag, "n_cells": len(df), "score_mean": float(df["score"].mean()), "score_std": float(df["score"].std())})
+    for pred_path in pred_files:
+        unit_id = _unit_id_from_prediction(pred_path)
+        try:
+            labels_path = _find_labels(unit_id)
+        except FileNotFoundError as exc:
+            typer.echo(f"Error: {exc}", err=True)
+            raise typer.Exit(1)
+        run_meta = {
+            "method_id": _method_id_from_prediction(pred_path),
+            "unit_id": unit_id,
+            "track": track.upper(),
+            **_load_run_meta(pred_path, unit_id),
+        }
+        rows.append(evaluate_predictions(pred_path, labels_path, run_meta=run_meta))
 
     summary = pd.DataFrame(rows)
     output_file = output_file or REPO_ROOT / "data" / "results" / f"eval_{track}_summary.csv"
     output_file.parent.mkdir(parents=True, exist_ok=True)
     summary.to_csv(output_file, index=False)
-    typer.echo(f"Evaluation summary written to {output_file}")
-    typer.echo(summary.describe().to_string())
+    typer.echo(f"Evaluation metrics written to {output_file}")
+    metric_cols = [c for c in ["ap", "auroc", "precision_at_k", "recall_at_k", "f1_at_k"] if c in summary.columns]
+    if metric_cols:
+        typer.echo(summary[metric_cols].describe().to_string())
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -341,14 +407,28 @@ def figures(
         raise typer.Exit(1)
 
     try:
+        import pandas as pd
+
         from rarecellbenchmark import figures as fig_module
         output_dir.mkdir(parents=True, exist_ok=True)
         if all_flag or leaderboard:
-            fig_module.plot_leaderboard(output_dir / "leaderboard.png")
-            typer.echo(f"  Generated: {output_dir / 'leaderboard.png'}")
+            leaderboard_path = REPO_ROOT / "data" / "results" / "tables" / "phase11" / "leaderboard.csv"
+            if not leaderboard_path.exists():
+                typer.echo(f"Missing leaderboard table: {leaderboard_path}", err=True)
+                raise typer.Exit(1)
+            leaderboard_df = pd.read_csv(leaderboard_path)
+            out_path = output_dir / "leaderboard.png"
+            fig_module.plot_leaderboard(leaderboard_df, out_path)
+            typer.echo(f"  Generated: {out_path}")
         if all_flag or runtime:
-            fig_module.plot_runtime(output_dir / "runtime.png")
-            typer.echo(f"  Generated: {output_dir / 'runtime.png'}")
+            runtime_path = REPO_ROOT / "data" / "results" / "snapshots" / "paper_v1" / "results_per_unit.csv"
+            if not runtime_path.exists():
+                typer.echo(f"Missing runtime source table: {runtime_path}", err=True)
+                raise typer.Exit(1)
+            runtime_df = pd.read_csv(runtime_path)
+            out_path = output_dir / "runtime.png"
+            fig_module.plot_runtime_comparison(runtime_df, out_path)
+            typer.echo(f"  Generated: {out_path}")
         typer.echo("Figures complete.")
     except Exception as exc:
         typer.echo(f"Cannot generate data-driven figures: {exc}", err=True)

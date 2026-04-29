@@ -15,6 +15,7 @@ RUN pip install --no-cache-dir '.[dev]'
 LABEL org.opencontainers.image.source=https://github.com/jaswanthmoram/reach-rarecell-benchmark
 LABEL org.opencontainers.image.description="REACH Benchmark container"
 LABEL org.opencontainers.image.licenses=MIT
+LABEL org.opencontainers.image.version=1.2.0
 
 # Default command
 CMD ["rcb", "--help"]

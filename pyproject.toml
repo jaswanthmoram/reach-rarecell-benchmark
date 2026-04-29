@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rarecellbenchmark"
-version = "1.1.0"
+version = "1.2.0"
 description = "A benchmarking framework for rare cell type identification in single-cell transcriptomics."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -44,6 +44,8 @@ dev = [
     "pytest-cov",
     "ruff",
     "mypy",
+    "snakemake",
+    "dvc",
     "pre-commit",
 ]
 full = [
@@ -96,3 +98,4 @@ ignore = ["E501"]
 python_version = "3.11"
 ignore_missing_imports = true
 strict = false
+disable_error_code = ["import-untyped"]

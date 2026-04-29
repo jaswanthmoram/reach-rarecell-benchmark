@@ -23,8 +23,8 @@ This document contains the prompt used to generate the architecture figure asset
 > - Phase 10: Prediction Execution (play icon) → outputs `results/*/*/predictions.csv`
 >
 > **Right column (Phases 11-12):**
-> - Phase 11: Evaluation & Statistics (chart icon) → outputs `data/results/all_metrics.parquet` and `leaderboard.csv`
-> - Phase 12: Figure Generation (image icon) → outputs `data/results/figures/*.pdf`
+> - Phase 11: Evaluation & Statistics (chart icon) → outputs `data/results/tables/phase11/*.csv`
+> - Phase 12: Figure Generation (image icon) → outputs `data/results/figures/phase12/*.png`
 >
 > **Design requirements:**
 > - Use a light grey background.

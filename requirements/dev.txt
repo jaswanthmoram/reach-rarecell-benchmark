@@ -2,4 +2,6 @@ pytest
 pytest-cov
 ruff
 mypy
+snakemake
+dvc
 pre-commit

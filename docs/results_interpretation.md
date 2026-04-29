@@ -12,17 +12,15 @@ The primary leaderboard is a CSV with one row per method:
 |--------|---------|
 | `rank` | Overall rank by tie-breaking rule (see below). |
 | `method_id` | Short identifier. |
-| `category` | `naive`, `ranked`, `exploratory`. |
-| `median_ap_track_a` | Median AP across all Track A units (fallback-filtered). |
-| `mean_ap_track_a` | Mean AP across all Track A units. |
-| `ap_track_d` | Median AP on Track D (natural prevalence). |
-| `median_f1` | Median F1@k across Track A. |
-| `null_fpr` | False-positive rate on Track C (lower is better). |
-| `ap_drop_noise10` | AP on clean Track A minus AP on noise10 (smaller drop is better). |
-| `median_runtime_s` | Median wall-clock seconds per unit. |
+| `category` | Method role such as `ranked`, `naive_baseline`, `exploratory`, or `supervised_ceiling`. |
+| `mean_ap` | Mean Average Precision across included public units. |
+| `median_ap` | Median Average Precision across included public units. |
+| `mean_auroc` | Mean AUROC across included public units. |
+| `mean_f1_top_k` | Mean F1 at the known positive count. |
+| `mean_runtime_s` | Mean wall-clock seconds per unit. |
 | `breakdown_tier` | Lowest tier (T1→T4) with median AP > 0.50; `none` if never. |
 | `n_fallback` | Number of fallback units (excluded from primary AP). |
-| `n_degenerate` | Number of degenerate units (retained but flagged). |
+| `n_units` | Number of evaluated units contributing to the summary. |
 
 ### Tie-breaking rule
 
@@ -79,21 +77,19 @@ A positive slope in the nAP panel indicates prevalence sensitivity: the method p
 
 ## 4. Statistical Significance Stars
 
-`data/results/phase11/statistical_significance.csv` contains pairwise Wilcoxon tests.
+`data/results/phase11/pairwise_tests.csv` contains pairwise Wilcoxon tests regenerated from the public snapshot. The richer `statistical_significance.csv` matrix is retained as a compatibility table from the publication bundle.
 
 ### Reading the table
 
-| comparison | delta_mean_ap | p_raw | p_bh_fdr | significant |
-|------------|---------------|-------|----------|-------------|
-| FiRE vs DeepScena | 0.295 | 1.2e-25 | 4.85e-23 | true |
-| FiRE vs cellsius | 0.098 | 8.0e-05 | 4.00e-03 | true |
-| FiRE vs expr_threshold | 0.030 | 2.1e-01 | 8.36e-01 | false |
+| method_a | method_b | statistic | p_value | p_value_bonferroni |
+|----------|----------|-----------|---------|--------------------|
+| FiRE | DeepScena | 96520.0 | 4.11e-83 | 1.85e-81 |
+| FiRE | RareQ | 289177.0 | 7.34e-02 | 1.0 |
 
 **Columns:**
-- `delta_mean_ap` - mean AP difference (positive = first method better).
-- `p_raw` - uncorrected Wilcoxon p-value.
-- `p_bh_fdr` - Benjamini-Hochberg adjusted p-value.
-- `significant` - `true` if `p_bh_fdr < 0.05`.
+- `statistic` - Wilcoxon signed-rank statistic.
+- `p_value` - uncorrected Wilcoxon p-value.
+- `p_value_bonferroni` - Bonferroni-adjusted p-value.
 
 ### In figures
 
@@ -129,16 +125,15 @@ Here, `hvg_logreg` and `CaSee` are significantly better than all ranked methods.
 
 `data/results/phase11/rank_ci.csv` reports:
 
-| method_id | observed_rank | median_bootstrap_rank | rank_ci_lower | rank_ci_upper |
-|-----------|---------------|-----------------------|---------------|---------------|
-| hvg_logreg | 1 | 1.0 | 1.0 | 1.0 |
-| CaSee | 2 | 2.0 | 2.0 | 2.0 |
-| FiRE | 3 | 3.0 | 3.0 | 4.0 |
+| method_id | rank | ci95_low | ci95_high |
+|-----------|------|----------|-----------|
+| hvg_logreg | 1.625 | 1.0 | 2.85 |
+| CaSee | 3.75 | 2.19 | 5.31 |
+| FiRE | 4.75 | 3.02 | 6.48 |
 
 **Interpretation:**
-- `observed_rank` - rank on the actual data.
-- `median_bootstrap_rank` - median rank across 10,000 bootstrap resamples.
-- `rank_ci_lower` / `rank_ci_upper` - 95% confidence interval on the rank.
+- `rank` - mean dataset-level rank (lower is better).
+- `ci95_low` / `ci95_high` - approximate 95% interval on the mean rank.
 
 If the CI for method A does not overlap with the CI for method B, they are likely distinct.
 

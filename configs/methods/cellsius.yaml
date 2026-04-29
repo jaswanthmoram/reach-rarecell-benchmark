@@ -2,7 +2,7 @@ method_id: cellsius
 name: CellSIUS
 category: ranked
 language: python
-wrapper: rarecellbenchmark.methods.ranked.cellsius.CellsiusWrapper
+wrapper: rarecellbenchmark.methods.ranked.cellsius.CellSIUSWrapper
 consumes_labels: false
 supports_gpu: false
 requires_raw_counts: false

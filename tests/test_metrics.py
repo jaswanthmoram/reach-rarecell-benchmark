@@ -1,6 +1,9 @@
 """Tests for core evaluation metrics."""
 
+from pathlib import Path
+
 import numpy as np
+import pandas as pd
 import pytest
 from sklearn.metrics import (
     average_precision_score,
@@ -16,6 +19,7 @@ from rarecellbenchmark.evaluate.metrics import (
     f1_at_k,
     precision_at_k,
     recall_at_k,
+    evaluate_predictions,
 )
 
 
@@ -75,3 +79,36 @@ def test_expected_calibration_error_basic() -> None:
     ece = expected_calibration_error(y_true, scores, n_bins=2)
     assert isinstance(ece, float)
     assert 0.0 <= ece <= 1.0
+
+
+def test_evaluate_predictions_accepts_cell_id_csv_and_y_true_labels(tmp_path: Path) -> None:
+    """CLI/wrapper prediction CSVs use explicit cell_id columns and toy labels use y_true."""
+    predictions_path = tmp_path / "toy_unit_01_predictions.csv"
+    labels_path = tmp_path / "toy_unit_01_labels.parquet"
+
+    pd.DataFrame(
+        {
+            "cell_id": ["cell_0", "cell_1", "cell_2", "cell_3"],
+            "score": [0.9, 0.8, 0.2, 0.1],
+        }
+    ).to_csv(predictions_path, index=False)
+    pd.DataFrame(
+        {
+            "cell_id": ["cell_0", "cell_1", "cell_2", "cell_3"],
+            "y_true": [1, 0, 1, 0],
+        }
+    ).to_parquet(labels_path)
+
+    result = evaluate_predictions(
+        predictions_path,
+        labels_path,
+        run_meta={"method_id": "expr_threshold", "unit_id": "toy_unit_01", "track": "A"},
+    )
+
+    assert result["method_id"] == "expr_threshold"
+    assert result["unit_id"] == "toy_unit_01"
+    assert result["n_cells"] == 4
+    assert result["n_positive"] == 2
+    assert result["ap"] == pytest.approx(average_precision_score([1, 0, 1, 0], [0.9, 0.8, 0.2, 0.1]))
+    assert result["auroc"] == pytest.approx(roc_auc_score([1, 0, 1, 0], [0.9, 0.8, 0.2, 0.1]))
+    assert result["precision_at_k"] == pytest.approx(0.5)

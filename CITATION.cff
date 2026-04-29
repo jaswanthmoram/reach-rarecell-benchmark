@@ -8,9 +8,9 @@ authors:
     email: jaswanthmoram@gmail.com
 repository-code: "https://github.com/jaswanthmoram/reach-rarecell-benchmark"
 license: MIT
-version: 1.1.0
-date-released: 2026-04-28
-abstract: "REACH (Rare-cell Evaluation Across Cancer Heterogeneity) is a systematic, reproducible benchmark for computational methods that detect rare malignant cells in single-cell RNA sequencing data. Version 1.1 comprises 10 curated datasets, 5 benchmark tracks, and 10 included methods, producing 1,110 benchmark units."
+version: 1.2.0
+date-released: 2026-04-29
+abstract: "REACH (Rare-cell Evaluation Across Cancer Heterogeneity) is a systematic, reproducible benchmark for computational methods that detect rare malignant cells in single-cell RNA sequencing data. Version 1.2 comprises 10 curated datasets, 5 benchmark tracks, and 10 included method wrappers, producing 1,110 benchmark units with lightweight public snapshots in Git and large archives as external release assets."
 keywords:
   - benchmark
   - scRNA-seq

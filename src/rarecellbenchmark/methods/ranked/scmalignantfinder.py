@@ -12,10 +12,10 @@ import numpy as np
 import pandas as pd
 from anndata import AnnData
 
-from rarecellbenchmark.methods.base import BaseMethodWrapper, MethodRunResult
+from rarecellbenchmark.io.checksums import compute_checksum
+from rarecellbenchmark.methods.base import BaseMethodWrapper, MethodRunResult, validate_predictions
 from rarecellbenchmark.methods.common import (
     load_blind_adata,
-    validate_predictions,
     write_predictions,
     write_runmeta,
 )
@@ -35,6 +35,7 @@ class ScMalignantFinderWrapper(BaseMethodWrapper):
     """Wrapper for scMalignantFinder - pan-cancer malignant cell identification."""
 
     method_id = "scMalignantFinder"
+    category = "ranked"
     supports_gpu = False
     consumes_labels = False
     method_category = "ranked"
@@ -50,33 +51,67 @@ class ScMalignantFinderWrapper(BaseMethodWrapper):
         self._start_memory()
 
         adata = load_blind_adata(input_h5ad)
+        unit_id = config.get("unit_id", "unknown")
         seed = config.get("seed", 42)
         pretrain_dir = config.get("pretrain_dir", None)
         norm_type = config.get("norm_type", True)
 
-        predictions, meta = self._run_scMalignantFinder(
+        scores, meta = self._run_scMalignantFinder(
             adata,
             pretrain_dir=pretrain_dir,
             norm_type=norm_type,
             seed=seed,
         )
+        predictions = pd.DataFrame({
+            "cell_id": adata.obs_names.tolist(),
+            "score": scores.reindex(adata.obs.index).values,
+        })
 
         validate_predictions(predictions, adata)
 
-        peak_mem_mb = self._stop_memory()
+        runtime_s, peak_memory_mb = self._stop_memory()
         runtime = time.time() - t0
+        runtime_s = max(runtime_s, runtime)
 
-        meta.update({
-            "runtime_seconds": runtime,
-            "peak_memory_mb": peak_mem_mb,
-            "method_id": self.method_id,
-            "seed": seed,
-        })
+        pred_path = write_predictions(predictions, output_dir, unit_id)
+        input_hash = compute_checksum(input_h5ad)
+        output_hash = compute_checksum(pred_path)
 
-        write_predictions(predictions, output_dir)
-        write_runmeta(meta, output_dir)
+        reserved_meta_keys = {
+            "method_id",
+            "unit_id",
+            "runtime_s",
+            "peak_memory_mb",
+            "seed",
+            "input_hash",
+            "output_hash",
+            "status",
+        }
+        extra_meta = {
+            key: value for key, value in meta.items() if key not in reserved_meta_keys
+        }
+        meta_path = write_runmeta(
+            method_id=self.method_id,
+            unit_id=unit_id,
+            output_dir=output_dir,
+            runtime_s=runtime_s,
+            peak_memory_mb=peak_memory_mb,
+            seed=seed,
+            input_hash=input_hash,
+            output_hash=output_hash,
+            **extra_meta,
+        )
 
-        return MethodRunResult(predictions=predictions, meta=meta)
+        logger.info(
+            "[%s] %d cells scored in %.3fs", self.method_id, adata.n_obs, runtime_s
+        )
+        return MethodRunResult(
+            method_id=self.method_id,
+            unit_id=unit_id,
+            predictions_path=pred_path,
+            runmeta_path=meta_path,
+            status="success",
+        )
 
     def _run_scMalignantFinder(
         self,

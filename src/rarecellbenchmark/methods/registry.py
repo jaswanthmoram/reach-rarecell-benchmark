@@ -36,10 +36,27 @@ def list_methods(category: str | None = None) -> list[str]:
 
 
 # Auto-import and register all built-in methods at module load time.
-from rarecellbenchmark.methods.naive.random_baseline import RandomBaselineWrapper  # noqa: E402
+from rarecellbenchmark.methods.exploratory.casee import CaSeeWrapper  # noqa: E402
 from rarecellbenchmark.methods.naive.expr_threshold import ExprThresholdWrapper  # noqa: E402
 from rarecellbenchmark.methods.naive.hvg_logreg import HVGLogRegWrapper  # noqa: E402
+from rarecellbenchmark.methods.naive.random_baseline import RandomBaselineWrapper  # noqa: E402
+from rarecellbenchmark.methods.ranked.cellsius import CellSIUSWrapper  # noqa: E402
+from rarecellbenchmark.methods.ranked.deepscena import DeepScenaWrapper  # noqa: E402
+from rarecellbenchmark.methods.ranked.fire import FiREWrapper  # noqa: E402
+from rarecellbenchmark.methods.ranked.rareq import RareQWrapper  # noqa: E402
+from rarecellbenchmark.methods.ranked.sccad import ScCADWrapper  # noqa: E402
+from rarecellbenchmark.methods.ranked.scmalignantfinder import ScMalignantFinderWrapper  # noqa: E402
 
-register(RandomBaselineWrapper)
-register(ExprThresholdWrapper)
-register(HVGLogRegWrapper)
+for _wrapper_cls in [
+    RandomBaselineWrapper,
+    ExprThresholdWrapper,
+    HVGLogRegWrapper,
+    FiREWrapper,
+    DeepScenaWrapper,
+    RareQWrapper,
+    CellSIUSWrapper,
+    ScCADWrapper,
+    ScMalignantFinderWrapper,
+    CaSeeWrapper,
+]:
+    register(_wrapper_cls)  # type: ignore[type-abstract]

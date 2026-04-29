@@ -1,145 +1,94 @@
-# Snakefile - REACH workflow outline
-# =============================================================================
-# This file defines a Snakemake workflow for the REACH pipeline.
-# Full execution requires processed data and method dependencies
-# (download from Zenodo: https://doi.org/10.5281/zenodo.19850652).
+# Snakemake workflow for the public REACH checkout.
 #
-# Usage:
-#   snakemake --cores 4         # run full pipeline
-#   snakemake --cores 1 preprocess  # run one rule
-# =============================================================================
+# Default targets are the lightweight snapshot-derived outputs tracked in Git.
+# Full raw/processed/prediction archives are external release assets; use the
+# explicit full_data_* rules only after restoring those archives.
 
-# -----------------------------------------------------------------------------
-# Configuration
-# -----------------------------------------------------------------------------
-configfile: "configs/datasets.yaml"
+SNAPSHOT_DIR = "data/results/snapshots/paper_v1"
+PHASE11_DIR = "data/results/tables/phase11"
+PHASE12_DIR = "data/results/figures/phase12"
 
-DATASETS = [d["dataset_id"] for d in config.get("datasets", []) if d.get("enabled")]
-TRACKS = ["a", "b", "c", "d", "e"]
-METHODS = ["random_baseline", "expr_threshold", "hvg_logreg",
-           "FiRE", "DeepScena", "RareQ", "cellsius", "scCAD",
-           "scMalignantFinder", "CaSee"]
+SNAPSHOTS = [
+    "data/results/snapshots/paper_v1/results_per_unit.csv",
+    "data/results/snapshots/paper_v1/results_per_method.csv",
+    "data/results/snapshots/paper_v1/results_per_dataset.csv",
+    "data/results/snapshots/paper_v1/degenerate_predictions_report.csv",
+]
 
-# -----------------------------------------------------------------------------
-# Wildcard constraints
-# -----------------------------------------------------------------------------
-wildcard_constraints:
-    dataset_id="[a-z_]+",
-    track="[a-e]",
-    method_id="[a-zA-Z0-9_]+",
+PHASE11_TABLES = [
+    f"{PHASE11_DIR}/leaderboard.csv",
+    f"{PHASE11_DIR}/rank_ci.csv",
+    f"{PHASE11_DIR}/global_tests.csv",
+    f"{PHASE11_DIR}/pairwise_tests.csv",
+    f"{PHASE11_DIR}/per_dataset_summary.csv",
+    f"{PHASE11_DIR}/unit_metrics_sample.csv",
+]
 
-# -----------------------------------------------------------------------------
-# Top-level target
-# -----------------------------------------------------------------------------
+PHASE12_FIGURES = [
+    f"{PHASE12_DIR}/Fig0_Phase11_Summary_Heatmap.png",
+    f"{PHASE12_DIR}/Fig1_Leaderboard.png",
+    f"{PHASE12_DIR}/Fig2_Sensitivity_Robustness.png",
+    f"{PHASE12_DIR}/Fig3_Critical_Difference.png",
+    f"{PHASE12_DIR}/Fig4_AP_Prevalence.png",
+    f"{PHASE12_DIR}/Fig5_TrackC_Null_Calibration.png",
+    f"{PHASE12_DIR}/Fig6_Runtime_Scalability_Pareto.png",
+    f"{PHASE12_DIR}/Fig7_Rank_Bootstrap_Forest.png",
+]
+
+
 rule all:
     input:
-        "data/results/figures/phase12/Fig1_Leaderboard.png",
-        "data/results/figures/phase12/Fig2_Sensitivity_Robustness.png",
-        "data/results/figures/phase12/Fig3_Critical_Difference.png",
-        "data/results/tables/phase11/leaderboard.csv",
-        "data/results/report.md",
+        SNAPSHOTS,
+        PHASE11_TABLES,
+        PHASE12_FIGURES,
 
-# -----------------------------------------------------------------------------
-# Preprocess (Phase 2)
-# -----------------------------------------------------------------------------
-rule preprocess:
+
+rule public_phase11:
+    input:
+        SNAPSHOTS,
     output:
-        h5ad="data/processed/{dataset_id}.h5ad",
-        qc="data/interim/{dataset_id}_qc_report.json",
+        PHASE11_TABLES,
     params:
-        dataset="{dataset_id}",
+        output_dir=PHASE11_DIR,
     shell:
-        "python scripts/run_phase.py --phase 2 --dataset {params.dataset}"
+        "python scripts/phase11_statistics.py --from-snapshots --output-dir {params.output_dir}"
 
-# -----------------------------------------------------------------------------
-# Validation (Phase 3)
-# -----------------------------------------------------------------------------
-rule validate:
-    input:
-        "data/processed/{dataset_id}.h5ad",
-    output:
-        tiers="data/validation/{dataset_id}_tier_assignments.parquet",
-        report="data/validation/{dataset_id}_validation_report.json",
-    shell:
-        "python scripts/run_phase.py --phase 3 --dataset {wildcards.dataset_id}"
 
-# -----------------------------------------------------------------------------
-# Generate all tracks (Phases 4-8)
-# -----------------------------------------------------------------------------
-rule tracks:
+rule public_phase12:
     input:
-        "data/validation/{dataset_id}_tier_assignments.parquet",
-        "data/processed/{dataset_id}.h5ad",
+        SNAPSHOTS,
+        f"{PHASE11_DIR}/leaderboard.csv",
     output:
-        touch("data/tracks/{dataset_id}_complete.flag"),
-    shell:
-        "rcb run-track --track {wildcards.track} --dataset {wildcards.dataset_id} "
-
-# -----------------------------------------------------------------------------
-# Execute a single method on a single unit (Phase 9-10)
-# -----------------------------------------------------------------------------
-rule execute:
-    input:
-        expr="data/tracks/{track}/{dataset_id}/tier/{unit_id}_expression.h5ad",
-    output:
-        pred="data/predictions/{method_id}/{unit_id}_predictions.csv",
-        meta="data/predictions/{method_id}/{unit_id}_runmeta.json",
-    shell:
-        "rcb run-method --method {wildcards.method_id} "
-        "--unit-id {wildcards.unit_id} --input {input.expr} "
-        "--output-dir data/predictions/{wildcards.method_id}"
-
-# -----------------------------------------------------------------------------
-# Evaluate all predictions (Phase 11)
-# -----------------------------------------------------------------------------
-rule evaluate:
-    input:
-        expand("data/predictions/{method_id}",
-               method_id=METHODS),
-        expand("data/tracks/{track}",
-               track=TRACKS),
-    output:
-        metrics="data/results/all_metrics.parquet",
-        leaderboard="data/results/tables/phase11/leaderboard.csv",
-    shell:
-        "python scripts/evaluate_results.py --track all "
-        "--predictions-dir data/predictions/ "
-        "--output-dir data/results/tables/phase11/"
-
-# -----------------------------------------------------------------------------
-# Generate all figures (Phase 12)
-# -----------------------------------------------------------------------------
-rule figures:
-    input:
-        "data/results/tables/phase11/leaderboard.csv",
-        "data/results/all_metrics.parquet",
-    output:
-        expand("data/results/figures/phase12/{fig}",
-               fig=["Fig0_Phase11_Summary_Heatmap.png",
-                    "Fig1_Leaderboard.png",
-                    "Fig2_Sensitivity_Robustness.png",
-                    "Fig3_Critical_Difference.png",
-                    "Fig4_AP_Prevalence.png",
-                    "Fig5_TrackC_Null_Calibration.png",
-                    "Fig6_Runtime_Scalability_Pareto.png",
-                    "Fig7_Rank_Bootstrap_Forest.png"]),
+        PHASE12_FIGURES,
     shell:
         "python scripts/reproduce_from_snapshots.py"
 
-# -----------------------------------------------------------------------------
-# Build markdown report
-# -----------------------------------------------------------------------------
-rule report:
-    input:
-        "data/results/tables/phase11/leaderboard.csv",
-        "data/results/figures/phase12/Fig1_Leaderboard.png",
-        "data/results/figures/phase12/Fig3_Critical_Difference.png",
-        "data/results/all_metrics.parquet",
+
+rule toy_data:
     output:
-        "data/results/report.md",
+        "data/toy/toy_expression.h5ad",
+        "data/toy/toy_labels.parquet",
+        "data/toy/toy_manifest.json",
     shell:
-        "python scripts/generate_figures.py --leaderboard "
-        "--output-dir data/results/figures/ && "
-        "echo '# REACH Benchmark Report' > {output} && "
-        "echo && date >> {output} && "
-        "echo 'Leaderboard: data/results/tables/phase11/leaderboard.csv' >> {output}"
+        "python scripts/create_toy_data.py --out-dir data/toy"
+
+
+rule toy_smoke:
+    input:
+        "data/toy/toy_expression.h5ad",
+        "data/toy/toy_labels.parquet",
+        "data/toy/toy_manifest.json",
+    output:
+        touch("data/results/toy_smoke.ok"),
+    shell:
+        "rcb smoke-test && touch {output}"
+
+
+rule full_data_phase11:
+    input:
+        "data/predictions/.gitkeep",
+        "data/tracks/.gitkeep",
+    output:
+        touch("data/results/full_data_phase11.requires_archives"),
+    shell:
+        "python scripts/run_phase.py --phase 11"

@@ -17,6 +17,59 @@ from sklearn.metrics import (
 logger = logging.getLogger(__name__)
 
 
+def load_binary_labels(labels_path: Path) -> pd.Series:
+    """Load benchmark labels as a binary Series indexed by cell_id.
+
+    Supported public formats:
+    - ``cell_id`` + numeric ``y_true`` (toy/public label files)
+    - ``cell_id`` + string ``true_label`` with ``positive``/``background``
+    - indexed parquet with either ``y_true`` or ``true_label``
+    """
+    labels = pd.read_parquet(labels_path)
+    if "cell_id" in labels.columns:
+        labels = labels.set_index("cell_id", drop=False)
+        labels.index = labels.index.astype(str)
+
+    if "y_true" in labels.columns:
+        raw = labels["y_true"]
+        if pd.api.types.is_numeric_dtype(raw):
+            y_true = raw.astype(int)
+        else:
+            y_true = raw.astype(str).str.lower().isin({"1", "true", "positive", "malignant"}).astype(int)
+    elif "true_label" in labels.columns:
+        raw = labels["true_label"]
+        if pd.api.types.is_numeric_dtype(raw):
+            y_true = raw.astype(int)
+        else:
+            y_true = raw.astype(str).str.lower().isin({"1", "true", "positive", "malignant"}).astype(int)
+    else:
+        raise ValueError(
+            f"Label file {labels_path} must contain either 'y_true' or 'true_label'."
+        )
+
+    y_true.index = y_true.index.astype(str)
+    return y_true
+
+
+def load_prediction_scores(predictions_csv: Path) -> pd.Series:
+    """Load a prediction CSV as scores indexed by cell_id."""
+    predictions = pd.read_csv(predictions_csv)
+    if "score" not in predictions.columns:
+        raise ValueError(f"Prediction file {predictions_csv} is missing required column 'score'.")
+
+    if "cell_id" in predictions.columns:
+        scores = predictions.set_index("cell_id")["score"]
+    elif len(predictions.columns) >= 2:
+        scores = predictions.set_index(predictions.columns[0])["score"]
+    else:
+        raise ValueError(
+            f"Prediction file {predictions_csv} must contain a 'cell_id' column or an index column."
+        )
+
+    scores.index = scores.index.astype(str)
+    return scores.astype(float)
+
+
 def average_precision(y_true: np.ndarray, scores: np.ndarray) -> float:
     """Compute Average Precision (area under precision-recall curve).
 
@@ -226,7 +279,7 @@ def evaluate_unit(
     dict
         Dict with all metrics and metadata.
     """
-    true_labels = pd.read_parquet(labels_path)["true_label"]
+    true_labels = load_binary_labels(labels_path)
 
     # Align scores and labels
     aligned_scores = scores.reindex(true_labels.index)
@@ -249,7 +302,7 @@ def evaluate_unit(
         fill_value = 0.0 if scores.empty else float(np.nanmin(scores.values)) - 1.0
         aligned_scores = aligned_scores.fillna(fill_value)
 
-    y_true = (true_labels == "positive").astype(int).values
+    y_true = true_labels.astype(int).values
     y_score = aligned_scores.values
 
     if y_true.sum() == 0:
@@ -312,8 +365,8 @@ def evaluate_predictions(
     dict
         Evaluation result dictionary.
     """
-    scores = pd.read_csv(predictions_csv, index_col=0)["score"]
-    true_labels = pd.read_parquet(labels_path)["true_label"]
+    scores = load_prediction_scores(predictions_csv)
+    true_labels = load_binary_labels(labels_path)
 
     aligned_scores = scores.reindex(true_labels.index)
     n_missing = int(aligned_scores.isna().sum())
@@ -323,7 +376,7 @@ def evaluate_predictions(
         fill_value = 0.0 if scores.empty else float(np.nanmin(scores.values)) - 1.0
         aligned_scores = aligned_scores.fillna(fill_value)
 
-    y_true = (true_labels == "positive").astype(int).values
+    y_true = true_labels.astype(int).values
     y_score = aligned_scores.values
 
     run_meta = run_meta or {}

@@ -202,13 +202,20 @@ class ExecutionRunner:
             # Ranked tracks do not permit label-consuming methods
             msg = f"Method {method_id} consumes labels but track {track} is ranked"
             logger.error(msg)
-            return self._failure_handler.handle_failure(
+            failure_path = self._failure_handler.handle_failure(
                 method_id=method_id,
                 unit_id=unit_id,
                 exception=RuntimeError(msg),
                 output_dir=method_pred_dir,
                 runtime_s=0.0,
                 peak_memory_mb=-1.0,
+            )
+            return MethodRunResult(
+                method_id=method_id,
+                unit_id=unit_id,
+                success=False,
+                meta_path=failure_path,
+                error=msg,
             )
 
         adata = ad.read_h5ad(expr_path)

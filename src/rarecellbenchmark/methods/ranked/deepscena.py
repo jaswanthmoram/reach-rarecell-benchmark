@@ -33,6 +33,7 @@ class DeepScenaWrapper(BaseMethodWrapper):
     """Wrapper for DeepScena deep-clustering method."""
 
     method_id = "DeepScena"
+    category = "ranked"
     supports_gpu = True
     consumes_labels = False
 
@@ -259,8 +260,8 @@ if __name__ == "__main__":
         if num_cluster is None:
             num_cluster = max(3, min(30, int(np.sqrt(adata.n_obs / 10))))
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmpdir = Path(tmpdir)
+        with tempfile.TemporaryDirectory() as tmpdir_name:
+            tmpdir = Path(tmpdir_name)
             input_csv = tmpdir / "input.csv"
             output_csv = tmpdir / "output.csv"
 

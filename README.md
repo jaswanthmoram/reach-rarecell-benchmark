@@ -112,7 +112,7 @@ rcb create-toy-data
 rcb smoke-test
 ```
 
-Both commands should exit with code 0. `create-toy-data` generates ~300 synthetic cells in `data/toy/`; `smoke-test` runs the three naive baselines and prints a mini-leaderboard.
+Both commands should exit with code 0. `create-toy-data` generates ~300 synthetic cells in `data/toy/`; `smoke-test` verifies imports, configs, toy-data creation, and metric/schema basics.
 
 ### Option 2: Docker (no installation needed)
 
@@ -136,7 +136,7 @@ python scripts/generate_figures.py --pipeline --track-design --method-audit --ou
 # or: make figures
 ```
 
-Data-driven figures (leaderboard, runtime, critical-difference) require evaluation results in `data/results/`.
+Data-driven figures (leaderboard and runtime) can be regenerated from the tracked public result tables and snapshots in `data/results/`.
 
 ### Running methods on track units
 
@@ -162,13 +162,13 @@ All CLI commands:
 | `rcb smoke-test` | Verify installation (imports, configs, metrics) |
 | `rcb run-method --method X --unit-id Y --input Z` | Run one method on one unit |
 | `rcb run-track --track a --processed-h5ad P` | Generate track units from processed data |
-| `rcb evaluate --track a --predictions-dir D` | Compute metrics from predictions |
+| `rcb evaluate --track a --predictions-dir D --labels-dir L` | Compute AP/AUROC/top-k metrics from predictions and labels |
 | `rcb figures --all --output-dir O` | Generate publication figures |
 | `rcb run-phase --phase N` | Execute pipeline phases (requires Zenodo data) |
 | `rcb verify-checksums` | Verify snapshot integrity |
 | `rcb freeze-leaderboard` | Lock current leaderboard |
 
-> **Full pipeline:** `rcb run-phase`, `rcb run-track`, `rcb run-method`, `rcb evaluate`, and `rcb figures` work with local data. End-to-end rerun from raw GEO data requires archived datasets from Zenodo — see [Data availability](#data-availability).
+> **Full pipeline:** Git contains executable toy and snapshot workflows. Full processed-data, track-unit, and prediction reruns require the Zenodo/GitHub release archives listed in [Data availability](#data-availability).
 
 ---
 
@@ -184,12 +184,16 @@ Key result paths:
 |---|---|
 | `data/results/snapshots/paper_v1/` | Frozen CSV snapshot used for public reproducibility checks |
 | `data/results/tables/phase11/` | Leaderboard, dataset summaries, rank tests, sensitivity summaries, and related Phase 11 CSV tables |
+| `data/results/phase11/` | Compatibility copy of the canonical Phase 11 table bundle |
 | `data/results/figures/phase12/` | GitHub-friendly PNG previews for leaderboard, sensitivity, null controls, runtime, pipeline, track design, and method audit |
 
 Regenerate the public result bundle with:
 
 ```bash
+python scripts/phase11_statistics.py --from-snapshots
 python scripts/reproduce_from_snapshots.py
+snakemake -n --cores 1
+dvc repro --dry
 ```
 
 ---
@@ -226,8 +230,8 @@ reach-rarecell-benchmark/
 ├── Dockerfile        # Container image
 ├── docker-compose.yml
 ├── Makefile          # Common development tasks
-├── Snakefile         # Snakemake workflow scaffold
-├── dvc.yaml          # DVC data-versioning pipeline
+├── Snakefile         # Snakemake workflow for toy/snapshot/full-data entrypoints
+├── dvc.yaml          # DVC data-versioning stages for public and full-data outputs
 └── environment.yml   # Conda environment specification
 ```
 
@@ -313,10 +317,20 @@ See [`docs/metrics.md`](docs/metrics.md) for full definitions and formulas.
 ## How to regenerate the benchmark
 
 ```bash
-# Quick: reproduce Phase 11-12 from frozen snapshots (no data needed)
-python scripts/reproduce_from_snapshots.py
+# Toy: local smoke workflow
+python scripts/run_all.py --toy
 
-# Full: download processed data from Zenodo, then run tracks → methods → evaluate → figures
+# Snapshot: reproduce public Phase 11-12 from frozen CSVs (no external data)
+python scripts/phase11_statistics.py --from-snapshots
+python scripts/reproduce_from_snapshots.py
+python scripts/run_all.py --from-snapshots
+
+# Workflow dry-runs
+snakemake -n --cores 1
+dvc repro --dry
+
+# Full: download processed data, track units, and predictions from Zenodo,
+# then run tracks -> methods -> evaluate -> figures.
 # See docs/benchmark_regeneration.md for step-by-step instructions.
 ```
 

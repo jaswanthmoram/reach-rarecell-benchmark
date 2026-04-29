@@ -43,37 +43,16 @@ def _write_readme(path: Path, title: str, body: str) -> None:
 
 def regenerate_tables(data: dict[str, pd.DataFrame]) -> None:
     """Regenerate and stage the public Phase 11 table bundle."""
-    TABLE_DIR.mkdir(parents=True, exist_ok=True)
+    from phase11_statistics import regenerate_phase11, update_compat_dir
 
-    per_method = data["per_method"].sort_values("median_ap", ascending=False)
-    per_method.to_csv(TABLE_DIR / "leaderboard.csv", index=False)
-
-    per_dataset = data["per_dataset"].sort_values(["dataset_id", "mean_ap"], ascending=[True, False])
-    per_dataset.to_csv(TABLE_DIR / "per_dataset_summary.csv", index=False)
-
-    data["degenerate"].to_csv(TABLE_DIR / "degenerate_predictions_report.csv", index=False)
-
-    sample = data["per_unit"].head(1000)
-    sample.to_csv(TABLE_DIR / "unit_metrics_sample.csv", index=False)
-
-    _write_readme(
-        TABLE_DIR / "README.md",
-        "Phase 11 Public Tables",
-        """This directory contains small CSV exports from the REACH evaluation and statistics phase.
-
-The tables are kept in Git because they are summary-sized and useful for
-reviewing the public repository without downloading full prediction outputs.
-The large unit-level parquet export and raw prediction files remain outside
-Git and are expected to be archived separately.
-
-Key entry points:
-
-- `leaderboard.csv` - method-level AP/AUROC/runtime summary.
-- `per_dataset_summary.csv` - method summaries stratified by dataset.
-- `unit_metrics_sample.csv` - first 1,000 unit rows from the frozen CSV snapshot.
-- `rank_ci.csv`, `pairwise_tests.csv`, `global_tests.csv`, and sensitivity tables - Phase 11 statistical summaries.
-""",
+    regenerate_phase11(
+        data["per_unit"],
+        data["per_method"],
+        data["per_dataset"],
+        data["degenerate"],
+        TABLE_DIR,
     )
+    update_compat_dir(TABLE_DIR)
     print(f"  Wrote Phase 11 tables: {TABLE_DIR}")
 
 
