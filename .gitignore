@@ -104,6 +104,9 @@ htmlcov/
 # mypy
 .mypy_cache/
 
+# snakemake
+.snakemake/
+
 # OS
 .DS_Store
 Thumbs.db
