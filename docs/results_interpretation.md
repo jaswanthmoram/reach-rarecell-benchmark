@@ -141,7 +141,7 @@ If the CI for method A does not overlap with the CI for method B, they are likel
 
 ## 7. Cross-dataset robustness
 
-`data/results/sensitivity_analyses/sens9_platform_stratification.csv` splits results by sequencing platform:
+`data/results/tables/phase11/sens9_platform_stratification.csv` splits results by sequencing platform:
 
 | method_id | platform | median_ap | n_units |
 |-----------|----------|-----------|---------|

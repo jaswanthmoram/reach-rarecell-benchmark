@@ -1,7 +1,7 @@
 # REACH - System Architecture
 
-> **Version:** 1.2-final  
-> **Date:** 2026-04-27  
+> **Version:** 1.2.0
+> **Date:** 2026-04-30
 > **Scope:** Technical architecture of the REACH benchmark evaluation framework
 
 ---

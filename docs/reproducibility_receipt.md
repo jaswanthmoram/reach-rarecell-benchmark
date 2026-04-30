@@ -2,7 +2,7 @@
 
 > **Date:** 2026-04-30
 > **Git tag:** v1.2.0
-> **Commit:** b17c872 (fix: complete publication-readiness — 11 files, all deep-scan issues resolved)
+> **Commit:** 55cc9da (fix: final publication polish — ORCID, receipt hash, acknowledgements)
 > **Environment:** Python 3.12, Ubuntu 24.04, Docker 29.1.3
 
 ## Snapshot Reproduction (no external data required)
