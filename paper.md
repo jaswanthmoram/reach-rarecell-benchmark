@@ -167,16 +167,29 @@ behaviour cannot be summarised by a single number.
 **Moram Venkata Satya Jaswanth**
 Department of Computer Science and Engineering, SRM University AP
 Email: jaswanthmoram@gmail.com
-ORCID: https://orcid.org/0000-0000-0000-0000 (register at https://orcid.org)
+ORCID: 0009-0003-2369-1692
 
 ## Acknowledgements
 
 The author thanks the REACH working group for feedback on benchmark design.
-This work used computational resources at [TODO: institution/cloud provider].
-Funding: [TODO: grant numbers and funding sources].
 
-Contributor acknowledgements: [TODO: dataset authors, software maintainers,
-reviewers, and colleagues who provided feedback on early drafts].
+This work used Google Cloud Platform (GCP) compute resources:
+- 30 vCPU / 240 GB RAM and 60 vCPU / 480 GB RAM high-memory instances
+  for preprocessing, track generation, and evaluation across 11,100
+  method-unit runs.
+- NVIDIA L4 GPU instances for GPU-accelerated method execution.
+Degenerate and failed method runs (CopyKAT, MACE, SCANER, SCEVAN,
+RaceID3, scATOMIC, GiniClust3) were identified on these systems and
+documented in the excluded-methods table.
+
+Funding: No external funding was received for this work.
+
+The author acknowledges the dataset creators and original publication
+authors whose GEO-deposited scRNA-seq data made this benchmark possible.
+Method developers (FiRE, DeepScena, RareQ, CellSIUS, scCAD,
+scMalignantFinder, CaSee) are acknowledged for publishing their software
+packages. The open-source tools Scanpy, scikit-learn, Snakemake, DVC,
+and Docker are acknowledged as foundational infrastructure.
 
 ## Competing Interests
 

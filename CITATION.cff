@@ -6,6 +6,7 @@ authors:
   - family-names: Moram
     given-names: Venkata Satya Jaswanth
     email: jaswanthmoram@gmail.com
+    orcid: "https://orcid.org/0009-0003-2369-1692"
 repository-code: "https://github.com/jaswanthmoram/reach-rarecell-benchmark"
 license: MIT
 version: 1.2.0
