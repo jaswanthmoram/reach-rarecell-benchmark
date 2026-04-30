@@ -15,7 +15,7 @@
 | | |
 |---|---|
 | **Datasets** | 10 scRNA-seq cohorts across 8 solid-tumour types and 2 blood malignancies |
-| **Tracks** | 5 (controlled spike-ins · synthetic stress-test · null controls · natural prevalence · noisy labels) |
+| **Tracks** | 5 (Track A controlled real-cell spike-ins · Track B synthetic stress · Track C null controls · Track D natural prevalence · Track E supervised label-noise diagnostic) |
 | **Methods** | 10 wrappers (6 ranked detectors · 2 baselines · 1 supervised ceiling · 1 exploratory) |
 | **Benchmark units** | 1,110 |
 | **Method–unit evaluations** | 11,100 |
@@ -23,9 +23,18 @@
 
 ---
 
-## What problem it solves
+## Reviewer navigation
 
-Rare malignant cell detection is critical for understanding tumour heterogeneity, but method comparison is hampered by inconsistent datasets, metrics, and evaluation protocols. REACH provides a standardised, reproducible benchmark with explicit file contracts, fixed random seeds, and comprehensive statistical evaluation.
+* Reproducibility: `docs/reproducibility.md`
+* Reproducibility receipt: `docs/reproducibility_receipt.md`
+* Benchmark architecture: `docs/architecture.md`
+* Method details and inclusion/exclusion: `docs/METHODS.md`
+* Fairness and leakage controls: `docs/fairness.md`
+* Results interpretation: `docs/results_interpretation.md`
+* Manuscript source/snapshot: `paper.md`
+* Public result snapshots: `data/results/snapshots/paper_v1/`
+* Phase 11 tables: `data/results/tables/phase11/`
+* Phase 12 figures: `data/results/figures/phase12/`
 
 ---
 
@@ -50,7 +59,7 @@ flowchart LR
     TB["Track B · Splatter Stress<br/>120 units · secondary"]
     TC["Track C · Null Controls<br/>160 units · diagnostic"]
     TD["Track D · Natural Blood/CTC<br/>30 units · primary"]
-    TE["Track E · Label Noise<br/>640 units · primary"]
+    TE["Track E · Label Noise<br/>640 units · supervised diagnostic"]
   end
 
   P9["Phase 9 · Method Wrappers<br/>10 included methods · run() contract"]
@@ -85,9 +94,10 @@ flowchart LR
   classDef figs    fill:#fae8ff,stroke:#a21caf,stroke-width:1.6px,color:#0f172a;
 
   class P0,P1,P2,P3 prep;
-  class TA,TD,TE primary;
+  class TA,TD primary;
   class TB second;
   class TC diag;
+  class TE diag;
   class P9 method;
   class P10 exec;
   class P11 eval;
@@ -170,6 +180,34 @@ All CLI commands:
 
 > **Full pipeline:** Git contains executable toy and snapshot workflows. Full processed-data, track-unit, and prediction reruns require the Zenodo/GitHub release archives listed in [Data availability](#data-availability).
 
+**Track E interpretation.** Track E is a supervised-only interpretive track and label-noise diagnostic. It is interpreted as algorithmic robustness only for `hvg_logreg`, which consumes labels. For unsupervised methods, Track E reflects metric sensitivity to corrupted labels, not algorithmic robustness. Track E is therefore not part of the primary unsupervised method ranking.
+
+---
+
+## Reviewer quick check
+
+The following commands run from a Git-only checkout and do not require the external Zenodo archives:
+
+```bash
+python -m pip install -e '.[dev]'
+rcb smoke-test
+python scripts/run_all.py --toy
+python scripts/phase11_statistics.py --from-snapshots
+python scripts/reproduce_from_snapshots.py
+snakemake -n --cores 1
+dvc repro --dry
+```
+
+Expected behaviour:
+
+* `rcb smoke-test` exits with code 0.
+* `python scripts/run_all.py --toy` generates toy workflow outputs.
+* `phase11_statistics.py --from-snapshots` regenerates Phase 11 summary tables from frozen snapshots.
+* `reproduce_from_snapshots.py` regenerates public snapshot-derived tables/figures.
+* `snakemake -n` and `dvc repro --dry` validate workflow structure without running the full data pipeline.
+
+Full processed-data, track-unit, prediction, and complete-result reruns require restoring the Zenodo archives listed in [Data availability](#data-availability).
+
 ---
 
 ## Result Preview
@@ -245,13 +283,15 @@ reach-rarecell-benchmark/
 | B | Synthetic Splatter Stress-Test | Secondary track: synthetic data generated with Splatter; realism-audited |
 | C | Null Controls | Diagnostic track: background-only units to test false-positive calibration |
 | D | Natural Blood/CTC Prevalence | Primary track: natural prevalence in blood-origin datasets without artificial spike-ins |
-| E | Noisy-Label Robustness | Restricted track: label corruption while expression is held constant (supervised methods only) |
+| E | Noisy-Label Robustness | Supervised-only interpretive track: label noise diagnostic for hvg_logreg. For unsupervised methods, this track reflects metric sensitivity to corrupted labels, not algorithmic robustness. |
 
 ---
 
 ## Data availability
 
 All raw datasets are publicly available from GEO (accessions listed below). Processed datasets, track units, predictions, and frozen results are archived on Zenodo.
+
+**Git alone is sufficient for toy workflows and public snapshot reproduction. Full processed-data, track-unit, prediction, and complete-result reruns require the external Zenodo archives listed below.**
 
 **What lives where:**
 

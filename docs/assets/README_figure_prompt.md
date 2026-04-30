@@ -18,7 +18,7 @@ This document contains the prompt used to generate the architecture figure asset
 > - Track B: Synthetic Splatter Stress-Test (secondary, dashed border)
 > - Track C: Null Controls (diagnostic, dotted border)
 > - Track D: Natural Blood/CTC Prevalence (primary, bold border)
-> - Track E: Noisy-Label Robustness (primary, bold border)
+> - Track E: Noisy-Label Robustness (supervised diagnostic, dotted border)
 > - All tracks feed into Phase 9: Method Wrappers (puzzle-piece icon)
 > - Phase 10: Prediction Execution (play icon) → outputs `results/*/*/predictions.csv`
 >

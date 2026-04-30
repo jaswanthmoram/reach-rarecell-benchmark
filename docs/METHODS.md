@@ -10,7 +10,7 @@
 | cellsius | ranked | Included | A-E | R | Wegmann et al., Genome Biology 2019 | Cell-level rarity statistic; R-based |
 | scCAD | ranked | Included | A-E | Python | Original publication (see wrapper) | Anomaly-based scorer; fallback on large datasets |
 | scMalignantFinder | ranked | Included | A-E | Python | Original publication (see wrapper) | Fast Python scorer; proxy fidelity; high degeneracy |
-| CaSee | ranked | Included | A-E | Python (PyTorch) | Yu et al., 2022 | Faithful exploratory comparator; strong AP but reported separately from published ranked methods |
+| CaSee | exploratory | Included | A-E | Python (PyTorch) | Yu et al., 2022 | Faithful exploratory comparator; strong AP but reported separately from published ranked methods |
 | random_baseline | naive | Included | A-E | Python | N/A - baseline | Random floor for significance testing |
 | expr_threshold | naive | Included | A-E | Python | N/A - baseline | Naive biological signal (expression threshold) |
 | hvg_logreg | supervised | Included | A,B,C,E | Python | N/A - supervised ceiling baseline | Supervised in-sample oracle; ceiling reference |
