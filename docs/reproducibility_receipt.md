@@ -2,7 +2,7 @@
 
 > **Date:** 2026-04-30
 > **Git tag:** v1.2.0
-> **Commit:** 3279cdd (fix: final corrections — ORCID typo, receipt hash, version strings)
+> **Commit:** 5af3491 (chore: update reproducibility_receipt.md commit hash)
 > **Environment:** Python 3.12, Ubuntu 24.04, Docker 29.1.3
 
 ## Snapshot Reproduction (no external data required)
