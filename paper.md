@@ -30,9 +30,102 @@ Full-data evaluation requires restoring the external archives listed in `README.
 | `data/results/phase11/` | Compatibility copy of Phase 11 public tables |
 | `data/results/figures/phase12/` | Public PNG figure previews |
 
+## Method Inclusion and Exclusion
+
+REACH considered 17 candidate methods. Ten produced evaluable outputs under the standardised score contract. The remaining seven were excluded.
+
+| Status | Method | Category | Wrapper Fidelity | Reason |
+|--------|--------|----------|------------------|--------|
+| Included | hvg_logreg | Supervised Ceiling | Faithful | In-sample logistic ceiling |
+| Included | CaSee | Exploratory | Faithful | Autoencoder-Isolation Forest (Yu et al., 2022) |
+| Included | FiRE | Ranked | Faithful | Frequency-based rarity (Jindal et al., 2018) |
+| Included | DeepScena | Ranked | Proxy | Deep clustering/SSL (Lei et al., 2023) |
+| Included | RareQ | Ranked | Faithful | Neighbourhood rarity (R package) |
+| Included | cellsius | Ranked | Faithful | Rarity statistic (Wegmann et al., 2019) |
+| Included | scCAD | Ranked | Proxy | Anomaly scorer (Xu et al., 2024) |
+| Included | scMalignantFinder | Ranked | Proxy | Malignancy probability (Yu et al., 2025) |
+| Included | expr_threshold | Naive Baseline | Faithful | Total-UMI/expression rank baseline |
+| Included | random_baseline | Naive Baseline | Faithful | Random uniform floor |
+| Excluded | CopyKAT | — | — | CNV modality mismatch (requires raw counts + gene positions) |
+| Excluded | MACE | — | — | Score contract mismatch (bulk-level annotation) |
+| Excluded | SCANER | — | — | Score contract mismatch (cluster-level, not cell-level) |
+| Excluded | SCEVAN | — | — | CNV modality mismatch |
+| Excluded | RaceID3 | — | — | Score contract mismatch (cluster-level rare-cell identification) |
+| Excluded | scATOMIC | — | — | Score contract mismatch (multi-class classifier, not continuous rarity score) |
+| Excluded | GiniClust3 | — | — | Score contract mismatch (cluster-level, not cell-level) |
+
+### Wrapper Fidelity Notes
+
+- **Faithful:** The wrapper executes the original published software package with
+  default parameters and documented configurations.
+- **Proxy:** The wrapper reimplements the published algorithm from the paper
+  description. Performance may differ from the original implementation.
+
+### Supervised Ceiling Justification
+
+hvg_logreg is a supervised logistic regression trained in-sample on 2,000 highly
+variable genes. It consumes ground-truth labels and therefore represents the
+upper bound of what is learnable from expression data alone. It is NOT a peer
+competitor to unsupervised methods. It is included as a calibration ceiling to
+quantify the gap between supervised separability and current unsupervised
+ranking — a gap that REACH v1.2 measures at ~0.687 median AP (1.000 vs 0.313).
+
 ## Included Methods
 
 The `rarecellbenchmark.methods.registry` module exposes 10 included wrappers: FiRE, DeepScena, RareQ, cellsius, scCAD, scMalignantFinder, CaSee, random_baseline, expr_threshold, and hvg_logreg.
+
+## Limitations
+
+1. **Single CNV caller.** Version 1 uses infercnvpy as the sole copy-number
+   inference arm. Cross-validation with CopyKAT, Numbat, or SCEVAN would
+   strengthen CNV evidence but was not feasible at this scale.
+2. **Imperfect ground truth.** High-confidence labels (P_HC/B_HC) rely on
+   consensus across four evidence arms. False positives in source annotation or
+   CNV calls can propagate. The tier-assignment system mitigates this by only
+   using P_HC vs B_HC for primary AP computation.
+3. **Fallback and degenerate rates.** Across all methods, 249 units (22.4% of
+   Track A) produced fallback scores and 377 units (34.0%) produced degenerate
+   (constant/near-constant) outputs. These rates are high and reflect current
+   engineering stability limitations of method wrappers rather than algorithmic
+   quality.
+4. **Dataset diversity.** The 10 datasets span 8 solid-tumour types and 2 blood
+   malignancies but are dominated by 10x Chromium (8/10). SMART-seq2 is
+   represented in only 2 datasets. No spatial transcriptomics or multi-omics
+   data are included.
+5. **Track D size.** Natural prevalence evaluation (Track D) contains only 30
+   units from 2 datasets, limiting statistical power for this track.
+6. **No held-out datasets.** All datasets are public. Method developers can
+   tune against the leaderboard, though REACH's multi-track design with null
+   controls and label-noise tracks makes simple overfitting harder.
+7. **Single contributor.** The benchmark was developed by a single author.
+   Independent verification by additional researchers would strengthen
+   reproducibility claims.
+8. **Cancer-type scope.** Several therapeutically important cancer types
+   (glioblastoma, prostate adenocarcinoma, gastric cancer) are not represented.
+
+## Comparison to Related Benchmarks
+
+REACH differs from existing single-cell benchmarks in several ways:
+
+| Feature | REACH v1.2 | scIB (Luecken 2022) | OpenProblems (Lance 2024) |
+|---------|------------|---------------------|---------------------------|
+| Task | Rare malignant cell detection | Batch correction, clustering, integration | Multi-task (denoising, DE, etc.) |
+| Tracks | 5 (spike-in, synthetic, null, natural, noise) | Multi-metric per task | Per-task metrics |
+| Labels | Multi-arm confidence tiers (P_HC-B_LC) | Canonical cell-type labels | Truth from data generators |
+| Null controls | Yes (Track C) | Not standard | Not standard |
+| Label noise | Yes (Track E, supervised only) | Not included | Not included |
+| Supervised ceiling | Yes (hvg_logreg) | Not standard | Not standard |
+| Fallback handling | Filtered from primary AP | Not standardised | Varies |
+| Containerisation | Docker + GHCR | Docker | Docker + Nextflow |
+
+## Version History
+
+- **v1.2.0 (2026-04-29):** Publication-ready snapshot. 10 datasets, 10 methods,
+  1,110 units, 11,100 evaluations. Added public Phase 11/12 tables and figures,
+  label-based evaluation, all method wrappers exposed through registry, paper.md,
+  and reproducibility receipt.
+- **v1.1.0 (2026-04-28):** Initial public release. Code, configs, tests, Docker,
+  CI/CD, toy-data generation, frozen CSV snapshots, Zenodo DOIs.
 
 ## Citation
 
@@ -74,12 +167,16 @@ behaviour cannot be summarised by a single number.
 **Moram Venkata Satya Jaswanth**
 Department of Computer Science and Engineering, SRM University AP
 Email: jaswanthmoram@gmail.com
-ORCID: [TODO]
+ORCID: https://orcid.org/0000-0000-0000-0000 (register at https://orcid.org)
 
 ## Acknowledgements
 
-[TODO: insert funding, institutional support, computational resources, and
-contributor acknowledgements]
+The author thanks the REACH working group for feedback on benchmark design.
+This work used computational resources at [TODO: institution/cloud provider].
+Funding: [TODO: grant numbers and funding sources].
+
+Contributor acknowledgements: [TODO: dataset authors, software maintainers,
+reviewers, and colleagues who provided feedback on early drafts].
 
 ## Competing Interests
 

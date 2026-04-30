@@ -1,6 +1,6 @@
 # Supplementary Note 2 — Sensitivity Analyses
 
-Seven sensitivity analyses were completed in Phase 11 to validate the robustness of the primary Track A ranking. Each analysis is stored as a CSV in `data/results/sensitivity_analyses/` and referenced in the main report.
+Seven sensitivity analyses were completed in Phase 11 to validate the robustness of the primary Track A ranking. Each analysis result is stored as a CSV in `data/results/phase11/` and `data/results/manuscript/tables/`.
 
 ---
 
@@ -70,4 +70,4 @@ Tests whether Track A performance depends on the absolute number of cells in the
 
 ---
 
-*All completed sensitivity CSVs are available in `data/results/sensitivity_analyses/` and copied to `paper_creation/tables/`.*
+*All completed sensitivity CSVs are available in `data/results/phase11/` and copied to `data/results/manuscript/tables/`.*

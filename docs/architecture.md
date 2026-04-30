@@ -257,7 +257,8 @@ Results (CSV)
   - `predictions.csv` - columns: `cell_id`, `score`, `pred_label`
   - `runmeta.json` - keys: `method`, `version`, `runtime_seconds`, `peak_ram_mb`, `success`, `n_cells`, `fidelity` (`faithful` | `proxy` | `fallback`), `is_degenerate` (bool)
 - **Categories:**
-  - **Naive Baseline:** `random_baseline`, `expr_threshold`, `hvg_logreg` (supervised ceiling, not a competitor).
+  - **Naive Baseline:** `random_baseline`, `expr_threshold`.
+  - **Supervised Ceiling:** `hvg_logreg` (supervised in-sample oracle; not a competitor — calibrates the upper bound).
   - **Ranked Detector:** `FiRE`, `DeepScena`, `RareQ`, `cellsius`, `scCAD`, `scMalignantFinder`.
   - **Exploratory:** `CaSee` (Yu et al., 2022) - faithful implementation, reported separately from ranked published methods.
 - **Excluded methods (7):** CopyKAT, MACE, SCANER, SCEVAN, raceid3, scATOMIC, GiniClust3 - documented in `docs/METHODS.md`.
@@ -303,7 +304,8 @@ Results (CSV)
 
 | Category | Methods | Fidelity | Description |
 |----------|---------|----------|-------------|
-| **Naive Baseline** | `random_baseline`, `expr_threshold`, `hvg_logreg` | Faithful | Floor (`random`), naive biological signal (`expr_threshold`), and supervised in-sample ceiling (`hvg_logreg`). The ceiling is not a competitor. |
+| **Naive Baseline** | `random_baseline`, `expr_threshold` | Faithful | Floor (`random`) and naive biological signal (`expr_threshold`). |
+| **Supervised Ceiling** | `hvg_logreg` | Faithful | Supervised in-sample oracle; not a competitor — calibrates the upper bound of what is learnable from expression data. |
 | **Ranked Detector** | `FiRE`, `DeepScena`, `RareQ`, `cellsius`, `scCAD`, `scMalignantFinder` | Faithful / Proxy | Published methods designed for rare malignant cell detection. All Version 1 ranked methods were implemented faithfully via their published software packages. |
 | **Exploratory** | `CaSee` | Faithful | Autoencoder-Isolation Forest architecture (Yu et al., 2022). Reported separately from ranked methods for transparent comparator separation. |
 

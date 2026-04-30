@@ -1,13 +1,14 @@
 """
 src/rarecellbenchmark/methods/naive/hvg_logreg.py
-REACH - Naive Baseline: HVG Logistic Regression
+REACH - Supervised Ceiling: HVG Logistic Regression
 
 Logistic regression on top highly variable genes.
 Uses labeled data (true_labels) to train logistic regression on HVGs.
-This is the strongest naive baseline - captures supervised learning floor.
+This is the supervised ceiling — calibrates the upper bound of what is learnable.
 
-NOTE: This baseline uses true labels for training - it's a supervised
-floor that shows what logistic regression CAN achieve with perfect labels.
+NOTE: This method uses true labels for training — it is the supervised
+oracle that shows what logistic regression CAN achieve with perfect labels.
+It is not a competitor and is excluded from ranking against unsupervised methods.
 """
 
 from __future__ import annotations

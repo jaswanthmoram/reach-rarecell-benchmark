@@ -1,6 +1,6 @@
 # Supplementary Note 1 — Excluded Methods
 
-Seven selected methods were excluded from the primary REACH Benchmark leaderboard after output-quality control. This note documents the rationale for each exclusion. Full wrapper code for excluded methods is retained in `src/methods/orthogonal/` and `src/methods/ranked/` for reproducibility and future repair.
+Seven selected methods were excluded from the primary REACH Benchmark leaderboard after output-quality control. This note documents the rationale for each exclusion. Full wrapper code for excluded methods is retained in `src/rarecellbenchmark/methods/` for reproducibility and future repair. For the current version (v1.2.0), excluded method wrappers are not bundled; inclusion rationale and exclusion reasons are documented in `docs/METHODS.md`.
 
 ---
 

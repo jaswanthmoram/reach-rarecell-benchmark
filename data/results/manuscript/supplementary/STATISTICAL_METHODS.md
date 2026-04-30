@@ -41,5 +41,5 @@ Median runtime per method is computed across all successfully executed units (in
 
 ---
 
-*Source code:* `scripts/phase11_statistics.py`, `scripts/phase11_enhanced_metrics.py`  
+*Source code:* `scripts/phase11_statistics.py`  
 *Output tables:* `data/results/phase11/*.csv`

@@ -93,7 +93,7 @@ class MethodConfig(BaseModel):
 
     method_id: str = Field(..., description="Unique method identifier.")
     name: str = Field(..., description="Human-readable method name.")
-    category: Literal["ranked", "naive_baseline", "orthogonal", "exploratory"] = Field(...)
+    category: Literal["ranked", "naive_baseline", "naive", "orthogonal", "exploratory", "supervised"] = Field(...)
     language: Literal["python", "r", "mixed"] = Field(default="python")
     wrapper_path: str = Field(..., description="Import path or script path for the wrapper.")
     consumes_labels: bool = Field(default=False, description="Whether the method uses ground-truth labels.")

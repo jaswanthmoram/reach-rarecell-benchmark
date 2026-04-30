@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 PROJECT_NAME = "REACH"
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 GLOBAL_SEED = 42
 DEFAULT_CONFIG_PATH = Path("configs/benchmark.yaml")
 TRACKS = ["a", "b", "c", "d", "e"]

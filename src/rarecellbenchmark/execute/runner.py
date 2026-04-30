@@ -101,7 +101,7 @@ def run_method_on_unit(
     module = _load_method_module(method_id)
     t0 = time.time()
 
-    # Handle methods that require labels (naive supervised baselines)
+    # Handle methods that require labels (supervised ceiling)
     if method_id == "hvg_logreg":
         if true_labels is None:
             true_labels = pd.read_parquet(labels_path)["true_label"]

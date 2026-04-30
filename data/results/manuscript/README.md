@@ -8,7 +8,6 @@ This directory contains the manuscript source materials for REACH Benchmark.
 
 ```text
 manuscript/
-├── paper.md              # Full benchmark report (Phase 1–12)
 ├── supplementary/        # Supplementary markdown documents
 │   ├── EXCLUDED_METHODS.md
 │   ├── SENSITIVITY_ANALYSES.md
