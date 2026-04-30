@@ -1,8 +1,7 @@
 # Reproducibility Receipt — REACH v1.2.0
 
 > **Date:** 2026-04-30
-> **Git tag:** v1.2.0
-> **Commit:** 5af3491 (chore: update reproducibility_receipt.md commit hash)
+> **Git tag:** v1.2.0 (run `git rev-parse v1.2.0^{}` to get the exact commit)
 > **Environment:** Python 3.12, Ubuntu 24.04, Docker 29.1.3
 
 ## Snapshot Reproduction (no external data required)
