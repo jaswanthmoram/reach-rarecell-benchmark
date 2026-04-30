@@ -1,6 +1,6 @@
 method_id: hvg_logreg
 name: HVG Logistic Regression (Supervised Ceiling)
-category: naive
+category: supervised
 language: python
 wrapper: rarecellbenchmark.methods.naive.hvg_logreg.HVGLogRegWrapper
 consumes_labels: true
