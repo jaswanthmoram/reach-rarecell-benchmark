@@ -140,6 +140,14 @@ class ScMalignantFinderWrapper(BaseMethodWrapper):
             }
 
         try:
+            import sys
+            finder_path = os.path.join(
+                os.path.dirname(__file__), "..", "..", "..", "..",
+                "External-Methods", "scMalignantFinder", "scMalignantFinder-main"
+            )
+            finder_path = os.path.abspath(finder_path)
+            if finder_path not in sys.path:
+                sys.path.insert(0, finder_path)
             from scMalignantFinder import classifier
         except ImportError:
             logger.error("[%s] scMalignantFinder not installed", self.method_id)

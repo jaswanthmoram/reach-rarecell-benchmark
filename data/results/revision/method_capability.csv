@@ -1,0 +1,11 @@
+method_id,kind,runnable_here,reason
+random_baseline,native,YES,built-in
+expr_threshold,native,YES,built-in
+hvg_logreg,native,YES,built-in
+FiRE,external,NO,Rscript missing (requires R+renv)
+scCAD,external,YES,python-louvain package installed, running faithfully
+cellsius,external,NO,Rscript missing (requires R+renv)
+RareQ,external,NO,Rscript missing (requires R+renv)
+scMalignantFinder,external,YES,squidpy and model files configured, running faithfully
+DeepScena,external,NO,GPU required (runner exits on CPU-only hosts)
+CaSee,external,YES,running faithfully via CPU-compatible wrapper recreation
