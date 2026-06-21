@@ -69,6 +69,9 @@ gpu = [
 r = [
     "rpy2",
 ]
+cnv = [
+    "infercnvpy",
+]
 docs = [
     "mkdocs",
     "mkdocs-material",
