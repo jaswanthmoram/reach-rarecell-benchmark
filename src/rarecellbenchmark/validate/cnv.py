@@ -28,6 +28,15 @@ def compute_cnv_score(adata: AnnData, reference_key: str = "cell_type",
     work = adata.copy()
     work.var.index = work.var.index.astype(object)
     work.obs.index = work.obs.index.astype(object)
+    # Filter to keep only genes with valid chromosome, start, and end
+    valid_genes = (
+        work.var["chromosome"].notna() & (work.var["chromosome"].astype(str) != "") &
+        work.var["start"].notna() & work.var["end"].notna()
+    )
+    work = work[:, valid_genes].copy()
+    if work.n_vars == 0:
+        logger.error("No genes with valid genomic positions; returning ZERO CNV.")
+        return pd.Series(0.0, index=adata.obs.index, name="cnv_score")
     cnv.tl.infercnv(work, **kwargs)
     mat = work.obsm["X_cnv"]
     arr = mat.toarray() if hasattr(mat, "toarray") else np.asarray(mat)
