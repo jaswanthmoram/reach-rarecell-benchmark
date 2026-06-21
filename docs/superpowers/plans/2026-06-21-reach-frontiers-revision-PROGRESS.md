@@ -4,18 +4,18 @@
 
 **Plan:** `2026-06-21-reach-frontiers-revision.md`
 **Branch:** `revision/frontiers-r1`
-**Last updated:** 2026-06-21 (created; no tasks executed yet)
+**Last updated:** 2026-06-21 (Phase 0 completed)
 
 ## Environment (fill from Task 0.2)
-- GPU available: _PENDING (run Task 0.2)_
-- CPU / RAM / OS: _PENDING (`data/results/revision/environment_capture.txt`)_
-- Methods runnable here: _PENDING (`data/results/revision/method_capability.csv`)_
+- GPU available: NO
+- CPU / RAM / OS: AMD EPYC 7B12 (16 cores) / 62Gi / Debian 13 (trixie)
+- Methods runnable here: random_baseline, expr_threshold, hvg_logreg, scCAD, scMalignantFinder, CaSee (6 methods)
 
 ## Phase status
 
 | Phase | Title | Status | Exit artifact |
 |---|---|---|---|
-| 0 | Environment / branch / GPU / deps | ☐ not started | `environment_capture.txt`, `method_capability.csv` |
+| 0 | Environment / branch / GPU / deps | ☑ done | `environment_capture.txt`, `method_capability.csv` |
 | 1 | Regenerate real CNV | ☐ not started | 10× `cnv_scores/*_cnv.parquet` |
 | 2 | Zero-prereq analyses | ☐ not started | circularity/casee/cliff/sens extracts |
 | 3 | CNV-dependent analyses | ☐ not started | `cnv_concordance.csv`, `threshold_sensitivity.csv` |
@@ -28,10 +28,11 @@
 ## Task checklist + results
 
 ### Phase 0
-- [ ] 0.1 branch created
-- [ ] 0.2 hardware/GPU captured → Result: ____
-- [ ] 0.3 infercnvpy installed → Result (version): ____
-- [ ] 0.4 External-Methods restored + capability matrix → Result (runnable count): ____
+- [x] 0.1 branch created
+- [x] 0.2 hardware/GPU captured → Result: AMD EPYC 7B12 / 62Gi / Debian 13 / NO GPU
+- [x] 0.3 infercnvpy installed → Result (version): 0.6.1
+- [x] 0.4 External-Methods restored + capability matrix → Result (runnable count): 6
+
 
 ### Phase 1
 - [ ] 1.1 real CNV impl + test pass
