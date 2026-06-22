@@ -16,9 +16,14 @@ def main():
     if not os.path.exists(positions_file):
         raise FileNotFoundError(f"Gene positions table not found at {positions_file}")
         
+    import sys
     h5ad_files = sorted(glob.glob(os.path.join(processed_dir, "*.h5ad")))
+    if len(sys.argv) > 1:
+        target = sys.argv[1]
+        h5ad_files = [f for f in h5ad_files if target in os.path.basename(f)]
+        
     if not h5ad_files:
-        print(f"No .h5ad files found in {processed_dir}")
+        print(f"No matching .h5ad files found in {processed_dir} for target '{sys.argv[1] if len(sys.argv) > 1 else ''}'")
         return
 
     print(f"Found {len(h5ad_files)} datasets to process.")
@@ -28,7 +33,11 @@ def main():
     for f in h5ad_files:
         dataset_name = os.path.basename(f).replace(".h5ad", "")
         out_path = os.path.join(output_dir, f"{dataset_name}_cnv.parquet")
-        
+
+        if os.path.exists(out_path):
+            print(f"Skipping {dataset_name} as output parquet already exists at {out_path}")
+            continue
+
         print(f"\nProcessing {dataset_name}...")
         t0 = time.time()
         
