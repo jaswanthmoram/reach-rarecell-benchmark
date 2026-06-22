@@ -85,7 +85,6 @@ class TrackFGenerator(BaseTrackGenerator):
                 unit_adata = adata[all_indices].copy()
                 
                 # Setup labels
-                pos_cell_ids = set(adata.obs.index[sampled_pos])
                 true_labels = pd.Series("background", index=unit_adata.obs.index)
                 
                 # Handle potential duplicate indices in sampled_pos by using matching cell names
@@ -140,7 +139,6 @@ class TrackFGenerator(BaseTrackGenerator):
         n_replicates = config.get("n_replicates", 5)
         base_seed = config.get("base_seed", 42)
         
-        rng = np.random.default_rng(base_seed)
         
         manifests = []
         unit_dirs = []

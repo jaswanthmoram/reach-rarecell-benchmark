@@ -3,7 +3,6 @@ import os
 import time
 import pandas as pd
 import scanpy as sc
-import anndata as ad
 from rarecellbenchmark.preprocess.gene_annotations import annotate_genes
 from rarecellbenchmark.validate.cnv import compute_cnv_score
 

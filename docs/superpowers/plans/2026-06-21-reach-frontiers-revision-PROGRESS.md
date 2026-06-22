@@ -4,7 +4,7 @@
 
 **Plan:** `2026-06-21-reach-frontiers-revision.md`
 **Branch:** `revision/frontiers-r1`
-**Last updated:** 2026-06-22 (Phase 1 completed)
+**Last updated:** 2026-06-22 (Phases 1–3 completed; Phase 4 in progress)
 
 ## Environment (fill from Task 0.2)
 - GPU available: NO
@@ -18,8 +18,8 @@
 | 0 | Environment / branch / GPU / deps | ☑ done | `environment_capture.txt`, `method_capability.csv` |
 | 1 | Regenerate real CNV | ☑ done | 10× `cnv_scores/*_cnv.parquet` |
 | 2 | Zero-prereq analyses | ☑ done | `circularity_ranking.csv`, `casee_filtered_leaderboard.csv`, `cliff_delta_matrix.csv`, `sens2_sens3_extract.txt` |
-| 3 | CNV-dependent analyses | ☐ not started | `cnv_concordance.csv`, `threshold_sensitivity.csv` |
-| 4 | Track F intra-lineage | ☐ not started | `track_f/track_f_results.csv` |
+| 3 | CNV-dependent analyses | ☑ done | `cnv_concordance.csv`, `threshold_sensitivity.csv` |
+| 4 | Track F intra-lineage | ⏳ in progress | `track_f/track_f_results.csv` (5/6 CPU methods done; CaSee running) |
 | 5 | Result consolidation | ☐ not started | `REVISION_RESULTS_INDEX.md` |
 | 6 | Figures + captions | ☐ not started | new Fig11, `FIGURE_CHANGES.md` |
 | 7 | Manuscript change doc | ☐ not started | `MANUSCRIPT_CHANGES.md`, `RESPONSE_TO_REVIEWERS.md` |
@@ -47,13 +47,13 @@
 - [x] 2.4 sens2/sens3 extract → Result (A↔B ρ; per-method Track C FPR): A-vs-B Spearman r: 0.042424, Track C FPR: ~0.030 (except hvg_logreg at 0.788)
 
 ### Phase 3
-- [ ] 3.1 CNV concordance → Result (overall AUROC / MCC CNV-vs-source): ____
-- [ ] 3.2 threshold sensitivity → Result (Spearman ρ range across 9 settings): ____
+- [x] 3.1 CNV concordance → Result (overall AUROC / MCC CNV-vs-source): AUROC=0.731022, MCC=0.338052
+- [x] 3.2 threshold sensitivity → Result (Spearman ρ range across 9 settings): [0.684848, 0.939394] (7 datasets × 9 threshold combos)
 
 ### Phase 4
-- [ ] 4.1 Track F generator + test pass
-- [ ] 4.2 core baselines → Result (expr_threshold AP collapse?; hvg_logreg ceiling on Track F): ____
-- [ ] 4.3 full panel → Result (CPU comparators APs; DeepScena/CaSee status): ____
+- [x] 4.1 Track F generator + test pass → `tests/tracks/test_track_f_generator.py` PASS
+- [x] 4.2 core baselines → Result: expr_threshold collapses (median AP at 0.1%: 0.009, not chance-corrected); hvg_logreg collapses to floor (AP=prevalence at all levels). scMalignantFinder is a surprise ceiling (median AP 1.0 at 0.1%).
+- [ ] 4.3 full panel → CaSee in-process running (15 units × ~90s). DeepScena: deferred (no GPU).
 
 ### Phase 5
 - [ ] 5.1 Track F leaderboard + A-vs-F comparison → Result (methods that dropped most): ____

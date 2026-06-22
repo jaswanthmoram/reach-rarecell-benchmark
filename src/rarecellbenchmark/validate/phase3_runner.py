@@ -96,11 +96,13 @@ def run_phase3(
     }
 
     # Step 5: Tier assignment
+    config_copy = dict(config) if config is not None else {}
+    config_copy["dataset_id"] = dataset_id
     tier_df = assign_tiers(
         adata=adata,
         cnv_scores=cnv_scores,
         signature_scores=sig_scores,
-        config=config,
+        config=config_copy,
     )
     tier_path = out_dir / f"{dataset_id}_tier_assignments.parquet"
     tier_df.to_parquet(tier_path, index=True)

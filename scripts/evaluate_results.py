@@ -62,10 +62,13 @@ def main() -> int:
         return 1
 
     pred_files = sorted(args.predictions_dir.rglob("*_predictions.csv"))
+    if args.track != "all":
+        track_suffix = f"_track_{args.track.lower()}_"
+        pred_files = [path for path in pred_files if track_suffix in path.name]
     if args.method:
         pred_files = [path for path in pred_files if path.parent.name == args.method]
     if not pred_files:
-        print(f"ERROR: no prediction files found in {args.predictions_dir}", file=sys.stderr)
+        print(f"ERROR: no prediction files found in {args.predictions_dir} for track {args.track}", file=sys.stderr)
         return 1
 
     rows = []
