@@ -8,6 +8,8 @@ logger = logging.getLogger(__name__)
 _DEFAULT_REFERENCE_CATS = (
     "T cells", "B cells", "Myeloids", "Mast cells", "Stromal cells",
     "Endothelial cells", "NK cells", "Plasma cells",
+    "T cell", "B cell", "Endothelial", "Mast", "Macrophage",
+    "Dendritic", "Fibroblast", "myocyte",
 )
 
 
