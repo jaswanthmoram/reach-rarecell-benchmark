@@ -4,7 +4,7 @@
 
 **Plan:** `2026-06-21-reach-frontiers-revision.md`
 **Branch:** `revision/frontiers-r1`
-**Last updated:** 2026-06-21 (Phase 0 completed)
+**Last updated:** 2026-06-22 (Phase 1 completed)
 
 ## Environment (fill from Task 0.2)
 - GPU available: NO
@@ -16,7 +16,7 @@
 | Phase | Title | Status | Exit artifact |
 |---|---|---|---|
 | 0 | Environment / branch / GPU / deps | ☑ done | `environment_capture.txt`, `method_capability.csv` |
-| 1 | Regenerate real CNV | ☐ not started | 10× `cnv_scores/*_cnv.parquet` |
+| 1 | Regenerate real CNV | ☑ done | 10× `cnv_scores/*_cnv.parquet` |
 | 2 | Zero-prereq analyses | ☐ not started | circularity/casee/cliff/sens extracts |
 | 3 | CNV-dependent analyses | ☐ not started | `cnv_concordance.csv`, `threshold_sensitivity.csv` |
 | 4 | Track F intra-lineage | ☐ not started | `track_f/track_f_results.csv` |
@@ -35,9 +35,10 @@
 
 
 ### Phase 1
-- [ ] 1.1 real CNV impl + test pass
-- [ ] 1.2 gene-position helper + test pass
-- [ ] 1.3 CNV regenerated (10 datasets) → Result (per-dataset mean CNV): ____
+- [x] 1.1 real CNV impl + test pass
+- [x] 1.2 gene-position helper + test pass
+- [x] 1.3 CNV regenerated (10 datasets) → Result (per-dataset mean CNV): Parquets generated. E.g. bcc_yost (Epi: 0.0156, Imm: 0.0073), crc_lee (Epi: 0.0081, Imm: 0.0071)
+
 
 ### Phase 2
 - [ ] 2.1 circularity → Result (overall Spearman ρ vs published leaderboard): ____
