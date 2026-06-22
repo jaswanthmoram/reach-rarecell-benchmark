@@ -9,6 +9,7 @@ from rarecellbenchmark.tracks.track_b_generator import TrackBGenerator
 from rarecellbenchmark.tracks.track_c_generator import TrackCGenerator
 from rarecellbenchmark.tracks.track_d_generator import TrackDGenerator
 from rarecellbenchmark.tracks.track_e_generator import TrackEGenerator
+from rarecellbenchmark.tracks.track_f_generator import TrackFGenerator
 
 TRACK_GENERATORS: dict[str, type[BaseTrackGenerator]] = {
     "A": TrackAGenerator,
@@ -16,6 +17,7 @@ TRACK_GENERATORS: dict[str, type[BaseTrackGenerator]] = {
     "C": TrackCGenerator,
     "D": TrackDGenerator,
     "E": TrackEGenerator,
+    "F": TrackFGenerator,
 }
 
 
