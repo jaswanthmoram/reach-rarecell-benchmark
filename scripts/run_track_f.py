@@ -57,8 +57,14 @@ def main():
     results_dir.mkdir(parents=True, exist_ok=True)
     
     if not args.evaluate_only:
-        # Step 1: Generate units for each dataset
+        # Step 1: Generate units for each dataset (skip if already exists)
         for dataset_id in args.datasets:
+            # Check if units already exist
+            existing_manifests = list(tracks_dir.rglob(f"{dataset_id}_track_f_*_manifest.json"))
+            if existing_manifests:
+                print(f"=== Track F units for {dataset_id} already exist ({len(existing_manifests)} manifests), skipping generation ===")
+                continue
+                
             print(f"\n=== Generating Track F units for {dataset_id} ===")
             
             processed_h5ad = Path("data/processed") / f"{dataset_id}.h5ad"
@@ -109,7 +115,8 @@ def main():
                 "prevalences": (0.001, 0.005, 0.01),
                 "n_replicates": 5,
                 "unit_size": 2000,
-                "base_seed": 42
+                "base_seed": 42,
+                "prevalence_unit_sizes": {0.001: 2000, 0.005: 400, 0.01: 400},
             }
             generator.generate(
                 dataset_id=dataset_id,

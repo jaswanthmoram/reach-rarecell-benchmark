@@ -32,85 +32,95 @@ class TrackFGenerator(BaseTrackGenerator):
         unit_size=2000,
         n_replicates=5,
         seed=42,
+        prevalence_unit_sizes=None,
     ) -> list[dict]:
         """Generate Track F unit dictionaries.
 
         Positives are sampled from malignant_mask.
         Background is sampled from normal_epi_mask.
+
+        Parameters
+        ----------
+        prevalence_unit_sizes : dict[float, int] | None
+            If provided, overrides ``unit_size`` for each prevalence level.
+            Example: ``{0.001: 2000, 0.005: 400, 0.01: 400}`` to keep large
+            units for the ultra-rare level (preserving the ceiling-drop signal)
+            while reducing duplication at higher prevalences.
         """
         rng = np.random.default_rng(seed)
-        
+
         pos_indices = np.where(malignant_mask)[0]
         bg_indices = np.where(normal_epi_mask)[0]
-        
+
         n_phc = len(pos_indices)
         n_bhc = len(bg_indices)
-        
+
         results = []
         for prev in prevalences:
+            effective_unit_size = unit_size
+            if prevalence_unit_sizes is not None and prev in prevalence_unit_sizes:
+                effective_unit_size = prevalence_unit_sizes[prev]
+
             for rep in range(1, n_replicates + 1):
-                # Unique seed for each prevalence and replicate
                 rep_seed = int(rng.integers(0, MAX_SEED))
                 unit_rng = np.random.default_rng(rep_seed)
-                
-                n_positive = int(round(prev * unit_size))
-                # Ensure at least 1 positive is spiked in
+
+                n_positive = int(round(prev * effective_unit_size))
                 if n_positive == 0 and prev > 0:
                     n_positive = 1
-                n_background = unit_size - n_positive
-                
-                # Check pos pool
+                n_background = effective_unit_size - n_positive
+
                 if n_phc < n_positive:
                     logger.warning(f"Insufficient positive cells: pool {n_phc} < requested {n_positive}")
-                    # Sample with replacement if necessary
                     sampled_pos = unit_rng.choice(pos_indices, size=n_positive, replace=True)
                 else:
                     sampled_pos = unit_rng.choice(pos_indices, size=n_positive, replace=False)
-                    
-                # Check bg pool and duplication cap (<20%)
-                if n_bhc < n_background:
-                    # Must sample with replacement
-                    sampled_bg = unit_rng.choice(bg_indices, size=n_background, replace=True)
-                    unique_bg = len(np.unique(sampled_bg))
-                    dup_frac = 1.0 - (unique_bg / n_background)
-                    if dup_frac >= 0.20:
-                        logger.warning(f"Duplication fraction ({dup_frac:.2f}) exceeds 20% cap due to small bg pool ({n_bhc})")
-                else:
+
+                if n_bhc >= n_background:
                     sampled_bg = unit_rng.choice(bg_indices, size=n_background, replace=False)
                     dup_frac = 0.0
-                    
+                elif n_bhc > 0:
+                    n_without_rep = n_bhc
+                    n_with_rep = n_background - n_bhc
+                    sampled_bg_no_rep = unit_rng.choice(bg_indices, size=n_without_rep, replace=False)
+                    sampled_bg_with_rep = unit_rng.choice(bg_indices, size=n_with_rep, replace=True)
+                    sampled_bg = np.concatenate([sampled_bg_no_rep, sampled_bg_with_rep])
+                    unique_bg = len(np.unique(sampled_bg))
+                    dup_frac = 1.0 - (unique_bg / n_background)
+                    unit_rng.shuffle(sampled_bg)
+                    if dup_frac >= 0.20:
+                        logger.warning(
+                            f"Duplication fraction ({dup_frac:.2f}) exceeds 20% cap "
+                            f"due to small bg pool ({n_bhc}) at prevalence {prev}"
+                        )
+                else:
+                    logger.error("No background cells available")
+                    sampled_bg = np.array([], dtype=int)
+                    dup_frac = 1.0
+
                 all_indices = np.concatenate([sampled_pos, sampled_bg])
                 unit_rng.shuffle(all_indices)
-                
+
                 unit_adata = adata[all_indices].copy()
-                
-                # Setup labels
+
                 true_labels = pd.Series("background", index=unit_adata.obs.index)
-                
-                # Handle potential duplicate indices in sampled_pos by using matching cell names
-                # or matching their index positions
-                # Find cell IDs that are in sampled_pos
-                true_labels.iloc[:n_positive] = "positive"
-                
-                # Re-verify label mapping
-                # Since we shuffled indices, the positions of positives in all_indices are where
-                # they were placed. Let's map them exactly:
                 is_pos_cell = np.isin(all_indices, sampled_pos)
-                true_labels = pd.Series("background", index=unit_adata.obs.index)
                 true_labels.iloc[is_pos_cell] = "positive"
-                
+
                 manifest = {
                     "track": "F",
                     "prevalence": prev,
                     "replicate": rep,
                     "n_positive": int(n_positive),
                     "n_background": int(n_background),
-                    "n_total": int(unit_size),
+                    "n_total": int(effective_unit_size),
                     "seed": rep_seed,
-                    "duplication_fraction": dup_frac,
+                    "duplication_fraction": float(dup_frac),
+                    "unit_size": int(effective_unit_size),
+                    "n_unique_background": int(n_bhc),
                     "status": "success",
                 }
-                
+
                 results.append({
                     "status": "success",
                     "unit_adata": unit_adata,
@@ -138,6 +148,7 @@ class TrackFGenerator(BaseTrackGenerator):
         unit_size = config.get("unit_size", 2000)
         n_replicates = config.get("n_replicates", 5)
         base_seed = config.get("base_seed", 42)
+        prevalence_unit_sizes = config.get("prevalence_unit_sizes")
         
         
         manifests = []
@@ -161,6 +172,7 @@ class TrackFGenerator(BaseTrackGenerator):
                     unit_size=unit_size,
                     n_replicates=1,
                     seed=seed,
+                    prevalence_unit_sizes=prevalence_unit_sizes,
                 )
                 unit_res = results[0]
                 
