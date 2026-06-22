@@ -153,14 +153,14 @@ The manuscript §Evaluation Tracks now includes an "Intra-lineage principle" sub
 
 **Reviewer comment:** Add an intra-lineage track with normal epithelial background.
 
-**Response:** Track F is now implemented and run on 9/10 methods (135/150 predictions complete; DeepScena pending Colab GPU re-run) using the crc_lee colorectal cancer dataset (`data/results/revision/track_f/track_f_leaderboard.csv`). Design:
+**Response:** Track F is now implemented and run on all 10 methods (150/150 predictions complete) using the crc_lee colorectal cancer dataset (`data/results/revision/track_f/track_f_leaderboard.csv`). Design:
 - Background: normal epithelial cells (tissue_origin == "Normal", cell_type == "Epithelial cells")
 - Positives: malignant epithelial cells (tissue_origin == "Tumor", HC-positive from Track A)
 - Prevalences: 0.1%, 0.5%, 1.0%; 5 replicates each; 15 units total
 - Adaptive unit sizes: 2,000 cells for 0.1% (preserves ultra-rare ceiling-drop signal), 400 cells for 0.5% and 1.0% (reduces duplication below 20% cap)
 - Background sampling: without replacement first, then with replacement only if unique pool exhausted
 
-**Key results (median AP at 0.1% prevalence, 9 methods):**
+**Key results (median AP at 0.1% prevalence, all 10 methods):**
 | Method | Track A median AP | Track F 0.1% median AP | Δ |
 |--------|-------------------|------------------------|---|
 | hvg_logreg (ceiling) | 1.000 | 0.001 | −0.999 |
@@ -172,7 +172,7 @@ The manuscript §Evaluation Tracks now includes an "Intra-lineage principle" sub
 | FiRE | 0.313 | 0.004 | −0.309 |
 | cellsius | 0.259 | 0.001 | −0.258 |
 | RareQ | 0.196 | 0.001 | −0.195 |
-| DeepScena | 0.018 | [Colab pending] | — |
+| DeepScena | 0.018 | 0.001 | −0.017 |
 
 Source: `data/results/revision/track_f/track_f_leaderboard.csv` and `data/results/revision/track_f/track_a_vs_f_comparison.csv`. Δ values are cited only where present in the comparison CSV; for the remaining 5 methods, the Track A and Track F medians are cited individually from their respective leaderboards.
 
@@ -184,6 +184,6 @@ At higher prevalences, scMalignantFinder remains dominant (0.5% AP = 1.000, 1% A
 3. **scMalignantFinder cancer-type bias:** Track A AP on crc_lee = 0.943 (colorectal, used by Track F) vs 0.015 on hnscc_puram (head & neck SCC). The AP = 1.0 on Track F is colorectal-specific and does not generalize across cancer types.
 4. **hvg_logreg constant 0.5:** The supervised classifier was trained on inter-lineage Track A labels; on intra-lineage Track F it sees all cells as one class and outputs a constant 0.5 (AUROC = 0.500). This is the expected ceiling-drop, not a fallback.
 5. **CaSee fidelity:** CaSee ran as a faithful CPU recreation of the original autoencoder (`faithful_recreation`), not the original GPU-dependent code.
-6. **DeepScena environment:** DeepScena ran on a Google Colab T4 GPU (this revision VM has no GPU), with a `torch.load` `weights_only` patch for PyTorch 2.6+. New 400-cell unit predictions pending Colab re-run.
+6. **DeepScena environment:** DeepScena ran on a Google Colab T4 GPU (this revision VM has no GPU), with a `torch.load` `weights_only` patch for PyTorch 2.6+. All 15 Track F units processed (3–14 clusters per unit; 2 small 400-cell units collapsed to 1 cluster — legitimate DeepScena behavior).
 
 The Track F results demonstrate that (1) the inter-lineage ceiling collapses on intra-lineage tasks, (2) a domain-specific pretrained classifier (scMalignantFinder) can retain discriminative power in intra-lineage settings but only for the cancer type it was effectively trained on, and (3) generic unsupervised anomaly detectors fail without inter-lineage contrast. Future work should curate additional datasets with normal epithelial references to reduce duplication and enable cross-cancer Track F evaluation.
