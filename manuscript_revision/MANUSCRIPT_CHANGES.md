@@ -310,7 +310,7 @@ At higher prevalences scMalignantFinder remains dominant (0.5% AP = 0.916, 1% AP
 | R3-1 | Reframe malignant-vs-TME | Abstract / Contributions / Evaluation Tracks | Inter-lineage imbalanced ranking, not sub-state discovery |
 | R3-2 | Ceiling trivial (concede) | Supervised Ceiling Justification | Concede; hvg_logreg 1.000→0.001 |
 | R3-3 | TME outliers as FP | Limitations | Scope-choice paragraph + Track C evidence |
-| R3-4 | Intra-lineage principle | Evaluation Tracks | 9/10 methods fall to ≤0.009 on Track F |
+| R3-4 | Intra-lineage principle | Evaluation Tracks | 10/10 methods fall to ≤0.009 on Track F (DeepScena on Colab T4) |
 | R3-5 | Track F track | Evaluation Tracks + KSR | New row + subsection + results; crc_lee + adaptive unit sizes (dup <20% at 0.5%/1%) |
 
 **Mandatory disclosures carried into the manuscript (from VERIFICATION_ISSUES.md):**

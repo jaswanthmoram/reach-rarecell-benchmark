@@ -58,7 +58,7 @@
 
 ### Phase 4-NEW (push R1-2 + R3-5 to 100% — see plan §PHASE 4-NEW)
 - [x] 4N.1 hnscc_puram CNV repair (R1-2) → Result: hnscc AUROC 0.500→0.906, MCC 0.000→0.763; overall AUROC 0.731→0.782, MCC 0.338→0.361
-- [x] 4N.2 Track F adaptive unit_size + without-replacement (R3-5) → Result: 0.1% dup 83%, 0.5% dup 14.6%, 1% dup 14.1% (<20% cap); 9/10 methods done (DeepScena pending Colab)
+- [x] 4N.2 Track F adaptive unit_size + without-replacement (R3-5) → Result: 0.1% dup 83%, 0.5% dup 14.6%, 1% dup 14.1% (<20% cap); 10/10 methods done (DeepScena on Colab T4, 150/150 predictions)
 - [x] 4N.3 re-run cascade: Phase 3.1→5→6→7→8; numbers-consistency clean → Result: all gates green, 0 missing source files
 
 ### Phase 5
