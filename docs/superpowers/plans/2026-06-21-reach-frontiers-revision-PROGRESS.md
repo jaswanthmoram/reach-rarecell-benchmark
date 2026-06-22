@@ -17,7 +17,7 @@
 |---|---|---|---|
 | 0 | Environment / branch / GPU / deps | ☑ done | `environment_capture.txt`, `method_capability.csv` |
 | 1 | Regenerate real CNV | ☑ done | 10× `cnv_scores/*_cnv.parquet` |
-| 2 | Zero-prereq analyses | ☐ not started | circularity/casee/cliff/sens extracts |
+| 2 | Zero-prereq analyses | ☑ done | `circularity_ranking.csv`, `casee_filtered_leaderboard.csv`, `cliff_delta_matrix.csv`, `sens2_sens3_extract.txt` |
 | 3 | CNV-dependent analyses | ☐ not started | `cnv_concordance.csv`, `threshold_sensitivity.csv` |
 | 4 | Track F intra-lineage | ☐ not started | `track_f/track_f_results.csv` |
 | 5 | Result consolidation | ☐ not started | `REVISION_RESULTS_INDEX.md` |
@@ -41,10 +41,10 @@
 
 
 ### Phase 2
-- [ ] 2.1 circularity → Result (overall Spearman ρ vs published leaderboard): ____
-- [ ] 2.2 CaSee filtered → Result (median AP all / excl-degenerate / n_degenerate): ____
-- [ ] 2.3 Cliff's δ → Result (FiRE vs expr_threshold δ; hvg_logreg vs FiRE δ): ____
-- [ ] 2.4 sens2/sens3 extract → Result (A↔B ρ; per-method Track C FPR): ____
+- [x] 2.1 circularity → Result (overall Spearman ρ vs published leaderboard): 0.648230 (p-value: 4.26e-02)
+- [x] 2.2 CaSee filtered → Result (median AP all / excl-degenerate / n_degenerate): 0.512127 / 0.605549 / 20
+- [x] 2.3 Cliff's δ → Result (FiRE vs expr_threshold δ; hvg_logreg vs FiRE δ): 0.068242 / 0.796445
+- [x] 2.4 sens2/sens3 extract → Result (A↔B ρ; per-method Track C FPR): A-vs-B Spearman r: 0.042424, Track C FPR: ~0.030 (except hvg_logreg at 0.788)
 
 ### Phase 3
 - [ ] 3.1 CNV concordance → Result (overall AUROC / MCC CNV-vs-source): ____
