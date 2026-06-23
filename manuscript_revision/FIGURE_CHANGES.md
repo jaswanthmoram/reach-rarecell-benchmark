@@ -56,7 +56,7 @@ If rankings shifted, regenerate from the updated per-unit AP matrix.
 **Change:** Add N annotation and FPR clarification.
 
 **New caption addition:**
-> "N = 80 null units (Track C; 8 datasets × 10 replicates). Expected FPR at 5% threshold ≈ 0.050. Most methods: FPR ≈ 0.030. hvg_logreg outlier FPR = 0.788 reflects cross-validation overfitting on null data (see `data/results/revision/sens2_sens3_extract.txt`)."
+> "N = 160 null units (Track C; 8 datasets × 20 replicates). Expected FPR at 5% threshold ≈ 0.050. Most methods: FPR ≈ 0.030. hvg_logreg outlier FPR = 0.788 reflects cross-validation overfitting on null data (see `data/results/revision/sens2_sens3_extract.txt`)."
 
 ---
 

@@ -90,15 +90,18 @@ The matrix has an unnamed first column (`Unnamed: 0`) instead of `method_id`. Va
 
 **Verdict:** Fixed and verified. ✅
 
-### 4.2 Threshold sensitivity — bcc_yost has n_B_HC=0 across all settings
+### 4.2 Threshold sensitivity — ALL datasets have n_B_HC=0; ρ identical across threshold settings
 
 **File:** `data/results/revision/threshold_sensitivity.csv`
 
-- bcc_yost: `n_B_HC = 0` for all 9 threshold combinations
-- This means no cells are classified as high-confidence background at any threshold
-- Spearman ρ = 0.818 (still valid — computed on P_HC counts)
+- **ALL 7 datasets** have `n_B_HC = 0` for all 9 threshold combinations (not just bcc_yost)
+- This means no cells are classified as high-confidence background at any threshold setting
+- The AUCell and kNN threshold variations do NOT change the HC label set — same cells selected at every setting
+- Each dataset has exactly 1 unique ρ value across all 9 settings (the "range" is cross-dataset, not cross-threshold)
+- ov_izar_tirosh and rcc_multi produce NaN ρ (insufficient data)
+- The 5 included datasets have valid ρ (computed on P_HC counts): luad 0.685, pdac 0.758, bcc 0.818, hcc 0.879, crc 0.939
 
-**Verdict:** Dataset-specific quirk, not a bug. Already in the data.
+**Verdict:** The labels are insensitive to the tested threshold parameters. The analysis demonstrates label stability, not ranking robustness to threshold changes. Manuscript text updated to reflect this honestly.
 
 ---
 

@@ -278,7 +278,7 @@
 | DeepScena | 0.001 | 0.241 |
 | hvg_logreg | 0.001 | 0.500 |
 
-At higher prevalences scMalignantFinder remains dominant (0.5% AP = 0.916, 1% AP = 0.862); expr_threshold rises to 0.115 (0.5%) / 0.083 (1%); all other methods stay ≤ 0.039.
+At higher prevalences scMalignantFinder remains dominant (0.5% AP = 1.000, 1% AP = 0.917); expr_threshold rises to 0.062 (0.5%) / 0.154 (1%); all other methods stay ≤ 0.063.
 
 **Sections to modify:** Evaluation Tracks (L47) — add Track F as a new row in the track table and a dedicated subsection; Key Statistical Results (L132) — add a Track F results paragraph.
 
