@@ -48,7 +48,7 @@
 - [x] 2.4 sens2/sens3 extract → Result (A↔B ρ; per-method Track C FPR): A-vs-B Spearman r: 0.042424, Track C FPR: ~0.030 (except hvg_logreg at 0.788)
 
 ### Phase 3
-- [x] 3.1 CNV concordance → Result (overall AUROC / MCC CNV-vs-source): AUROC=0.731022, MCC=0.338052
+- [x] 3.1 CNV concordance → Result (overall AUROC / MCC CNV-vs-source): AUROC=0.782246, MCC=0.360979 (updated after Phase 4-NEW hnscc fix; was 0.731/0.338)
 - [x] 3.2 threshold sensitivity → Result (Spearman ρ range across 9 settings): [0.684848, 0.939394] (7 datasets × 9 threshold combos)
 
 ### Phase 4
@@ -75,9 +75,9 @@
 - [x] 7.2 RESPONSE_TO_REVIEWERS.md (all 15 points) → 17,659 bytes, covers all reviewer points
 
 ### Phase 8
-- [x] 8.1 pytest/ruff/mypy/smoke green → ruff 0 errors, mypy 0 issues, pytest 57/57 pass
-- [x] 8.2 numbers-consistency: MISSING SOURCE FILES = 14 (expected — DVC data not pulled locally)
-- [x] 8.3 reproduce-check + branch pushed → pending push
+- [x] 8.1 pytest/ruff/mypy/smoke green → ruff 0 errors, mypy 0 issues, pytest 57 pass / 4 skip
+- [x] 8.2 numbers-consistency: MISSING SOURCE FILES = 0 (all cited files exist)
+- [x] 8.3 reproduce-check + branch pushed → pushed to origin/revision/frontiers-r1 (commit 6edab54)
 
 ## Open decisions / blockers
 - [x] External-Methods upstream URLs VERIFIED via GitHub API (2026-06-21):
@@ -86,7 +86,7 @@
   - scMalignantFinder → `Jonyyqn/scMalignantFinder` ✓ (20 stars, 111 commits) + Zenodo `17888140` ✓
   - CaSee → `yuansh3354/CaSee` ✓ (confirmed by wrapper code)
   - FiRE → CRAN ✓ · CellSIUS → `Novartis/CellSIUS` ✓ · RareQ → `fabotao/RareQ` ✓
-- [ ] CNV regeneration confirmed (no cached scores — regenerating from scratch). Owner: ____
-- [ ] GPU host for DeepScena Track F ONLY (CaSee runs on CPU — `supports_gpu=False` with CPU fallback). Owner: ____
-- [ ] scCAD_patched.py: upstream repo has `scCAD.py` only — plan creates a copy; apply n_jobs=4 + unique-temp-dir patch if running parallel. Owner: ____
-- [ ] Check if `configs/grch38_gene_positions.tsv` already exists before downloading GENCODE v44. Owner: ____
+- [x] CNV regeneration confirmed — all 10 datasets regenerated with real infercnvpy (hnscc_puram fixed in Phase 4-NEW).
+- [x] GPU host for DeepScena Track F — ran on Google Colab T4 GPU (Phase 4-NEW, 15/15 units complete).
+- [x] scCAD_patched.py: upstream repo has `scCAD.py` only — plan creates a copy; apply n_jobs=4 + unique-temp-dir patch if running parallel.
+- [x] Gene positions reference: `data/reference/gene_positions.tsv` exists (headerless TSV, 61,228 unique genes).
