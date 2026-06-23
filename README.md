@@ -15,10 +15,10 @@
 | | |
 |---|---|
 | **Datasets** | 10 scRNA-seq cohorts across 8 solid-tumour types and 2 blood malignancies |
-| **Tracks** | 5 (Track A controlled real-cell spike-ins · Track B synthetic stress · Track C null controls · Track D natural prevalence · Track E supervised label-noise diagnostic) |
+| **Tracks** | 6 (Track A controlled real-cell spike-ins · Track B synthetic stress · Track C null controls · Track D natural prevalence · Track E supervised label-noise diagnostic · Track F intra-lineage) |
 | **Methods** | 10 wrappers (6 ranked detectors · 2 baselines · 1 supervised ceiling · 1 exploratory) |
-| **Benchmark units** | 1,110 |
-| **Method–unit evaluations** | 11,100 |
+| **Benchmark units** | 1,125 |
+| **Method–unit evaluations** | 11,250 |
 | **Primary metric** | Average Precision (AUPRC) on P_HC vs B_HC |
 
 ---
@@ -35,6 +35,37 @@
 * Public result snapshots: `data/results/snapshots/paper_v1/`
 * Phase 11 tables: `data/results/tables/phase11/`
 * Phase 12 figures: `data/results/figures/phase12/`
+
+---
+
+## Frontiers Revision (v1.3.0, branch `revision/frontiers-r1`)
+
+The Frontiers in Bioinformatics revision addresses all 15 reviewer points. Key additions:
+
+- **Track F (intra-lineage benchmark):** New track testing malignant vs normal epithelial cells of the same lineage. 15 units from crc_lee, all 10 methods (150/150 predictions). See `data/results/revision/track_f/`.
+- **Real CNV validation:** infercnvpy CNV validated against published source annotations (overall AUROC=0.782, 9 datasets). Fixed hnscc_puram reference labels (AUROC 0.500→0.906).
+- **CNV circularity check:** HC labels recomputed with CNV removed (ρ=0.648).
+- **DeepScena on Colab:** DeepScena Track F predictions require GPU — run on Google Colab T4. See `docs/deepscena_colab_instructions.md`.
+
+### Revision artifacts
+
+| Artifact | Path |
+|---|---|
+| Manuscript (with all 15 points applied) | `paper.md` |
+| Change instructions | `manuscript_revision/MANUSCRIPT_CHANGES.md` |
+| Response to reviewers | `manuscript_revision/RESPONSE_TO_REVIEWERS.md` |
+| Figure caption edits | `manuscript_revision/FIGURE_CHANGES.md` |
+| Issues audit | `data/results/revision/VERIFICATION_ISSUES.md` |
+| Results index | `data/results/revision/REVISION_RESULTS_INDEX.md` |
+| Progress tracker | `docs/superpowers/plans/2026-06-21-reach-frontiers-revision-PROGRESS.md` |
+| Revision plan | `docs/superpowers/plans/2026-06-21-reach-frontiers-revision.md` |
+
+### Revision environment
+
+- **CPU node:** AMD EPYC 7B12 (16 vCPUs), 62 GiB RAM, Debian 13, Python 3.13.5, R 4.5.0
+- **GPU:** None locally — DeepScena ran on Google Colab Tesla T4
+- **Key new deps:** `infercnvpy==0.6.1` (pip), R packages FiRE/CellSIUS/RareQ/Seurat (see `setup/setup_external_methods.sh`)
+- **Gene positions:** `data/reference/gene_positions.tsv` (GENCODE v44, headerless TSV, 61,228 genes) — not git-tracked; regenerate from GENCODE or see `scripts/regenerate_cnv.py`
 
 ---
 

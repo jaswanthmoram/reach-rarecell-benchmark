@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.3.0] - 2026-06-23
+
+### Frontiers Revision (branch `revision/frontiers-r1`)
+
+### Added
+- **Track F (intra-lineage benchmark):** New evaluation track where background is normal-diploid epithelial cells (same lineage as positives), testing intra-lineage discriminability. 15 units (3 prevalences × 5 replicates) from crc_lee. All 10 methods evaluated (150/150 predictions). Adaptive unit sizes (2,000 cells for 0.1%, 400 for 0.5%/1%) with without-replacement sampling (duplication <20% at 0.5%/1%).
+- **CNV circularity check (R1-1):** Recomputed HC labels with CNV removed; Spearman ρ=0.648. Honestly disclosed that CNV-free labels collapse to chance floor (0.009–0.010).
+- **CNV validation concordance (R1-2):** Validated infercnvpy CNV against published source annotations — overall AUROC=0.782, MCC=0.361 across 9 datasets. Fixed hnscc_puram (AUROC 0.500→0.906) by correcting reference category labels.
+- **Track A↔B correlation (R1-3):** Method-level ρ=0.042 (p=0.907); withdrew prior ">0.95" claim.
+- **Track C FPR analysis (R1-4):** Per-method FPR ~3% (9 methods); hvg_logreg outlier 0.788.
+- **CaSee degenerate filtering (R1-5):** 20/160 degenerate units filtered; AP 0.512→0.606. Documented as faithful_recreation.
+- **Threshold sensitivity (R1-6):** 9 threshold combos × 7 datasets; honestly disclosed labels are threshold-insensitive.
+- **Effect sizes (R1-9):** Pairwise Cliff's δ matrix.
+- **Track F figure (Fig11):** New figure showing Track A vs Track F median AP per method with ceiling-collapse annotation.
+- **DeepScena Colab workflow:** `docs/deepscena_colab_instructions.md` for reproducing DeepScena on Google Colab T4 GPU.
+
+### Changed
+- **Supervised ceiling justification (R1-10/R3-2):** Conceded ceiling is trivial for intra-lineage; hvg_logreg collapses 1.000→0.001 on Track F.
+- **Scope reframe (R3-1):** Reframed as "rare malignant-cell detection in heterogeneous TME" (inter-lineage), not intra-lineage sub-state discovery.
+- **Limitations expanded:** 10 items (was 8) — added threshold sensitivity, TME overlap scope choice.
+- **Reproducibility:** Added revision compute environment section (AMD EPYC 7B12, 62 GiB, no GPU; DeepScena on Colab T4).
+- **Real CNV implementation:** Replaced zero-stub with genuine infercnvpy; fixed gene-name quote-wrapping (hnscc_puram) and headerless gene_positions.tsv parsing.
+- **Track F generator:** Adaptive unit_size + without-replacement sampling.
+- Abstract updated: six tracks (was five), 1,125 units (was 1,110), 11,250 evaluations (was 11,100).
+
+### Fixed
+- hnscc_puram CNV all-zeros → AUROC 0.906 (reference category label mismatch + gene-name quote-wrapping).
+- Track F duplication 83% (all levels) → 83% at 0.1% only, <20% at 0.5%/1%.
+- Stale manuscript numbers: "ten of ten" → "nine of ten", Track F higher-prevalence values updated.
+- Fig5 caption N=80 → N=160 (actual Track C unit count).
+
 ## [1.2.0] - 2026-04-29
 
 ### Added
