@@ -7,3 +7,16 @@ services:
     environment:
       - RCB_GLOBAL_SEED=42
     command: rcb smoke-test
+
+  # R-based methods (FiRE, CellSIUS, RareQ) — includes R + system headers
+  reach-rarecell-benchmark-r:
+    build:
+      context: .
+      dockerfile: Dockerfile.r
+    volumes:
+      - ./data:/app/data
+      - ./results:/app/results
+    environment:
+      - RCB_GLOBAL_SEED=42
+    command: rcb smoke-test
+    profiles: ["r-methods"]

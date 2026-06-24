@@ -443,7 +443,7 @@ z
     <text style="font-weight: 700; font-size: 20px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #0f172a" x="602.28" y="31.18675" transform="rotate(-0 602.28 31.18675)">REACH benchmark architecture</text>
    </g>
    <g id="text_2">
-    <text style="font-size: 10.6px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #64748b" x="602.28" y="57.403017" transform="rotate(-0 602.28 57.403017)">12-phase reproducible pipeline · 10 datasets · 5 tracks · 10 methods · 1,110 units · 11,100 evaluations</text>
+    <text style="font-size: 10.6px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #64748b" x="602.28" y="57.403017" transform="rotate(-0 602.28 57.403017)">12-phase reproducible pipeline · 10 datasets · 6 tracks · 10 methods · 1,125 units · 11,250 evaluations</text>
    </g>
    <g id="text_3">
     <g id="patch_35">
@@ -563,7 +563,7 @@ z
     <text style="font-weight: 700; font-size: 9.8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #0f172a" x="454.70016" y="450.491269" transform="rotate(-0 454.70016 450.491269)">Prediction Execution</text>
    </g>
    <g id="text_27">
-    <text style="font-size: 7.7px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #64748b" transform="translate(454.70016 468.102317)">11,100 method-unit runs · resource-aware batching</text>
+    <text style="font-size: 7.7px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #64748b" transform="translate(454.70016 468.102317)">11,250 method-unit runs · resource-aware batching</text>
     <text style="font-size: 7.7px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #64748b" transform="translate(454.70016 476.724632)">→ results/&lt;method&gt;/&lt;unit&gt;/predictions.csv + runmeta.json</text>
    </g>
    <g id="text_28">

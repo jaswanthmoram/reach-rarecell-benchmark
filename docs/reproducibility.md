@@ -72,7 +72,7 @@ Generated public tables and figures are written under `data/results/` and are tr
 | Full prediction evaluation | `python scripts/run_phase.py --phase 11` | Yes, predictions and track-unit labels |
 | Full figure regeneration | `python scripts/run_phase.py --phase 12` | Yes, complete Phase 11 tables/results |
 
-The Git repository alone does not contain enough data to rerun all 11,100 method-unit predictions or rebuild raw-data-derived track units.
+The Git repository alone does not contain enough data to rerun all 11,250 method-unit predictions or rebuild raw-data-derived track units.
 
 ## Data Archives
 

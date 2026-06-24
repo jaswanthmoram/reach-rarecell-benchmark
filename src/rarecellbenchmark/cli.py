@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import traceback
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import typer
 
@@ -236,10 +236,11 @@ def run_track(
     output_dir = output_dir or REPO_ROOT / "data" / "tracks" / track
     output_dir.mkdir(parents=True, exist_ok=True)
     
-    config = {"global_seed": 42, "n_replicates": 5}
-    if generator_key in ("A", "C", "E"):
-        import pandas as pd
-        dataset_id = dataset or processed_h5ad.stem
+    import pandas as pd
+    config: dict[str, Any] = {"base_seed": 42, "n_replicates": 5}
+    dataset_id = dataset or processed_h5ad.stem
+
+    if generator_key in ("A", "C", "E", "F"):
         val_path = REPO_ROOT / "data" / "validation" / f"{dataset_id}_tier_assignments.parquet"
         if val_path.exists():
             config["tier_assignments"] = pd.read_parquet(val_path)
@@ -249,6 +250,42 @@ def run_track(
                 f"Proceeding without tier assignments — generator may use defaults.",
                 err=True,
             )
+
+    if generator_key == "D":
+        config["ctc_mask"] = "ctc"
+        try:
+            import anndata as ad
+            ad_tmp = ad.read_h5ad(processed_h5ad, backed="r")
+            obs_cols = list(ad_tmp.obs.columns)
+            ad_tmp.file.close()
+            for col in ("ctc", "is_ctc", "ctc_label", "cell_type"):
+                if col in obs_cols:
+                    config["ctc_mask"] = col
+                    break
+        except Exception:
+            pass
+
+    if generator_key == "E":
+        config["track_a_dir"] = str(output_dir.parent / "a")
+
+    if generator_key == "F":
+        config["malignant_mask"] = "malignant"
+        config["normal_epi_mask"] = "normal_epithelial"
+        try:
+            import anndata as ad
+            ad_tmp = ad.read_h5ad(processed_h5ad, backed="r")
+            obs_cols = list(ad_tmp.obs.columns)
+            ad_tmp.file.close()
+            for col in ("malignant", "is_malignant", "malignant_label"):
+                if col in obs_cols:
+                    config["malignant_mask"] = col
+                    break
+            for col in ("normal_epithelial", "normal_epi", "is_normal_epi"):
+                if col in obs_cols:
+                    config["normal_epi_mask"] = col
+                    break
+        except Exception:
+            pass
 
     generator = gen_cls()
     units = generator.generate(dataset or "unknown", processed_h5ad, output_dir, config)

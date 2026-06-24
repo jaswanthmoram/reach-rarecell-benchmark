@@ -33,6 +33,10 @@ PHASE12_FIGURES = [
     f"{PHASE12_DIR}/Fig5_TrackC_Null_Calibration.png",
     f"{PHASE12_DIR}/Fig6_Runtime_Scalability_Pareto.png",
     f"{PHASE12_DIR}/Fig7_Rank_Bootstrap_Forest.png",
+    f"{PHASE12_DIR}/Fig8_REACH_Pipeline_Overview.png",
+    f"{PHASE12_DIR}/Fig9_Track_Design.png",
+    f"{PHASE12_DIR}/Fig10_Method_QC_Audit.png",
+    f"{PHASE12_DIR}/Fig11_Track_F_vs_Track_A.png",
 ]
 
 

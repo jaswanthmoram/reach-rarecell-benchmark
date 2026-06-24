@@ -91,10 +91,11 @@ flowchart LR
     TC["Track C · Null Controls<br/>160 units · diagnostic"]
     TD["Track D · Natural Blood/CTC<br/>30 units · primary"]
     TE["Track E · Label Noise<br/>640 units · supervised diagnostic"]
+    TF["Track F · Intra-lineage<br/>15 units · inter-lineage removal test"]
   end
 
   P9["Phase 9 · Method Wrappers<br/>10 included methods · run() contract"]
-  P10["Phase 10 · Prediction Execution<br/>11,100 method-unit runs"]
+  P10["Phase 10 · Prediction Execution<br/>11,250 method-unit runs"]
 
   subgraph EVAL["ANALYSIS (Phases 11-12)"]
     direction TB
@@ -108,11 +109,13 @@ flowchart LR
   P3 --> TC
   P3 --> TD
   P3 --> TE
+  P3 --> TF
   TA --> P9
   TB --> P9
   TC --> P9
   TD --> P9
   TE --> P9
+  TF --> P9
   P9 --> P10 --> P11
 
   classDef prep    fill:#e0f2fe,stroke:#0369a1,stroke-width:1.6px,color:#0f172a;
@@ -332,7 +335,7 @@ All raw datasets are publicly available from GEO (accessions listed below). Proc
 | Processed `.h5ad` datasets (7.3 GB) | Zenodo [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19850652.svg)](https://doi.org/10.5281/zenodo.19850652) |
 | Track Units A–C (9.7 GB) | Zenodo [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19850972.svg)](https://doi.org/10.5281/zenodo.19850972) |
 | Track Units D–E (2.2 GB) | Zenodo [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19851287.svg)](https://doi.org/10.5281/zenodo.19851287) |
-| Complete results & predictions — all 10 methods × 1,110 units (425 MB) | Zenodo [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19851710.svg)](https://doi.org/10.5281/zenodo.19851710) |
+| Complete results & predictions — all 10 methods × 1,125 units (425 MB) | Zenodo [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19851710.svg)](https://doi.org/10.5281/zenodo.19851710) |
 
 Code releases are archived automatically via the GitHub–Zenodo integration. The concept DOI [10.5281/zenodo.19847108](https://doi.org/10.5281/zenodo.19847108) always resolves to the latest version.
 

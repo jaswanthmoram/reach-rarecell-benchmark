@@ -8,7 +8,7 @@ PROJECT_NAME = "REACH"
 VERSION = "1.2.0"
 GLOBAL_SEED = 42
 DEFAULT_CONFIG_PATH = Path("configs/benchmark.yaml")
-TRACKS = ["a", "b", "c", "d", "e"]
+TRACKS = ["a", "b", "c", "d", "e", "f"]
 
 
 def _detect_repo_root(start: Path | None = None) -> Path:

@@ -151,7 +151,7 @@ The default Snakemake target covers public snapshot-derived outputs. Full-data r
 | Preprocessing | 2-4 h | Yes |
 | Validation (Phase 3) | 6-12 h | Yes |
 | Track generation | 1-2 h | Yes |
-| Method execution (10 methods × 1,110 units) | 48-96 h | Yes (unit-level) |
+| Method execution (10 methods × 1,125 units) | 48-96 h | Yes (unit-level) |
 | Evaluation (Phase 11) | 10-20 min | No (single pipeline) |
 | Figure generation | 5-10 min | No |
 | **Total** | **~3-7 days** | - |

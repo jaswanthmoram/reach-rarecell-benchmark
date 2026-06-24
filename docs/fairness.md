@@ -44,9 +44,9 @@ This ensures comparisons are within a single modality. Methods designed for CNV-
 
 ## 5. Evaluation Is Per-Sample (Not Per-Cell)
 
-All metrics are computed **per benchmark unit** (a single spike-in experiment on one dataset), not aggregated across cells. Each of the 1,110 units contributes one independent data point.
+All metrics are computed **per benchmark unit** (a single spike-in experiment on one dataset), not aggregated across cells. Each of the 1,125 units contributes one independent data point.
 
-**Why this matters:** Pooling predictions across cells within the same dataset (pseudoreplication) inflates sample size and makes even tiny differences "significant." Unit-level evaluation preserves the correct N = 1,110 independent observations.
+**Why this matters:** Pooling predictions across cells within the same dataset (pseudoreplication) inflates sample size and makes even tiny differences "significant." Unit-level evaluation preserves the correct N = 1,125 independent observations.
 
 ---
 

@@ -39,8 +39,8 @@ def plot_track_design(out_path: Path) -> None:
     ax.text(50, 96, "REACH evaluation tracks",
             ha="center", va="center", fontsize=15, fontweight="bold", color=neutral)
     ax.text(50, 91.6,
-            "Five complementary tracks separate ranking, stress, null, "
-            "natural-prevalence, and label-noise behaviour.",
+            "Six complementary tracks separate ranking, stress, null, "
+            "natural-prevalence, label-noise, and intra-lineage behaviour.",
             ha="center", va="center", fontsize=9.7, color="#475569")
 
     rows = [
@@ -59,10 +59,13 @@ def plot_track_design(out_path: Path) -> None:
         ("Track E", "Label-noise robustness on Track A expression",
          "4 noise conditions × 160 units  →  640 method-units (supervised only)",
          bg["track_e"], False),
+        ("Track F", "Intra-lineage malignant vs normal epithelial  •  same-lineage contrast",
+         "crc_lee × 3 prevalence tiers × 5 reps  →  15 units (intra-lineage)",
+         bg["track_f"], False),
     ]
 
     base = 78
-    row_h = 15
+    row_h = 12.5
     for i, (name, sub, scale, color, show_tiers) in enumerate(rows):
         y = base - i * row_h
         _box(4, y, 62, row_h - 2, "", color, lw=1.2, radius=0.18)
@@ -89,7 +92,7 @@ def plot_track_design(out_path: Path) -> None:
 
     # Footer totals
     ax.text(50, 5.2,
-            "Total: 1,110 units per method  •  ranked Track A subset = 140 (common)",
+            "Total: 1,125 units per method  •  ranked Track A subset = 140 (common)",
             ha="center", va="center", fontsize=10, fontweight="bold", color="#0f172a")
 
     fig.tight_layout()

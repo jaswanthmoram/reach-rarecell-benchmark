@@ -22,6 +22,21 @@ ARCHIVES = [
         "desc": "Track units D-E (2.2 GB)",
     },
     {
+        "url": "https://zenodo.org/api/records/19850652/files/reach-track-units-f.tar.gz/content",
+        "filename": "reach-track-units-f.tar.gz",
+        "desc": "Track F intra-lineage units (NEW)",
+    },
+    {
+        "url": "https://zenodo.org/api/records/19850652/files/reach-cnv-results.tar.gz/content",
+        "filename": "reach-cnv-results.tar.gz",
+        "desc": "CNV inference scores + concordance (NEW)",
+    },
+    {
+        "url": "https://zenodo.org/api/records/19850652/files/reach-track-f-results.tar.gz/content",
+        "filename": "reach-track-f-results.tar.gz",
+        "desc": "Track F leaderboard + comparison results (NEW)",
+    },
+    {
         "url": "https://zenodo.org/api/records/19851710/files/reach-frozen-results.tar.gz/content",
         "filename": "reach-frozen-results.tar.gz",
         "desc": "Frozen results (5.2 MB)",
