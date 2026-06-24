@@ -1,0 +1,1586 @@
+--- manuscript_body
++++ final_sample_body
+@@ -1,14 +1,50 @@
+-1      Introduction
+-Tumor samples are often highly mixed. Along with dominant malignant and non-malignant populations, they
+-may contain small groups of cells that are biologically important but difficult to observe in bulk measurements.
+-Single-cell RNA sequencing (scRNA-seq) allows us to look at such populations of cells separately, and to investigate
+-tumor heterogeneity with an unprecedented level of detail [1, 2]. This is especially important when it comes to
+-circulating tumor cells, metastatic intermediates, minimal residual disease cells, drug-tolerant persisters and small
+-malignant compartments in the tumor microenvironment. These populations can be low-frequency, e.g., contribute
+-to 1% or less in a given dataset [3, 4]. That not only makes them challenging to identify in biological terms, but
+-also in statistical ones. They can be more difficult to extract if rare cells are in a more diluted cluster. If these
+-cells are rare, mixed with neighbouring cells expressing related cell-types or have low confidence from expression
+-and copy number evidence, they become nearly impossible to identify [5, 6, 7].
++REACH: A Reproducible Benchmark for Rare Malignant
++   Cell Detection in Single Cell RNA Sequencing
++     Moram Venkata Satya Jaswanth1 , Amruthaluri Gavin1 , Padarthi Aakash1 , Muttha Tejesh
++                              Kumar1 , and Abhijit Dasgupta1,*
++
++     Department of Computer Science and Engineering, SRM University, Andhra Pradesh, India
++               *
++                 Correspondence: abhijitju06@gmail.com or abhijit.d@srmap.edu.in
++
++
++                                                          Abstract
++       Rare malignant cells in single cell RNA sequencing (scRNA-seq) span circulating tumor cells, residual disease,
++       drug tolerant persisters, and small malignant compartments embedded in heterogeneous tumor microenviron-
++       ments. To detect rare cells, existing methods have been evaluated inconsistently because studies differ in
++       datasets, label definitions, prevalence regimes, score contracts, and failure handling. Here, we present a repro-
++       ducible benchmark framework, Rare cell Evaluation Across Cancer Heterogeneity (REACH), that treats rare
++       malignant cell detection as an imbalanced ranking task. REACH combines confidence tiered multi arm labels,
++       five complementary evaluation tracks (controlled real spike-ins, synthetic splatter stress, null background con-
++       trols, natural blood/CTC prevalence, and supervised label noise diagnostics), standardized method wrappers,
++       fallback aware metrics, nonparametric statistics, and figure regeneration from audited result tables. In its
++       current form, REACH evaluates ten recent computational methods on ten curated scRNA-seq cancer datasets
++       comprising 359,739 cells. Across 1,110 benchmark tasks, this produces 11,100 individual method performance
++       measurements. The supervised highly variable gene logistic regression ceiling achieves near perfect separation
++       for many tumor related labels, with a median average precision of 1.0, indicating clear gene expression dif-
++       ferences between tumor related and non tumor cell populations. In contrast, current unsupervised ranking
++       methods recover only part of these differences. The exploratory comparator CaSee obtains a median average
++       precision of 0.512, whereas FiRE, the strongest ranked published detector, achieves a median average preci-
++       sion of 0.313. Statistical testing confirms substantial performance differences among methods on the common
++       benchmark subset. More importantly, REACH shows that performance is highly context dependent: no single
++       method consistently performs best across tumor types, and method behavior under ranking, null controls, and
++       label noise cannot be adequately represented by a single summary score. These findings highlight a clear gap
++       between supervised expression-based separability and the current performance of unsupervised rare malignant
++       cell detection methods. All code, data, figures, and documentation required to reproduce the analysis are
++       available in the public GitHub repository: https://github.com/jaswanthmoram/reach-rarecell-benchmark
++
++
++1 Introduction
++Tumor samples are often highly mixed. Along with dominant malignant and non-malignant populations, they may
++contain small groups of cells that are biologically important but diﬀicult to observe in bulk measurements. Single-
++cell RNA sequencing (scRNA-seq) allows us to look at such populations of cells separately, and to investigate
++tumor heterogeneity with an unprecedented level of detail [1, 2]. This is especially important when it comes
++to circulating tumor cells, metastatic intermediates, minimal residual disease cells, drug-tolerant persisters and
++small malignant compartments in the tumor microenvironment. These populations can be low-frequency, e.g.,
++contribute to 1% or less in a given dataset [3, 4]. That not only makes them challenging to identify in biological
++terms, but also in statistical ones. They can be more diﬀicult to extract if rare cells are in a more diluted cluster.
++If these cells are rare, mixed with neighbouring cells expressing related cell-types or have low confidence from
++expression and copy number evidence, they become nearly impossible to identify [5, 6, 7].
+     This is particularly challenging for cancer data sets where the label malignant may not be clear-cut. A cell
+ can be classified as malignant based on copy number alteration, cancer associated expression signatures, somatic
+ mutation evidence, neighborhood structure or expert annotations [4, 8, 9]. However, in practice, the evidential
+@@ -19,13 +55,14 @@
+ clearly delineated. Moreover, the problem is extremely imbalanced as there are frequently many more background
+ cells surrounding the malignant cells of interest [10, 11].
+     This imbalance also raises questions about how methods should be assessed. The Area Under the Receiver
+-Operating Characteristic Curve (AUROC) is widely used as a performance metric for machine learning classification
+-and ranking tasks, but it becomes unwieldy and confusing if the positive class size shrinks very small. If true rare
+-malignant cells are not ranked anywhere near the top of the list for a method, it may obtain a quite reasonable
+-AUROC. Due to the high imbalance ratio, precision recall based measures are often more meaningful in this setting
+-since they reflect whether rare positive cells are recovered among the highest ranked predictions [12, 13]. However,
+-performance should never be evaluated on just a single statistic. Changing label definition, data distribution, null
+-behavior, method failure and statistical error makes how to interpret benchmark results a complex matter.
++Operating Characteristic Curve (AUROC) is widely used as a performance metric for machine learning classifi-
++cation and ranking tasks, but it becomes unwieldy and confusing if the positive class size shrinks very small. If
++true rare malignant cells are not ranked anywhere near the top of the list for a method, it may obtain a quite
++reasonable AUROC. Due to the high imbalance ratio, precision recall based measures are often more meaningful
++in this setting since they reflect whether rare positive cells are recovered among the highest ranked predictions
++[12, 13]. However, performance should never be evaluated on just a single statistic. Changing label definition,
++data distribution, null behavior, method failure and statistical error makes how to interpret benchmark results a
++complex matter.
+     There have been multiple scRNA-seq benchmarks that have already been created to test batch effect correction,
+ clustering, cell-type annotation and rare cell discovery. These benchmarks serve as useful reference standards
+ for method comparison. Nevertheless, rare malignant-cell detection requires a more tailored assessment plan.
+@@ -33,73 +70,52 @@
+ the same approach may not perform uniformly across tumor types, sequencing platforms or prevalence settings
+ [14, 15, 16, 17]. Thus, a benchmark for this task should not return just one best method. It should use common
+ rules to compare methods, separate supervised reference performance from unsupervised ranking performance, log
+-
+-
+-
+-
+ failed or unstable runs, include null control analysis, and report results in a cancer and dataset specific manner[18].
+-
+-
+-
+-
+     We herein present Rare cell Evaluation Across Cancer Heterogeneity (REACH), a reproducible benchmark for
+-
+-
+-
+-
+ rare malignant cell detection in scRNA-seq data (Fig. 1). REACH formulates the detection of rare malignant
+-
+-
+-
+-
+ cells as an imbalanced ranking problem. It is to expect that a method would give more scores to high-confidence
+ malignant cells than to high confidence background cells. It contains the various stages of a typical pipeline,
+-
+-
+-
+-
+ from data ingestion and preprocessing to multi evidence label construction, evaluation track generation, method
+ execution, metric summarization and statistical analysis.
+     Five evaluation tracks were designed to analyze different aspects of method behavior in REACH (Fig. 2).
+ Track A evaluates real malignant cells under controlled rarity levels and serves as the primary ranking endpoint.
+ Track B tests method performance under synthetic stress. Track C uses background-dominated controls to assess
+ false-positive behavior when rare malignant cells are not expected. Track D evaluates natural prevalence in
+-blood and circulating tumor cell datasets. Track E examines how the supervised ceiling changes when labels are
+-deliberately corrupted; therefore, it is interpreted as a supervised label noise diagnostic rather than as a general
+-robustness test for unsupervised methods. The current audited REACH snapshot includes 10 datasets, 10 methods,
+-and 11,100 individual method performance measurements. The framework also provides instructions for adding
+-new datasets and methods, so that it can be extended in future studies.
+-    The results show that many high confidence malignant and background labels contain gene-expression differences
+-that can be recovered by a supervised model. However, current unsupervised and rarity-based methods recover only
+-part of this separation on the primary Track A endpoint [17, 19]. REACH also shows that method performance
+-changes across datasets and evaluation tracks. A method that performs well in one tumor context may not remain
+-the strongest method in another [20, 21]. These findings support the need for a reproducible benchmark that
+-evaluates rare malignant-cell detection in relation to dataset context, rarity level, failure behavior, and evaluation
+-condition.
+-
+-
+-2     Related work
++blood and circulating tumor cell datasets. Track E examines how the supervised ceiling changes when labels
++are deliberately corrupted; therefore, it is interpreted as a supervised label noise diagnostic rather than as a
++general robustness test for unsupervised methods. The current audited REACH snapshot includes 10 datasets,
++10 methods, and 11,100 individual method performance measurements. The framework also provides instructions
++for adding new datasets and methods, so that it can be extended in future studies.
++    The results show that many high confidence malignant and background labels contain gene-expression differ-
++ences that can be recovered by a supervised model. However, current unsupervised and rarity-based methods
++recover only part of this separation on the primary Track A endpoint [17, 19]. REACH also shows that method
++performance changes across datasets and evaluation tracks. A method that performs well in one tumor context
++may not remain the strongest method in another [20, 21]. These findings support the need for a reproducible
++benchmark that evaluates rare malignant-cell detection in relation to dataset context, rarity level, failure behavior,
++and evaluation condition.
++
++2 Related work
+ 2.1    Rare cell discovery in scRNA-seq
+ Finder of Rare Entities (FiRE) assigns a density-derived rarity score to each cell and is included in REACH
+ as one of the ranked published comparators [5]. The Cell Subtype Identification from Up regulated gene Sets
+-(CellSIUS) method uses up regulated gene sets and greater specificity for rare sub populations of complex single
+-cell populations from single cell RNA sequencing to detect rare populations [22]. The detection of rare populations
++(CellSIUS) method uses up regulated gene sets and greater specificity for rare sub populations of complex single cell
++populations from single cell RNA sequencing to detect rare populations [22]. The detection of rare populations
+ using single molecule RNA fluorescence in situ hybridization (RNA FISH) shows the dual dependence of the
+ detection of rare expression on both the studied gene set and the number of cells from which expression is derived
+ [3]. Further analysis of cellular expression using deep clustering and anomaly detection scorers, such as Deep
+ Single Cell Ensemble Network Analysis (DeepScena) and single cell Clustering-based Anomaly Detection (scCAD)
+ are starting to give the first steps of multi sample benchmarking to get an insight into the effect of pool and/or
+-batch correction on the recovery of rare populations [23, 20]. Together, these methods motivate their inclusion in
+-
+-REACH, but they also show why a cancer-specific benchmark is needed: rare malignant cells may not share a
++
++batch correction on the recovery of rare populations [23, 20]. Together, these methods motivate their inclusion
++in REACH, but they also show why a cancer-specific benchmark is needed: rare malignant cells may not share a
+ single gene program and often require confirmation from multiple evidence arms [2, 7].
+ 
+ 2.2    Single cell benchmarking
+ Various mixture control tests have been used to benchmark a number of different scRNA-seq pipelines [16].
+ Other studies have provided benchmarking of cell type classification, batch corrections, clustering for tumor
+ types in cancer, automated annotation of tumor cells and copy number inference [17, 14, 19, 24, 25]. These
+-studies established useful practices for benchmarking fixed datasets with clearly defined metrics. However, the low
+-frequency of detection for the presence of malignant cells required prevalence adjusted methods, null controls,
++studies established useful practices for benchmarking fixed datasets with clearly defined metrics. However, the
++low frequency of detection for the presence of malignant cells required prevalence adjusted methods, null controls,
+ fallbacks and ranked metrics, based on the previous template [12, 13, 10].
+ 
+ 2.3    Malignant cell annotation and CNV evidence
+@@ -109,42 +125,28 @@
+ the cells in the tumor microenvironment for all types of cancer [9]. Here, variant calling has been tested as another
+ way of providing evidence of the presence of a cancer cell [8]. REACH uses CNV and cancer signature evidence to
+ support label construction rather than to create a separate leaderboard score. In other words, these signals help
+-
+-
+-
+-
+ define high confidence malignant and background cells, but they are not themselves ranked as competing detection
+-
+-
+-
+-
+ methods. Candidate methods that failed to provide valid cell level scores or did not satisfy the required score
+-
+-
+-
+-
+ contract are documented in the method inclusion audit and excluded from the main ranking analyses (Fig. 3(a)).
+ 
+-3.1
+-      Methodology
+-
+-
+-
+-       Task definition and metrics
+-For benchmark unit u, let Xu ∈ Rnu ×p be the log normalized expression matrix, where nu denotes the number of
+-cells and p the number of genes in unit u. Let yui ∈ {0, 1} denote the ground truth label of cell i in unit u, where
+-yui = 1 indicates a high confidence malignant (rare cell) state and yui = 0 indicates background or non malignant
+-status. A method m returns a continuous cell level score
++3 Methodology
++3.1    Task definition and metrics
++For benchmark unit u, let Xu ∈ Rnu ×p be the log normalized expression matrix, where nu denotes the number
++of cells and p the number of genes in unit u. Let yui ∈ {0, 1} denote the ground truth label of cell i in unit u,
++where yui = 1 indicates a high confidence malignant (rare cell) state and yui = 0 indicates background or non
++malignant status. A method m returns a continuous cell level score
+ 
+                                               fm (Xu ) = s(m)
+-                                                          u   ∈ Rnu ,                                            (1)
++                                                          u   ∈ R nu ,                                           (1)
+         (m)
+ where su is the vector of predicted scores for all cells in unit u, and larger scores indicate stronger predicted
+ malignant or rare cell status. REACH evaluates ranking performance rather than thresholded diagnosis. For a
+ ranked list, the standard interpolated Average Precision (AP) [12, 26] is
++
++                                                         ∑
+                                                          nu
+-                                                         X              
+-                                         AP(m, u) =            Rk − Rk−1 Pk ,                                    (2)
++                                                            (            )
++                                         AP(m, u) =             Rk − Rk−1 Pk ,                                   (2)
+                                                          k=1
+ 
+ where Pk and Rk denote precision and recall after the first k ranked cells, respectively, with R0 = 0. The primary
+@@ -154,28 +156,30 @@
+                                                         valid
+                                                      u∈UA,m
+ 
++
++where UA,m
+        valid
+-where UA,m   denotes the set of Track A benchmark units that remain after fallback-based filtering for method m.
++             denotes the set of Track A benchmark units that remain after fallback-based filtering for method m.
+ Because raw AP depends on class prevalence, REACH additionally reports prevalence adjusted quantities. Let
+-                                                          1 X
++                                                          1 ∑
+                                                   πu =        yui                                                (4)
+                                                          nu i
+ 
+ denotes the positive class prevalence in the benchmark unit u. AP above chance is defined as AP(m, u) − πu , and
+ the normalized AP is
+                                                         AP(m, u) − πu
+-                                           nAP(m, u) =                .                                       (5)
+-                                                             1 − πu
+-AUROC is reported as a secondary discrimination metric [12, 13]. Calibration metrics, including the Brier score
+-and Expected Calibration Error (ECE), are reported only for probability like outputs and are explicitly marked as
+-
+-not applicable for rank-based or anomaly-based scores. F1, precision, recall, balanced accuracy, and Matthews
+-correlation coefficient (MCC) are reported at top k, where k equals the number of positive cells in the corresponding
+-benchmark unit [10, 11].
++                                          nAP(m, u) =                 .                                       (5)
++                                                            1 − πu
++
++AUROC is reported as a secondary discrimination metric [12, 13]. Calibration metrics, including the Brier
++score and Expected Calibration Error (ECE), are reported only for probability like outputs and are explicitly
++marked as not applicable for rank-based or anomaly-based scores. F1, precision, recall, balanced accuracy, and
++Matthews correlation coeﬀicient (MCC) are reported at top k, where k equals the number of positive cells in the
++corresponding benchmark unit [10, 11].
+ 
+ 
+                                       REACH benchmark pipeline
+-                    10 datasets • 5 tracks • 10 methods • 1,110 units • 11,100 evaluations
++                     10 datasets • 5 tracks • 10 methods • 1,110 units • 11,100 evaluations
+                           10 curated scRNA-seq datasets (8 solid tumours + 2 blood/CTC)
+ 
+ 
+@@ -191,47 +195,23 @@
+ 
+ 
+ 
+-                    P_HC / P_MC / P_LC
+-
+-
+-
+-
+-                                        vi ew                                  B_HC / B_MC / B_LC
+-
+-
+-
+-
+-       Phase 4 Track A
+-
+-
+-
+-
+-        Real spike-in
+-          160 units
+-
+-
+-                              Phase 5 Track B
+-                              Splatter stress
+-                                 120 units
+-                                                    Phase 6 Track C
+-                                                     Null controls
+-                                                       160 units
+-                                                                           Phase 7 Track D
+-                                                                          Natural blood/CTC
+-                                                                              30 units
++                    P_HC / P_MC / P_LC                                          B_HC / B_MC / B_LC
++
++
++
++
++       Phase 4 Track A        Phase 5 Track B       Phase 6 Track C        Phase 7 Track D         Phase 8 Track E
++        Real spike-in         Splatter stress        Null controls        Natural blood/CTC          Label noise
++          160 units              120 units             160 units              30 units                640 units
+ 
+ 
+ 
+ 
+                              Phase 9 standardised wrappers • 10 included methods
+-                                                                                                   Phase 8 Track E
+-                                                                                                     Label noise
+-                                                                                                      640 units
+-
+-
+-
+-
+-        FiRE    DeepScena     RareQ     cellsius   scCAD    scMalignant   CaSee      hvg_logreg   expr_thr   random
++
++
++
++        FiRE    DeepScena     RareQ     cellsius    scCAD   scMalignant   CaSee      hvg_logreg   expr_thr   random
+ 
+ 
+ 
+@@ -249,21 +229,21 @@
+ 
+ 
+ 
+-Figure 1: REACH benchmark pipeline. Ten curated scRNA-seq datasets are ingested, preprocessed, assigned
+-confidence tiered malignant/background labels, transformed into five evaluation tracks (A to E), evaluated through
+-standardized wrappers for ten methods, and summarized by metrics, statistical tests, and publication figures. Each method
+-is evaluated on 1,110 benchmark units, yielding 11,100 method-unit evaluations across ten methods. The schematic mirrors
+-the Phase 0 to 12 file contracts documented in docs/architecure.md.
++Figure 1: REACH benchmark pipeline. Ten curated scRNA-seq datasets are ingested, preprocessed, assigned confi-
++dence tiered malignant/background labels, transformed into five evaluation tracks (A to E), evaluated through standardized
++wrappers for ten methods, and summarized by metrics, statistical tests, and publication figures. Each method is evaluated
++on 1,110 benchmark units, yielding 11,100 method-unit evaluations across ten methods. The schematic mirrors the Phase 0
++to 12 file contracts documented in docs/architecure.md.
+ 
+ 3.2    REACH pipeline
+-REACH is implemented as a 12-phase reproducible pipeline, beginning with environment setup and ending with
+-audited result tables and publication-ready figures (Fig. 1). Phase 0 defines the software environment, directory
+-structure, configuration files, and execution requirements. Phase 1 collects dataset metadata and source files. Phase
+-2 performs standardized preprocessing, including quality control, normalization, highly variable gene selection,
+-dimensionality reduction, graph construction, and harmonization of cell and gene annotations. Phase 3 assigns
+-confidence tiers to cells by combining source annotations, CNV evidence, cancer-signature scores, and neighborhood
+-support.
+-
++REACH is implemented as a 12-phase reproducible pipeline, beginning with environment setup and ending
++with audited result tables and publication-ready figures (Fig. 1). Phase 0 defines the software environment,
++directory structure, configuration files, and execution requirements. Phase 1 collects dataset metadata and source
++files. Phase 2 performs standardized preprocessing, including quality control, normalization, highly variable gene
++selection, dimensionality reduction, graph construction, and harmonization of cell and gene annotations. Phase
++
++3 assigns confidence tiers to cells by combining source annotations, CNV evidence, cancer-signature scores, and
++neighborhood support.
+     Phases 4–8 generate the benchmark units used for evaluation. Phase 4 creates Track A units for controlled
+ real-cell rarity. Phase 5 creates Track B units for synthetic stress testing. Phase 6 creates Track C background-
+ dominated null-control units. Phase 7 creates Track D units using natural blood and circulating tumor cell
+@@ -279,43 +259,24 @@
+ processing contract [18].
+ 
+ 3.3    Datasets and preprocessing
+-Here, we have processed 10 datasets (Table 1), such as 8 solid tumor and 2 blood/Circulating Tumor Cells (CTC).
+-Track A (ranking of solid tumor samples) has been done using the 8 solid tumor datasets, while Track D (natural
+-prevalence) has been created using the 2 blood/CTC datasets. Each of the data sets has been processed through
+-
+-
+-
+-
+-a standard AnnData pipeline [27] which includes: loading each data set, standardizing the gene symbol to the
+-
+-
+-
+-
+-normalization standard, obtaining the mitochondrial annotations, performing hard Quality Control (QC) (minimum
+-
+-
+-
+-
+-genes = 200; minimum Unique Molecular Identifiers (UMI) = 500; minimum cells = 3), performing the Scrublet
+-
+-
+-
+-
+-doublet detection algorithm [27], where possible, adaptively flagging mitochondrial results, performing total count
+-normalization (to 10,000) with subsequent log1p transformation, providing both raw and normalized layers[14],
+-
+-
+-
+-
+-identifying the 2,000 highly variable genes (hvg) (using Seurat V3 or Cell Ranger as fallback) [14, 17], calculating
+-50 components of Principal Component Analysis (PCA), constructing a neighborhood graph & performing Leiden
+-clustering (with res = 0.5 & seed 42) [19], analyzing the chromosome annotations based on the Genome Reference
+-Consortium Human Build 38 (GRCh38) reference, standardizing the observation columns across all data sets, and
+-finally creating gzipped .h5ad files and Secure Hash Algorithm 256-bit (SHA 256) metadata [18].
++Here, we have processed 10 datasets (Table 1), such as 8 solid tumor and 2 blood/Circulating Tumor Cells
++(CTC). Track A (ranking of solid tumor samples) has been done using the 8 solid tumor datasets, while Track
++D (natural prevalence) has been created using the 2 blood/CTC datasets. Each of the data sets has been
++processed through a standard AnnData pipeline [27] which includes: loading each data set, standardizing the
++gene symbol to the normalization standard, obtaining the mitochondrial annotations, performing hard Quality
++Control (QC) (minimum genes = 200; minimum Unique Molecular Identifiers (UMI) = 500; minimum cells = 3),
++performing the Scrublet doublet detection algorithm [27], where possible, adaptively flagging mitochondrial results,
++performing total count normalization (to 10,000) with subsequent log1p transformation, providing both raw and
++normalized layers[14], identifying the 2,000 highly variable genes (hvg) (using Seurat V3 or Cell Ranger as fallback)
++[14, 17], calculating 50 components of Principal Component Analysis (PCA), constructing a neighborhood graph
++& performing Leiden clustering (with res = 0.5 & seed 42) [19], analyzing the chromosome annotations based on
++the Genome Reference Consortium Human Build 38 (GRCh38) reference, standardizing the observation columns
++across all data sets, and finally creating gzipped .h5ad files and Secure Hash Algorithm 256-bit (SHA 256)
++metadata [18].
+ 
+ 3.4    Multi arm label construction
+-All cells acquire a confidence level as an outcome of the source annotation combined with a Python/Scanpy-based
+-tool (infercnvpy CNV inference), Area Under the Curve Cell scoring (AUCell) signatures (≥ 0.15) and the
++All cells acquire a confidence level as an outcome of the source annotation combined with a Python/Scanpy-
++based tool (infercnvpy CNV inference), Area Under the Curve Cell scoring (AUCell) signatures (≥ 0.15) and the
+ neighborhood support (≥ 50% of the k = 15 -PCA nearest neighbours share provisional class) of the individual
+ cells[24, 4, 28, 29]. All the data sets used infercnvpy as the main tool of CNV inference. CopyKAT was not
+ used as the primary CNV-calling method because it failed the cell-level score contract and, by design, does not
+@@ -336,74 +297,66 @@
+ of the MM Ledergor and breast CTC Szczerba [30, 31]. Track E has Track A expression matrices fixed and
+ measures 4 corrupted label conditions (10% symmetric flip, 20% symmetric flip, 30% positive→background, 30%
+ background→positive). Thus, the labeling procedure itself does not consume benchmark labels and is therefore
++
+ not supervised in the strict sense. However, Track E should be interpreted as a supervised hvg–logistic regression
+ (logreg) ceiling only when the evaluation is performed using the corresponding hvg-based logreg method [19].
+-
+ Table 1: Datasets. Final cell counts follow the Phase 1 to 12 report and are internally consistent with the tier count
+ table. GEO accessions are listed in the section Data and Code Availability.
+ 
+-         Dataset ID              Cancer type                          Platform         Tracks         Final cells
+-         hnscc puram             Head and neck SCC                    Smart-seq2       A/B/C/E             5,902
+-         ov izar tirosh          Ovarian cancer ascites               10x Chromium     A/B/C/E             9,482
+-         hcc wei                 Hepatocellular carcinoma             10x Chromium     A/B/C/E            19,382
+-         luad laughney           Lung adenocarcinoma                  10x Chromium     A/B/C/E            33,782
+-         rcc multi               Renal cell carcinoma                 10x Chromium     A/B/C/E            33,574
+-         pdac peng               Pancreatic ductal adenocarcinoma     10x Chromium     A/B/C/E           123,488
+-         crc lee                 Colorectal cancer                    10x Chromium     A/B/C/E            55,551
+-         bcc yost                Basal cell carcinoma                 10x Chromium     A/B/C/E           ∼47,000
+-         mm ledergor             Multiple myeloma                     10x Chromium     D                  31,181
+-         breast ctc szczerba     Breast cancer CTCs                   Smart-seq2       D                     357
+-
+-
+-
+-                                      REACH evaluation tracks
++        Dataset ID               Cancer type                          Platform         Tracks         Final cells
++        hnscc_puram              Head and neck SCC                    Smart-seq2       A/B/C/E             5,902
++        ov_izar_tirosh           Ovarian cancer ascites               10x Chromium     A/B/C/E             9,482
++        hcc_wei                  Hepatocellular carcinoma             10x Chromium     A/B/C/E            19,382
++        luad_laughney            Lung adenocarcinoma                  10x Chromium     A/B/C/E            33,782
++        rcc_multi                Renal cell carcinoma                 10x Chromium     A/B/C/E            33,574
++        pdac_peng                Pancreatic ductal adenocarcinoma     10x Chromium     A/B/C/E           123,488
++        crc_lee                  Colorectal cancer                    10x Chromium     A/B/C/E            55,551
++        bcc_yost                 Basal cell carcinoma                 10x Chromium     A/B/C/E           ∼47,000
++        mm_ledergor              Multiple myeloma                     10x Chromium     D                  31,181
++        breast_ctc_szczerba      Breast cancer CTCs                   Smart-seq2       D                     357
++
++
++
++                                     REACH evaluation tracks
+        Five complementary tracks separate ranking, stress, null, natural-prevalence, and label-noise behaviour.
+ 
+ 
+ 
+ 
+                             Controlled real spike-ins • P_HC + B_HC
+-
+-
+-
+-
+                                       at fixed prevalence                 T1         T2          T3           T4
+         Track A
+-                                 8 datasets × T1–T4 × 5 reps             5–10%       1–5%       0.1–1%     0.01–0.1%
+-
+-
+-
+-
+-                                    → 160 units (primary)
+-
+-
+-                                    Splatter synthetic stress
+-                                       • realism-audited                  T1         T2          T3           T4
++                                8 datasets × T1–T4 × 5 reps              5–10%       1–5%       0.1–1%     0.01–0.1%
++                                   → 160 units (primary)
++
++
++                                   Splatter synthetic stress
++                                      • realism-audited                   T1         T2          T3           T4
+         Track B
+-                                8 datasets × T1–T4 × 3–4 reps            5–10%       1–5%       0.1–1%     0.01–0.1%
+-                                   → 120 units (secondary)
++                               8 datasets × T1–T4 × 3–4 reps             5–10%       1–5%       0.1–1%     0.01–0.1%
++                                  → 120 units (secondary)
+ 
+ 
+                                  Null background-only controls
+                                          • no positives                   T1         T2          T3           T4
+         Track C
+-                               8 datasets × 4 size tiers × 5 reps        5–10%       1–5%       0.1–1%     0.01–0.1%
+-                                  → 160 units (false-positive)
+-
+-
+-
+-                                 Natural blood / CTC prevalence
++                              8 datasets × 4 size tiers × 5 reps         5–10%       1–5%       0.1–1%     0.01–0.1%
++                                 → 160 units (false-positive)
++
++
++
++                                Natural blood / CTC prevalence
+         Track D                                                                  natural prevalence
+                              mm_ledergor + breast_ctc_szczerba
+                                    → 30 units (natural)
+ 
+ 
+-                                     Label-noise robustness
+-                                      on Track A expression
+-        Track E                 4 noise conditions × 160 units
++                                    Label-noise robustness
++                                     on Track A expression
++        Track E                4 noise conditions × 160 units
+                                                                                      noisy labels
+-                                     → 640 method-units
+-                                      (supervised only)
++                                    → 640 method-units
++                                     (supervised only)
+ 
+                  Total: 1,110 units per method • ranked Track A subset = 140 (common)
+ 
+@@ -412,121 +365,123 @@
+ labels while holding expression fixed. There are 1,110 units per method total.
+ 
+ 3.6    Method execution, score contracts, and QC
+-The contract for a common wrapper run (input h5ad, output dir, config) will allow all of the methods to be executed
+-in a single mode of operation. Each method wrapper produces a predictions.csv file containing cell-level scores
+-and a runmeta.json file containing runtime, memory use, method version, success or failure status, fidelity status,
+-and degenerate-output flags. Each of the methods will produce a quantitative (continuous variable) cell-based
+-
+-scoring of the cell sample, with the higher the score, the higher the evidence of the cell being a malignant or rare
+-cell [5, 20].
+-
+-                        (a)                                         Method inclusion and QC audit (17 candidates)
+-                                         10 included methods (evaluated)                                                       7 excluded methods (audit)
+-                                             hvg_logreg                   Supervised ceiling                                      raceid3             Output not cell-level
+-                                             CaSee                        Exploratory comparator                                  scAIDE              Failed at scale on Track A
+-                                             expr_threshold               Naive baseline                                          SCANER              Modality-incompatible (multi-omics)
+-                                             random_baseline              Floor baseline                                          MACE                Returned degenerate constant outputs
+-                                             FiRE                         Published — frequency rarity                            CopyKAT             CNV-only; no expression score
+-                                             scMalignantFinder            Published — malignancy classifier                       SCEVAN              Tumour-only, not a ranker
+-                                             cellsius                     Published — rarity statistic                            scATOMIC            Classifier, not a ranker
+-                                             RareQ                        Published — neighbourhood topology
+-                                             scCAD                        Published — anomaly score
+-                                             DeepScena                    Published — deep clustering
+-
+-                        (b)                                                     Track-A AP leaderboard
+-                                    1.000      0.512            0.317          0.313           0.259                 0.235            0.196       0.130            0.019          0.018
++The contract for a common wrapper run (input h5ad, output dir, config) will allow all of the methods to be
++executed in a single mode of operation. Each method wrapper produces a predictions.csv file containing cell-level
++
++scores and a runmeta.json file containing runtime, memory use, method version, success or failure status, fidelity
++status, and degenerate-output flags. Each of the methods will produce a quantitative (continuous variable) cell-
++based scoring of the cell sample, with the higher the score, the higher the evidence of the cell being a malignant
++or rare cell [5, 20].
++
++                        (a)                                           Method inclusion and QC audit (17 candidates)
++                                         10 included methods (evaluated)                                                    7 excluded methods (audit)
++                                             hvg_logreg                     Supervised ceiling                                 raceid3             Output not cell-level
++                                             CaSee                          Exploratory comparator                             scAIDE              Failed at scale on Track A
++                                             expr_threshold                 Naive baseline                                     SCANER              Modality-incompatible (multi-omics)
++                                             random_baseline                Floor baseline                                     MACE                Returned degenerate constant outputs
++                                             FiRE                           Published — frequency rarity                       CopyKAT             CNV-only; no expression score
++                                             scMalignantFinder              Published — malignancy classifier                  SCEVAN              Tumour-only, not a ranker
++                                             cellsius                       Published — rarity statistic                       scATOMIC            Classifier, not a ranker
++                                             RareQ                          Published — neighbourhood topology
++                                             scCAD                          Published — anomaly score
++                                             DeepScena                      Published — deep clustering
++
++                        (b)                                                       Track-A AP leaderboard
++                                    1.000      0.512              0.317          0.313           0.259           0.235             0.196       0.130            0.019          0.018
+                        1.0
+ 
+ 
+ 
+                        0.8
+-                                                                                                                                                                                               Method role
++                                                                                                                                                                                            Method role
+ 
+ 
+ 
+ 
+           Track A AP
+-                                                                                                                                                                                               Supervised ceiling
+-                       0.6                                                                                                                                                                     Exploratory
+-
+-
+-
+-
+-                                                                                                                                                                                               Naive baseline
+-
+-
+-
+-
+-                                                                                                                                                                                               Floor
++                                                                                                                                                                                            Supervised ceiling
++                       0.6                                                                                                                                                                  Exploratory
++                                                                                                                                                                                            Naive baseline
++                                                                                                                                                                                            Floor
+                        0.4
+-                                                                                                                                                                                               Published
++                                                                                                                                                                                            Published
+ 
+                        0.2
+ 
+ 
+ 
+-
+                        0.0
+ 
+-                                     g          ee               old               E                 s             de  r            eQ            AD               ine              a
+-                                 gre         CaS                h              FiR           lsiu             tFin               Rar           scC              sel            cen
+-                              _lo                           res                           cel                                                               _ba             epS
+-                        hvg                            r_th                                            lignan                                            om               De
+-                                                   exp                                              Ma                                               and
+-                                                                                               sc                                                 r
+-
+-
+-                        (c)                                             Phase-11 multi-metric summary
+-                                                                                                                                                                                             1.0
+-       hvg_logreg                    1.000          0.909              0.953           0.906                 0.012             0.634           0.0%               0.0%             3.3s
+-
+-
+-              CaSee                  0.512          0.441              0.869           0.429                 0.028              N/A            0.0%               10.8%           357.5s
+-                                                                                                                                                                                             0.8
+-    expr_threshold                   0.317          0.361              0.737           0.346                 0.028              N/A            0.0%               0.0%            15.3s
+-
+-
+-
+-
+-                                                                                                                                                                                                   Normalized score
+-                       FiRE          0.313          0.385              0.885           0.371                 0.028              N/A            0.0%               0.9%            118.1s
+-                                                                                                                                                                                             0.6
+-           cellsius                  0.259          0.270              0.832           0.254                 0.028              N/A            0.4%               0.0%            39.8s
+-
+-
+-
+-
+-                                                                                                                                                                                                      (1 = best)
+- scMalignantFinder                   0.235          0.319              0.804           0.304                 0.028              N/A            0.0%               21.6%            7.6s
+-                                                                                                                                                                                             0.4
+-              RareQ                  0.196          0.256              0.818           0.240                 0.028              N/A            0.0%               0.6%            78.2s
+-
+-
+-             scCAD                   0.130          0.226              0.771           0.205                 0.028              N/A            10.8%              0.0%            123.4s
+-                                                                                                                                                                                             0.2
+-  random_baseline                    0.019          0.037              0.511           0.010                 0.028              N/A            0.0%               0.0%            11.6s
+-
+-
+-       DeepScena                     0.018          0.029              0.471           0.002                 0.028              N/A            11.3%              0.0%            80.6s
+-                                                                                                                                                                                             0.0
+-                                Median AP          Mean AP              Mean           Mean                  Track C           Track E        Fallback        Degenerate      Runtime
+-                                 Track A           Track A             AUROC           nAP                     FPR               hvg              %               %              s
++                                 gre
++                                     g          ee                 old           FiR
++                                                                                     E
++                                                                                               lsiu
++                                                                                                   s              der            eQ            AD
++                                                                                                                                                             sel
++                                                                                                                                                                ine         cen
++                                                                                                                                                                                 a
++                              _lo            CaS              res
++                                                                  h
++                                                                                            cel               Fin             Rar           scC                          epS
++                        hvg                             _th                                               ant                                            _ba           De
++                                                   exp
++                                                       r                                             lign                                             om
++                                                                                                scM
++                                                                                                    a
++                                                                                                                                               r  and
++
++
++                        (c)                                               Phase-11 multi-metric summary
++                                                                                                                                                                                          1.0
++       hvg_logreg                    1.000          0.909                0.953           0.906           0.012              0.634           0.0%               0.0%             3.3s
++
++
++              CaSee                  0.512          0.441                0.869           0.429           0.028               N/A            0.0%               10.8%           357.5s
++                                                                                                                                                                                          0.8
++    expr_threshold                   0.317          0.361                0.737           0.346           0.028               N/A            0.0%               0.0%            15.3s
++
++
++
++
++                                                                                                                                                                                                Normalized score
++                       FiRE          0.313          0.385                0.885           0.371           0.028               N/A            0.0%               0.9%            118.1s
++                                                                                                                                                                                          0.6
++           cellsius                  0.259          0.270                0.832           0.254           0.028               N/A            0.4%               0.0%            39.8s
++
++
++
++
++                                                                                                                                                                                                   (1 = best)
++ scMalignantFinder                   0.235          0.319                0.804           0.304           0.028               N/A            0.0%               21.6%            7.6s
++                                                                                                                                                                                          0.4
++              RareQ                  0.196          0.256                0.818           0.240           0.028               N/A            0.0%               0.6%            78.2s
++
++
++             scCAD                   0.130          0.226                0.771           0.205           0.028               N/A            10.8%              0.0%            123.4s
++                                                                                                                                                                                          0.2
++ random_baseline                     0.019          0.037                0.511           0.010           0.028               N/A            0.0%               0.0%            11.6s
++
++
++       DeepScena                     0.018          0.029                0.471           0.002           0.028               N/A            11.3%              0.0%            80.6s
++                                                                                                                                                                                          0.0
++                                Median AP          Mean AP                Mean           Mean           Track C             Track E        Fallback        Degenerate      Runtime
++                                 Track A           Track A               AUROC           nAP              FPR                 hvg              %               %              s
+ 
+ 
+ Figure 3: Method audit, leaderboard, and multi-metric summary.
+ (a) Method inclusion and QC audit. Seventeen candidate methods were considered. Ten produced evaluable outputs under
+ the standardized score contract, while seven were excluded because of integration constraints, score-contract mismatch,
+ out-of-memory or timeout failures, or degenerate outputs. The audit is part of the benchmark deliverable, not informal
+-curation. (b) Track A AP leaderboard. Box-and-strip summaries show fallback-filtered Track A AP by method. The figure
+-separates the supervised ceiling, exploratory comparator, naive baselines, ranked published methods, and random floor. (c)
+-Phase 11 multi-metric summary heatmap. Min–max scaled values are shown across AP, nAP, AUROC, MCC at top-k,
+-Track E robustness where applicable, runtime, and null-control behavior. The figure summarizes metric-level performance
+-rather than dataset-by-method behavior.
+-
+-   REACH assesses ten of the included methods sorted by their interpretive role (Table 3). Method hvg-logreg is
++curation. (b) Track A AP leaderboard. Box-and-strip summaries show fallback-filtered Track A AP by method. The
++figure separates the supervised ceiling, exploratory comparator, naive baselines, ranked published methods, and random
++floor. (c) Phase 11 multi-metric summary heatmap. Min–max scaled values are shown across AP, nAP, AUROC, MCC
++at top-k, Track E robustness where applicable, runtime, and null-control behavior. The figure summarizes metric-level
++performance rather than dataset-by-method behavior.
++
++    REACH assesses ten of the included methods sorted by their interpretive role (Table 3). Method hvg-logreg is
++
+ used as a supervised in-sample ceiling. It is not treated as an ordinary unsupervised detector; instead, it estimates
+ how well malignant and background cells can be separated when label information is available. An exploratory
+-
+ comparator called CaSee is included, as it gives a cancer/normal scoring framework but again is not among the
+ top ranked published detectors [32]. Main published ranked comparators in REACH include FiRE, DeepScena,
+ RareQ, CellSIUS, scCAD and scMalignantFinder [22, 20, 33]. Additionally, expr threshold and random baseline
+@@ -537,39 +492,20 @@
+ Table 2: Audited unit counts per method per track. The total of 1,110 units yields 11,100 method-unit evaluations across
+ ten included methods.
+ 
+-        Track   Purpose                                                  Units    Primary interpretation
+-        A       Controlled real P HC spike-ins into B HC background        160    Primary ranked endpoint
+-        B       Synthetic Splatter stress with realism audits              120    Secondary stress test
+-        C       Background dominated null controls                         160    False positive behavior
+-        D       Natural blood / CTC prevalence                              30    Natural prevalence supplement
+-        E       Track A expression with corrupted labels                   640    Supervised label noise analysis
++        Track   Purpose                                                   Units   Primary interpretation
++        A       Controlled real P_HC spike-ins into B_HC background         160   Primary ranked endpoint
++        B       Synthetic Splatter stress with realism audits               120   Secondary stress test
++        C       Background dominated null controls                          160   False positive behavior
++        D       Natural blood / CTC prevalence                               30   Natural prevalence supplement
++        E       Track A expression with corrupted labels                    640   Supervised label noise analysis
+         Total                                                            1,110
+ 
+-
+-
+-
+-      Method
+-
+-
+                                   Table 3: Included methods and interpretive roles.
+ 
+-                           Category
+-
+-
+-
+-
+-                                        viOutput type                              Role
+-
+-
+-
+-
+-      random baseline      Naive          Uniform random score                     Floor baseline
+-      expr threshold       Naive          Total UMI / signature expression rank    Naive biological baseline
+-
+-
+-
+-
+-      hvg logreg           Supervised     Logistic probability on 2,000 HVGs       In-sample ceiling
++      Method               Category       Output type                              Role
++      random_baseline      Naive          Uniform random score                     Floor baseline
++      expr_threshold       Naive          Total UMI / signature expression rank    Naive biological baseline
++      hvg_logreg           Supervised     Logistic probability on 2,000 HVGs       In-sample ceiling
+       FiRE                 Ranked         Frequency-based rarity score             Published comparator
+       DeepScena            Ranked         Deep clustering / SSL score              Published comparator
+       RareQ                Ranked         Neighborhood rarity score                Published comparator
+@@ -578,10 +514,10 @@
+       scMalignantFinder    Ranked         Malignancy probability                   Published / proxy comparator
+       CaSee                Exploratory    Autoencoder + Isolation Forest           Exploratory faithful comparator
+ 
+-     Fallback scores arise when a wrapper returns random scores after timeout or memory failure; these units are
+-filtered out of AP aggregation. Degenerate scores are constant or near constant outputs; these are retained, flagged,
+-and reported. Here, the audited snapshot contains 249 fallback units across methods (DeepScena 125, scCAD 120,
+-cellsius 4) and 377 degenerate units (scMalignantFinder 240, CaSee 120, FiRE 10, RareQ 7).
++    Fallback scores arise when a wrapper returns random scores after timeout or memory failure; these units
++are filtered out of AP aggregation. Degenerate scores are constant or near constant outputs; these are retained,
++flagged, and reported. Here, the audited snapshot contains 249 fallback units across methods (DeepScena 125,
++scCAD 120, cellsius 4) and 377 degenerate units (scMalignantFinder 240, CaSee 120, FiRE 10, RareQ 7).
+ 
+ 3.7     Reproducible extension protocol
+ REACH is extensible. If users want to add a new method, then they have to implement the wrapper which follows
+@@ -594,11 +530,11 @@
+ units. Likewise, to add a new evaluation track or metric, one needs to provide updates on the appropriate track
+ generator, evaluator (wherever it is defined), aggregation tables and figure-generation scripts [34, 17, 14].
+ 
+-
+-4     Experiments
++4 Experiments
+ 4.1     Benchmark scale
+ Across ten methods, REACH evaluates 1,110 benchmark units per method, resulting in 11,100 method-unit
+ evaluations [17, 35]. The primary leaderboard displays median AP on Track A after method specific fallback
++
+ filtering. The global rank test and pairwise rank test use the 140 unit common subset of Track A retained after
+ method specific fallback filtering, with 2,000 bootstrap resamples calculated for rank intervals [18].
+ 
+@@ -606,12 +542,12 @@
+ A Friedman test with Iman-Davenport correction was used to assess global differences in per-unit Track A AP
+ across methods [36]. Wilcoxon signed rank tests against the top published method (FiRE) were performed for
+ each pairwise comparison, with Benjamini-Hochberg FDR correction. However, these corrections are not reported
+-at all unless the relevant repository table is provided. Where appropriate, mean differences and Cliff’s δ define the
+-effect size of method comparisons. Rank uncertainty estimates are derived from 2,000 bootstrap resamples (rank
+-ci.csv). Rarity sensitivity is assessed by regressing nAP against log10 πu [13, 12].
+-
+-
+-5     Results
++at all unless the relevant repository table is provided. Where appropriate, mean differences and Cliff’s δ define
++the effect size of method comparisons. Rank uncertainty estimates are derived from 2,000 bootstrap resamples
++(rank ci.csv). Rarity sensitivity is assessed by regressing nAP against log10 πu [13, 12].
++
++
++5 Results
+ 5.1    Primary Track A leaderboard
+ The primary leaderboard is grouped by the median AP following the fallback filter (Table 4 and Fig. 3(b)). The
+ median AP of 1.00 for hvg-logreg indicates that many high confidence malignant and background labels contain
+@@ -619,66 +555,49 @@
+     CaSee is ranked as the second highest median AP (0.512), but it is reported as an exploratory faithful
+ comparator rather than as a primary ranked published detector among the published methods [32]. FiRE has the
+ highest median AP (0.313) of any ranked published comparators. The naive expr-threshold baseline is slightly
+-
+-
+-
+-
+-larger than the median AP (0.317) but is not presented as a published detector. The reported median of the naı̈ve
+-
+-
+-
+-
+-expr-threshold is greater than FiRE’s and is to be interpreted as a caution that a naı̈ve approach to the expression
+-
+-
+-
+-
+-burden may be competitive in some cancers (i.e., naı̈ve threshold expressed in earlier reports) [3].
+-
+-
+-
+-
+-Table 4: Primary Track A performance from statistical ranking.csv. Runtime is the mean Track A wall clock time.
++larger than the median AP (0.317) but is not presented as a published detector. The reported median of the
++naïve expr-threshold is greater than FiRE’s and is to be interpreted as a caution that a naïve approach to the
++expression burden may be competitive in some cancers (i.e., naïve threshold expressed in earlier reports) [3].
++Table 4: Primary Track A performance from statistical_ranking.csv. Runtime is the mean Track A wall clock time.
+ The supervised ceiling and exploratory comparator are not ordinary unsupervised leaderboard entries.
+ 
+-
+-
+-
+-       Role rank   Method                Median AP     Mean AP       AUROC      Runtime (s)     Role
+-       –           hvg logreg                 1.000          0.909      0.953             3.3   Supervised ceiling
+-       –           CaSee                       0.512         0.441      0.869           357.5   Exploratory
+-       –           expr threshold              0.317         0.361      0.737            15.3   Naive baseline
+-       1           FiRE                        0.313         0.385      0.885           118.1   Published
+-       2           cellsius                    0.259         0.270      0.832            39.8   Published
+-       3           scMalignantFinder           0.235         0.319      0.804             7.6   Published / proxy
+-       4           RareQ                       0.196         0.256      0.818            78.2   Published
+-       5           scCAD                       0.130         0.226      0.771           123.4   Published
+-       –           random baseline             0.019         0.037      0.511            11.6   Floor baseline
+-       6           DeepScena                   0.018         0.029      0.471            80.6   Published
++       Role rank   Method               Median AP     Mean AP       AUROC    Runtime (s)   Role
++       –           hvg_logreg                1.000          0.909    0.953           3.3   Supervised ceiling
++       –           CaSee                      0.512         0.441    0.869         357.5   Exploratory
++       –           expr_threshold             0.317         0.361    0.737          15.3   Naive baseline
++       1           FiRE                       0.313         0.385    0.885         118.1   Published
++       2           cellsius                   0.259         0.270    0.832          39.8   Published
++       3           scMalignantFinder          0.235         0.319    0.804           7.6   Published / proxy
++       4           RareQ                      0.196         0.256    0.818          78.2   Published
++       5           scCAD                      0.130         0.226    0.771         123.4   Published
++       –           random_baseline            0.019         0.037    0.511          11.6   Floor baseline
++       6           DeepScena                  0.018         0.029    0.471          80.6   Published
+ 
+ 
+ 5.2    Multi metric summary and dataset heterogeneity
+ Heatmaps of Phase 11 (Fig. 3(c)) reveal trade-offs between methods for all APs, nAPs, AUROC and MCC at
+ the top of each list (and sometimes Track E robustness) as well as for runtime and null control behavior for all
+-methods tested. There is no overall winner in all categories [15, 37]. The best datasets vary (Table 5): CaSee
+-is the best on 4 datasets (bcc yost, pdac peng, luad laughney, and hcc wei); expr-threshold is the best on 2
+-datasets (hnscc puram and ov izar tirosh). On the other hand, cellsius is the best on 1 dataset (rcc multi), whereas
++methods tested. There is no overall winner in all categories [15, 37]. The best datasets vary (Table 5): CaSee is
++the best on 4 datasets (bcc yost, pdac peng, luad laughney, and hcc wei); expr-threshold is the best on 2 datasets
++(hnscc puram and ov izar tirosh). On the other hand, cellsius is the best on 1 dataset (rcc multi), whereas
+ scMalignantFinder is the best on 1 dataset (crc lee). This variability justifies reporting method performance
+ according to the context (tumor type) rather than a “best method” story [30, 31, 2].
+-Table 5: Best overall and best non ceiling method by dataset, copied from best model per dataset.csv. Non ceiling
++
++Table 5: Best overall and best non ceiling method by dataset, copied from best_model_per_dataset.csv. Non ceiling
+ includes exploratory and naive comparators.
+ 
+-                     Dataset           Best overall           AP     Best non ceiling           AP
+-                     bcc yost          hvg logreg         1.0000     CaSee                  0.6079
+-                     hnscc puram       hvg logreg         1.0000     expr threshold         0.7872
+-                     pdac peng         hvg logreg         1.0000     CaSee                  0.4488
+-                     rcc multi         hvg logreg         1.0000     cellsius               0.1931
+-                     crc lee           hvg logreg         0.9998     scMalignantFinder      0.8373
+-                     luad laughney     hvg logreg         0.9983     CaSee                  0.5378
+-                     hcc wei           hvg logreg         0.9948     CaSee                  0.4908
+-                     ov izar tirosh    expr threshold     0.5717     expr threshold         0.5717
+-
+-5.3    Statistical significance and rank uncertainty
++                     Dataset           Best overall            AP   Best non ceiling          AP
++                     bcc_yost          hvg_logreg          1.0000   CaSee                 0.6079
++                     hnscc_puram       hvg_logreg          1.0000   expr_threshold        0.7872
++                     pdac_peng         hvg_logreg          1.0000   CaSee                 0.4488
++                     rcc_multi         hvg_logreg          1.0000   cellsius              0.1931
++                     crc_lee           hvg_logreg          0.9998   scMalignantFinder     0.8373
++                     luad_laughney     hvg_logreg          0.9983   CaSee                 0.5378
++                     hcc_wei           hvg_logreg          0.9948   CaSee                 0.4908
++                     ov_izar_tirosh    expr_threshold      0.5717   expr_threshold        0.5717
++
++
++5.3   Statistical significance and rank uncertainty
+ The overall rank tests have been conducted on the 140 common unit Track A subset. These tests showed significant
+ differences across methods: Friedman χ2 = 695.05, p < 0.001; Iman-Davenport F = 171.01, p < 0.001 [12, 13].
+ The results of the pairwise Wilcoxon tests relative to FiRE (Table 6) suggest that FiRE has significantly better
+@@ -687,46 +606,28 @@
+ when compared to FiRE. In our exploratory comparison, CaSee is better than FiRE (∆mean AP = −0.140, BH
+ FDR = 6.1 × 10−8 ; Cliff’s δ = −0.245); this is reported under the exploratory versus published category, not
+ under the primary ranked method category [32].
+-Table 6: Selected pairwise comparisons on Track A AP from pairwise tests.csv. Positive ∆ means FiRE has higher
++Table 6: Selected pairwise comparisons on Track A AP from pairwise_tests.csv. Positive ∆ means FiRE has higher
+ mean AP than the comparator; negative ∆ means the comparator has higher mean AP.
+ 
+-                      Comparator           ∆ mean AP       Wilcoxon p      BH FDR      Cliff’s δ
+-                                                                  −24           −23
+-                      DeepScena                  0.3320    1.10×10       1.66×10        0.7539
+-                      random baseline            0.3226    2.52×10−22    8.11×10−22     0.7271
+-                      CaSee                     -0.1395     3.96×10−8     6.14×10−8    -0.2451
+-                      scCAD                      0.1350     1.56×10−4     2.34×10−4     0.2886
+-                      RareQ                      0.1161     1.77×10−3     2.49×10−3     0.2457
+-
+-
+-
+-
+-                      cellsius                   0.0978     3.06×10−3     4.04×10−3     0.1930
+-
+-
+-
+-
+-                      scMalignantFinder          0.0453          0.812         0.831    0.1206
+-
+-
+-
+-
+-                      expr threshold             0.0304          0.836         0.836    0.0816
+-
+-
+-
++                      Comparator           ∆ mean AP       Wilcoxon p       BH FDR      Cliff’s δ
++                                                                    −24           −23
++                      DeepScena                  0.3320    1.10×10        1.66×10        0.7539
++                      random_baseline            0.3226    2.52×10−22     8.11×10−22     0.7271
++                      CaSee                     -0.1395     3.96×10−8      6.14×10−8    -0.2451
++                      scCAD                      0.1350     1.56×10−4      2.34×10−4     0.2886
++                      RareQ                      0.1161     1.77×10−3      2.49×10−3     0.2457
++                      cellsius                   0.0978     3.06×10−3      4.04×10−3     0.1930
++                      scMalignantFinder          0.0453          0.812          0.831    0.1206
++                      expr_threshold             0.0304          0.836          0.836    0.0816
+ 
+     The bootstrap intervals for ranks are stable, whereas the hvg logreg and CaSee methods are ranked 1 and 2
+-respectively for every resample of 2,000. On the other hand, FiRE is observed to have a median rank of 3 (with a
+-
+-
+-
+-
+-95% bootstrap rank interval of [3, 4]). Expr threshold, scMalignantFinder, cellsius, RareQ, and scCAD fall into an
+-overlapping middle band (Fig. 4(a)). The mean within-unit rank for each method, shown in Fig. 4(b), separates
+-the strongest methods from the overlapping middle group and is consistent with the bootstrap rank intervals [36].
+-
+-5.4    Rarity sensitivity and track specific robustness
++respectively for every resample of 2,000. On the other hand, FiRE is observed to have a median rank of 3 (with
++a 95% bootstrap rank interval of [3, 4]). Expr threshold, scMalignantFinder, cellsius, RareQ, and scCAD fall
++into an overlapping middle band (Fig. 4(a)). The mean within-unit rank for each method, shown in Fig. 4(b),
++separates the strongest methods from the overlapping middle group and is consistent with the bootstrap rank
++intervals [36].
++
++5.4   Rarity sensitivity and track specific robustness
+ Rarity sensitivity was assessed by regressing nAP against log10 (πu ), where πu denotes the positive-cell prevalence
+ in each benchmark unit (Fig. 4(c)). Most methods show positive slopes, indicating that performance improved
+ as rare cells became less sparse. CellSIUS shows the largest nAP slope (0.220, p = 1.78 × 10−20 ), while RareQ,
+@@ -740,26 +641,25 @@
+ On the other hand, the corresponding robustness indices (ranging from 0 to 1) for these analyses are 0.588, 0.912,
+ 0.529, 0.507 respectively (Fig. 5 (a), right side) [19].
+ 
+-5.5    Null behavior and calibration
+-Track C evaluates false-positive behavior in background dominated units, where no true rare malignant cells are
+-expected (Fig. 5(b)) [3]. For each method, REACH measures the fraction of top ranked cells that are incorrectly
+-selected as positives under these null-control conditions. Most unsupervised, exploratory, and naive scoring
+-methods show an average top k false positive rate of approximately 3%: CaSee = 0.0301, DeepScena = 0.0306,
+-FiRE = 0.0315, RareQ = 0.0293, CellSIUS = 0.0295, expr-threshold = 0.0310, scCAD = 0.0301, scMalignantFinder
+-= 0.0315, and random baseline = 0.0309. In contrast, the supervised hvg-logreg ceiling shows a much higher Track
+-C false positive rate of 0.788. This behavior is expected because hvg-logreg is an in-sample supervised ceiling, not
+-a deployable unsupervised detector. Calibration has been assessed only for methods that produced probability-like
+-scores [25, 17].
+-
+-5.6    Runtime, scalability, and failure modes
++5.5   Null behavior and calibration
++Track C evaluates false-positive behavior in background dominated units, where no true rare malignant cells
++are expected (Fig. 5(b)) [3]. For each method, REACH measures the fraction of top ranked cells that are
++incorrectly selected as positives under these null-control conditions. Most unsupervised, exploratory, and naive
++scoring methods show an average top k false positive rate of approximately 3%: CaSee = 0.0301, DeepScena
++= 0.0306, FiRE = 0.0315, RareQ = 0.0293, CellSIUS = 0.0295, expr-threshold = 0.0310, scCAD = 0.0301,
++scMalignantFinder = 0.0315, and random baseline = 0.0309. In contrast, the supervised hvg-logreg ceiling shows
++a much higher Track C false positive rate of 0.788. This behavior is expected because hvg-logreg is an in-sample
++supervised ceiling, not a deployable unsupervised detector. Calibration has been assessed only for methods that
++produced probability-like scores [25, 17].
++
++5.6   Runtime, scalability, and failure modes
+ Runtime varies by approximately two orders of magnitude across methods (Fig. 6). Track A Mean Execution
+-Times (MET) for the corresponding tools range from 3.3 seconds (hvg-logistic regression) to 7.6 seconds (scMalig-
+-
+-nantFinder) to 357.5 seconds (CaSee); FiRE MET of 118.1 seconds, scCAD MET of 123.4 seconds, RareQ MET
+-of 78.2 seconds, DeepScena MET of 80.6 seconds, cellsius MET of 39.8 seconds [37, 15]. Runtime also needs to
+-be put into context with fallback and/or degenerate output behavior. Runtime should therefore be interpreted
+-together with fallback and degenerate-output rates, because a fast method is not necessarily reliable if it frequently
+-returns constant scores or fails on many benchmark units [34, 14].
++Times (MET) for the corresponding tools range from 3.3 seconds (hvg-logistic regression) to 7.6 seconds (scMa-
++lignantFinder) to 357.5 seconds (CaSee); FiRE MET of 118.1 seconds, scCAD MET of 123.4 seconds, RareQ
++MET of 78.2 seconds, DeepScena MET of 80.6 seconds, cellsius MET of 39.8 seconds [37, 15]. Runtime also
++needs to be put into context with fallback and/or degenerate output behavior. Runtime should therefore be
++interpreted together with fallback and degenerate-output rates, because a fast method is not necessarily reliable
++if it frequently returns constant scores or fails on many benchmark units [34, 14].
+ 
+                                      (a)                                                Bootstrap AP intervals
+                hvg_logreg                                                                                                                                                        0.999
+@@ -786,23 +686,11 @@
+                                                                                        Track-A AP bootstrap mean
+ 
+ 
+-                                     (b)
++                                     (b)                                          Critical-difference rank view
+                                                  CD=1.14
+-
+-
+-
+-
+-                                                                vi ew             Critical-difference rank view
+-
+-
+-
+ 
+                hvg_logreg                                                                                                                                                      1 [1-1]
+                    CaSee                                                                                                                                                       2 [2-2]
+-
+-
+-
+-
+                      FiRE                                                                                                                                                      3 [3-4]
+            expr_threshold                                                                                                                                                      4 [3-5]
+         scMalignantFinder                                                                                                                                                      5 [3-6]
+@@ -849,10 +737,10 @@
+ 
+ Figure 4: Rank uncertainty, critical difference, and rarity sensitivity.
+ (a) Bootstrap rank confidence intervals. Ranks are computed from Track A AP over 2,000 unit level bootstrap resamples
+-(rank ci.csv). Lower rank is better. (b) Critical difference rank view. It shows the mean within unit ranks on the common
+-Track A subset, with the Nemenyi critical difference bar (CD ≈ 1.14, k = 10, N = 140, α = 0.05). (c) Rarity sensitivity. It
+-depicts AP and normalized AP across Track A prevalence tiers T1–T4. Several methods degrade sharply in ultra rare units,
+-while the supervised ceiling remains near 1 across tiers.
++(rank_ci.csv). Lower rank is better. (b) Critical difference rank view. It shows the mean within unit ranks on the
++common Track A subset, with the Nemenyi critical difference bar (CD ≈ 1.14, k = 10, N = 140, α = 0.05). (c) Rarity
++sensitivity. It depicts AP and normalized AP across Track A prevalence tiers T1–T4. Several methods degrade sharply in
++ultra rare units, while the supervised ceiling remains near 1 across tiers.
+ 
+                                   (a)             Track-A vs Track-B                                                    Track-E supervised label-noise diagnostic
+                                                                                               hvg_logreg
+@@ -894,30 +782,13 @@
+ 
+ 
+ 
+-          hvg_logreg
+-                                  (b)
+-
+-
+-
+-
+-                                                Null-control behaviour
+-
+-
+-
+-
+-                                                                  vi  w                       0.788
+-                                                                                                                              Calibration for probability-like outputs
++                                  (b)           Null-control behaviour                                                        Calibration for probability-like outputs
+                                                                                                                               0.5                               0.477
+-
+-
+-
++          hvg_logreg                                                                          0.788
+ 
+     scMalignantFinder                   0.032
+                                                                                                                               0.4
+                           FiRE          0.032
+-
+-
+-
+ 
+        expr_threshold                   0.031
+                                                                                                                               0.3
+@@ -949,7 +820,7 @@
+ for methods with probability like outputs.
+ 
+ 
+-6     Discussion
++6 Discussion
+ REACH shows a clear gap between supervised separability and the performance of current unsupervised rare
+ malignant-cell ranking methods [17, 25]. The supervised hvg-logreg ceiling indicates that many high confidence
+ malignant and background labels contain recoverable gene expression differences. In other words, when label
+@@ -967,58 +838,55 @@
+ E evaluates the effect of label corruption on the supervised ceiling and should not be interpreted as evidence
+ of unsupervised robustness [18, 3, 19]. Together, these tracks show that different evaluation conditions reveal
+ different aspects of method behavior.
+-    The main practical message from REACH is that method performance should be interpreted with caution. FiRE
+-is the strongest ranked published comparator on the primary Track A endpoint, but its advantage is not uniform
+-across all comparisons. In the paired tests, FiRE is not significantly better than the naive expr-threshold baseline
+-or scMalignantFinder. CaSee performs better than FiRE in the exploratory comparison, but it is substantially
+-slower and produces constant scores in some benchmark units [32, 33]. Dataset level results also show that different
+-methods perform best in different tumor contexts. Therefore, REACH does not support the idea of a single
+-universally best method. Instead, rare malignant cell detection methods should be reported together with the
+-dataset context, prevalence level, failure behavior, and the evaluation track in which they were tested [30, 31, 2].
+-                        Runtime vs accuracy — bubble size encodes unreliability (% fallback or degenerate)
+-                                                                                                             Method role
+-                                   hvg_logreg                                                                Supervised ceiling
+-                        1.0                                                                                  Exploratory
+-                                                                                                             Naive baseline
+-
+-
+-
+-
+-                                                                                                             Floor
+-
+-
+-
+-
+-                        0.8                                                                                  Published
+-
+-
+-
+-
+-    Median Track A AP                                  v
+-                        0.6                                                 CaSee
+-
+-
+-
+-
+-                                                    expr_threshold                                      Unreliability
+-                        0.4                 scMalignantFinder                    FiRE                   (fallback or degenerate)
+-                                                               cellsius                                         0% unreliable
+-                                                                                                                10% unreliable
+-                        0.2                                                                                     22% unreliable
+-
+-                                                           RareQ
+-                                                                                 scCAD
+-                        0.0
+-                                 random_baseline    DeepScena
+-                                           101                        102                   103
+-                                             Mean runtime per Track A unit (s, log scale)
+-
++    The main practical message from REACH is that method performance should be interpreted with caution.
++FiRE is the strongest ranked published comparator on the primary Track A endpoint, but its advantage is
++not uniform across all comparisons. In the paired tests, FiRE is not significantly better than the naive expr-
++threshold baseline or scMalignantFinder. CaSee performs better than FiRE in the exploratory comparison, but
++it is substantially slower and produces constant scores in some benchmark units [32, 33]. Dataset level results
++also show that different methods perform best in different tumor contexts. Therefore, REACH does not support
++the idea of a single universally best method. Instead, rare malignant cell detection methods should be reported
++together with the dataset context, prevalence level, failure behavior, and the evaluation track in which they were
++tested [30, 31, 2].
++
++                                                Runtime and AP Pareto behaviour
++
++                             hvg_logreg
++                       1.0
++
++
++
++
++   Median Track-A AP
++                       0.8
++
++
++
++                       0.6                                                           CaSee
++
++
++
++                       0.4                              expr_threshold
++                                                                                      FiRE
++                                                                    cellsius
++
++
++
++                       0.2                  scMalignantFinder
++                                                                   RareQ
++                                                  random_baseline
++                                                                                       scCAD
++                                                             DeepScena
++
++                       0.0
++
++                                          101                                  102              103
++                                          Mean runtime per Track-A unit (s, log scale)
+ Figure 6: Runtime and AP Pareto behavior. Left: per unit runtime versus cells per unit. Right: mean Track A
+ runtime versus mean Track A AP, highlighting the trade off between ranking performance, compute cost, and method
+ stability.
+ 
+ 
+-7                       Limitations
++7 Limitations
+ This study has a few limitations that should be considered when interpreting the results. First, CNV evidence in
+ the current version of REACH was generated using infercnvpy as the primary CNV inference approach. CopyKAT
+ was not used as a primary scored comparator because it did not satisfy the uniform cell-level score contract and
+@@ -1031,17 +899,17 @@
+ of all possible rare malignant-cell detection settings.
+     Third, some degree of circularity may remain in the label construction. Because CNV evidence contributes
+ to the definition of high-confidence malignant cells, methods that indirectly capture CNV-related expression
+-patterns may benefit in some datasets. This is particularly relevant for datasets such as ov izar tirosh, where
++patterns may benefit in some datasets. This is particularly relevant for datasets such as ov_izar_tirosh, where
++
+ CNV-supported labelling contributes to the evidence used for defining malignant cells. Future versions of REACH
+ should reduce this limitation by comparing multiple CNV callers and by testing label definitions that are less
+ dependent on a single evidence source.
+-
+     Fourth, Track E has a limited interpretation. It is useful for examining how the supervised hvg-logreg ceiling
+-responds to corrupted labels, but it should not be interpreted as a general robustness test for unsupervised rare-cell
+-detection methods. This distinction is important because unsupervised methods do not use label information in
+-the same way as the supervised ceiling.
++responds to corrupted labels, but it should not be interpreted as a general robustness test for unsupervised rare-
++cell detection methods. This distinction is important because unsupervised methods do not use label information
++in the same way as the supervised ceiling.
+     Fifth, method stability remains an important practical issue. In the current benchmark, 249 fallback units
+-and 377 degenerate units were recorded. These failures show that some methods still face difficulties related to
++and 377 degenerate units were recorded. These failures show that some methods still face diﬀiculties related to
+ memory use, runtime limits, wrapper stability, or constant score outputs. For rare-cell detection benchmarks,
+ reliability is therefore as important as accuracy: a method that performs well in some units but fails in many
+ others may not be practically useful [14, 34].
+@@ -1051,176 +919,120 @@
+ tracks, and containerized execution with fixed prediction schemas. The aforementioned changes could make the
+ benchmark more robust and more useful for evaluating new rare malignant-cell detection methods [38, 39].
+ 
+-
+-8    Conclusion
++8 Conclusion
+ REACH offers a reproducible way to compare methods for detecting rare malignant cells in scRNA-seq data.
+-
+-
+-
+-
+-The benchmark is designed around the practical difficulties of this task: rare cells are often present at very low
+-
+-
+-
+-
++The benchmark is designed around the practical diﬀiculties of this task: rare cells are often present at very low
+ frequency, their labels may require more than one source of evidence, and method outputs can vary across datasets
+-
+-
+-
+-
+ and tumor contexts. To address these issues, REACH combines multi evidence high confidence labels, controlled
+-
+-
+-
+-
+ and natural prevalence settings, null controls, label noise analysis, fallback-aware metrics, statistical testing, and
+ reproducible figure generation from audited results.
+-
+-
+-
+-
+-    The current benchmark shows that rare malignant cell detection remains challenging. The supervised hvg-logreg
+-ceiling performs strongly on Track A, suggesting that many high confidence malignant and background cells can
+-be separated using gene expression information. However, current unsupervised and rarity-based methods recover
+-only part of this separation. Among the ranked published methods, FiRE gives the strongest performance on the
+-primary Track A endpoint, while CaSee provides a strong exploratory comparison but should not be treated as an
+-ordinary ranked published detector. The results also indicate that the best performing method changes from one
+-dataset to another, suggesting that no single method is consistently best across all tumor contexts.
++    The current benchmark shows that rare malignant cell detection remains challenging. The supervised hvg-
++logreg ceiling performs strongly on Track A, suggesting that many high confidence malignant and background cells
++can be separated using gene expression information. However, current unsupervised and rarity-based methods
++recover only part of this separation. Among the ranked published methods, FiRE gives the strongest performance
++on the primary Track A endpoint, while CaSee provides a strong exploratory comparison but should not be treated
++as an ordinary ranked published detector. The results also indicate that the best performing method changes
++from one dataset to another, suggesting that no single method is consistently best across all tumor contexts.
+     These findings support the need for careful, context specific benchmarking. Instead of reducing performance
+ to one overall leaderboard, REACH encourages results to be interpreted together with tumor type, rarity level,
+ false-positive behavior, method stability, and evaluation track. In this sense, REACH provides a transparent
+-platform for future method comparison and a practical reference for developing more robust and reproducible rare
+-malignant cell detection methods.
++platform for future method comparison and a practical reference for developing more robust and reproducible
++rare malignant cell detection methods.
+ 
+ 
+ Data and Code Availability
+-The REACH benchmark framework, including all source code, pipelines, and evaluation scripts, is publicly available
+-at: https://github.com/jaswanthmoram/reach-rarecell-benchmark. Versioned Zenodo archives containing
+-the processed datasets, benchmark units, and result tables are available with the latest release. All datasets
+-used in this project have been obtained from public databases, specifically the GEO, and all sources are cited
+-within the manuscript. The processed dataset, along with benchmark units and performance results, will also be
+-available with the repository. The GitHub repository includes toy workflows, scripts for deterministic snapshot
+-regeneration, and documentation for reproducing the benchmark using the archived data and specified compute
+-environment. All results/figures reported in this analysis can be regenerated deterministically from any prediction
+-output stored using the scripts provided. All environment specifications are thoroughly documented in order to
+-achieve reproducibility across computational environments.
+-
++The REACH benchmark framework, including all source code, pipelines, and evaluation scripts, is publicly avail-
++able at: https://github.com/jaswanthmoram/reach-rarecell-benchmark. Versioned Zenodo archives con-
++taining the processed datasets, benchmark units, and result tables are available with the latest release. All
++datasets used in this project have been obtained from public databases, specifically the GEO, and all sources are
++cited within the manuscript. The processed dataset, along with benchmark units and performance results, will
++also be available with the repository. The GitHub repository includes toy workflows, scripts for deterministic
++snapshot regeneration, and documentation for reproducing the benchmark using the archived data and specified
++compute environment. All results/figures reported in this analysis can be regenerated deterministically from any
++prediction output stored using the scripts provided. All environment specifications are thoroughly documented
++in order to achieve reproducibility across computational environments.
+ 
+ Acknowledgements
+ References
+  [1] Efthymia Papalexi and Rahul Satija. Single-cell rna sequencing to explore immune cell heterogeneity. Nature
+      Reviews Immunology, 18(1):35–45, 2018.
+-
+  [2] Itay Tirosh and Mario L Suva. Cancer cell states: Lessons from ten years of single-cell rna-sequencing of
+      human tumors. Cancer Cell, 42(9):1497–1506, 2024.
+-
+  [3] Eduardo Torre, Hannah Dueck, Sydney Shaffer, Janko Gospocic, Rohit Gupte, Roberto Bonasio, Junhyong
+-     Kim, John Murray, and Arjun Raj. Rare cell detection by single-cell rna sequencing as guided by single-molecule
+-     rna fish. Cell systems, 6(2):171–179, 2018.
++     Kim, John Murray, and Arjun Raj. Rare cell detection by single-cell rna sequencing as guided by single-
++     molecule rna fish. Cell systems, 6(2):171–179, 2018.
+  [4] Ruli Gao, Shanshan Bai, Ying C Henderson, Yiyun Lin, Aislyn Schalck, Yun Yan, Tapsi Kumar, Min Hu,
+      Emi Sei, Alexander Davis, et al. Delineating copy number and clonal substructure in human tumors from
+      single-cell transcriptomes. Nature biotechnology, 39(5):599–608, 2021.
+-
+- [5] Kaspar Märtens, Michele Bortolomeazzi, Lucia Montorsi, Jo Spencer, Francesca Ciccarelli, and Christopher
++ [5] Kaspar Märtens, Michele Bortolomeazzi, Lucia Montorsi, Jo Spencer, Francesca Ciccarelli, and Christopher
+      Yau. Rarity: discovering rare cell populations from single-cell imaging data. Bioinformatics, 39(12):btad750,
+      2023.
+- [6] Oliver Stegle, Sarah A Teichmann, and John C Marioni. Computational and analytical challenges in single-cell
+-     transcriptomics. Nature Reviews Genetics, 16(3):133–145, 2015.
++ [6] Oliver Stegle, Sarah A Teichmann, and John C Marioni. Computational and analytical challenges in single-
++     cell transcriptomics. Nature Reviews Genetics, 16(3):133–145, 2015.
+  [7] Xianwen Ren, Boxi Kang, and Zemin Zhang. Understanding tumor ecosystems by single-cell sequencing:
+      promises and limitations. Genome biology, 19(1):211, 2018.
+ 
+-
+-
+-
+- [8] William Gasper, Francesca Rossi, Matteo Ligorio, and Dario Ghersi. Variant calling enhances the identification
+-
+-
+-
+-
+-     of cancer cells in single-cell rna sequencing data. PLoS computational biology, 18(10):e1010576, 2022.
+-
+-
+-
+-
++ [8] William Gasper, Francesca Rossi, Matteo Ligorio, and Dario Ghersi. Variant calling enhances the iden-
++     tification of cancer cells in single-cell rna sequencing data. PLoS computational biology, 18(10):e1010576,
++     2022.
+  [9] Ido Nofech-Mozes, David Soave, Philip Awadalla, and Sagi Abelson. Pan-cancer classification of single cells
+      in the tumour microenvironment. Nature Communications, 14(1):1615, 2023.
+ 
+-
+-
+-
+ [10] Justin M Johnson and Taghi M Khoshgoftaar. Survey on deep learning with class imbalance. Journal of big
+      data, 6(1):27, 2019.
+-
+ [11] Manahel Altalhan, Abdulmohsen Algarni, and Monia Turki-Hadj Alouane. Imbalanced data problem in
+      machine learning: A review. IEEE access, 13:13686–13699, 2025.
++
+ [12] Jesse Davis and Mark Goadrich. The relationship between precision-recall and roc curves. In Proceedings of
+      the 23rd international conference on Machine learning, pages 233–240, 2006.
+-
+ [13] Takaya Saito and Marc Rehmsmeier. The precision-recall plot is more informative than the roc plot when
+      evaluating binary classifiers on imbalanced datasets. PloS one, 10(3):e0118432, 2015.
++
+ [14] Hoa Thi Nhu Tran, Kok Siong Ang, Marion Chevrier, Xiaomeng Zhang, Nicole Yee Shin Lee, Michelle Goh,
+      and Jinmiao Chen. A benchmark of batch-effect correction methods for single-cell rna sequencing data.
+      Genome biology, 21(1):12, 2020.
+ 
+ [15] Jiacheng Wang, Quan Zou, and Chen Lin. A comparison of deep learning-based pre-processing and clustering
+      approaches for single-cell rna sequencing data. Briefings in Bioinformatics, 23(1):bbab345, 2022.
+-[16] Luyi Tian, Xueyi Dong, Saskia Freytag, Kim-Anh Lê Cao, Shian Su, Abolfazl JalalAbadi, Daniela Amann-
++[16] Luyi Tian, Xueyi Dong, Saskia Freytag, Kim-Anh Lê Cao, Shian Su, Abolfazl JalalAbadi, Daniela Amann-
+      Zalcenstein, Tom S Weber, Azadeh Seidi, Jafar S Jabbari, et al. Benchmarking single cell rna-sequencing
+      analysis pipelines using mixture control experiments. Nature methods, 16(6):479–487, 2019.
+-
+ [17] Tamim Abdelaal, Lieke Michielsen, Davy Cats, Dylan Hoogduin, Hailiang Mei, Marcel JT Reinders, and
+      Ahmed Mahfouz. A comparison of automatic cell identification methods for single-cell rna sequencing data.
+      Genome biology, 20(1):194, 2019.
++
+ [18] Yue Cao, Pengyi Yang, and Jean Yee Hwa Yang. A benchmark study of simulation methods for single-cell
+      rna sequencing data. Nature communications, 12(1):6911, 2021.
+-
+-[19] Alaina Mahalanabis, Andrei L Turinsky, Mia Husić, Erik Christensen, Ping Luo, Alaine Naidas, Michael
++[19] Alaina Mahalanabis, Andrei L Turinsky, Mia Husić, Erik Christensen, Ping Luo, Alaine Naidas, Michael
+      Brudno, Trevor Pugh, Arun K Ramani, and Parisa Shooshtari. Evaluation of single-cell rna-seq clustering
+      algorithms on cancer tumor datasets. Computational and Structural Biotechnology Journal, 20:6375–6387,
+      2022.
+-
+-[20] Yunpei Xu, Shaokai Wang, Qilong Feng, Jiazhi Xia, Yaohang Li, Hong-Dong Li, and Jianxin Wang. sccad:
+-     Cluster decomposition-based anomaly detection for rare cell identification in single-cell expression data.
++[20] Yunpei Xu, Shaokai Wang, Qilong Feng, Jiazhi Xia, Yaohang Li, Hong-Dong Li, and Jianxin Wang. sc-
++     cad: Cluster decomposition-based anomaly detection for rare cell identification in single-cell expression data.
+      Nature Communications, 15(1):7561, 2024.
++
+ [21] Zhiwei Ye, Yinqiao Yan, Yuanyuan Yu, and Hao Wu. Revealing the best strategies for rare cell type detection
+      in multi-sample single-cell datasets. Genes, 17(1):31, 2025.
++
+ [22] Rebekka Wegmann, Marilisa Neri, Sven Schuierer, Bilada Bilican, Huyen Hartkopf, Florian Nigsch, Felipa
+-     Mapa, Annick Waldt, Rachel Cuttat, Max R Salick, et al. Cellsius provides sensitive and specific detection of
+-     rare cell populations from complex single-cell rna-seq data. Genome biology, 20(1):142, 2019.
++     Mapa, Annick Waldt, Rachel Cuttat, Max R Salick, et al. Cellsius provides sensitive and specific detection
++     of rare cell populations from complex single-cell rna-seq data. Genome biology, 20(1):142, 2019.
+ [23] Tianyuan Lei, Ruoyu Chen, Shaoqiang Zhang, and Yong Chen. Self-supervised deep clustering of single-cell
+      rna-seq data to hierarchically detect rare cell populations. Briefings in bioinformatics, 24(6):bbad335, 2023.
+ [24] Xin Chen, Li Tai Fang, Zhong Chen, Wanqiu Chen, Hongjin Wu, Bin Zhu, Malcolm Moos Jr, Andrew Farmer,
+      Xiaowen Zhang, Wei Xiong, et al. A benchmarking study of copy number variation inference methods using
+      single-cell rna-sequencing data. Precision Clinical Medicine, 8(2):pbaf011, 2025.
+-[25] Erik Christensen, Ping Luo, Andrei Turinsky, Mia Husić, Alaina Mahalanabis, Alaine Naidas, Juan Javier
++
++[25] Erik Christensen, Ping Luo, Andrei Turinsky, Mia Husić, Alaina Mahalanabis, Alaine Naidas, Juan Javier
+      Diaz-Mejia, Michael Brudno, Trevor Pugh, Arun Ramani, et al. Evaluation of single-cell rnaseq labelling
+-
+-
+-
+-
+      algorithms using cancer datasets. Briefings in Bioinformatics, 24(1):bbac561, 2023.
+-
+-
+-
+-
+-[26] Gordon V Cormack and Thomas R Lynam. Statistical precision of information retrieval evaluation. In
+-
+-
+-
+-
+-     Proceedings of the 29th annual international ACM SIGIR conference on Research and development in
+-
+-
+-
+-
+-     information retrieval, pages 533–540, 2006.
+-
+-
+-
+-
++[26] Gordon V Cormack and Thomas R Lynam. Statistical precision of information retrieval evaluation. In Pro-
++     ceedings of the 29th annual international ACM SIGIR conference on Research and development in information
++     retrieval, pages 533–540, 2006.
+ [27] Dragomirka Jovic, Xue Liang, Hua Zeng, Lin Lin, Fengping Xu, and Yonglun Luo. Single-cell rna sequencing
+      technologies and applications: a brief overview. Clinical and translational medicine, 12(3):e694, 2022.
+-[28] Leon Hetzel, David S Fischer, Stephan Günnemann, and Fabian J Theis. Graph representation learning for
++
++[28] Leon Hetzel, David S Fischer, Stephan Günnemann, and Fabian J Theis. Graph representation learning for
+      single-cell biology. Current Opinion in Systems Biology, 28:100347, 2021.
+ [29] Botao Fa, Chao Huang, Yixin Ma, Wei Zhao, Yungang Xu, and Zhengtao Xiao. Cell neighborhood topology
+      directs rare cell population identification. Nature Communications, 2026.
+@@ -1228,73 +1040,59 @@
+      Jialin Jiang, Guan-Shen Cui, et al. Single-cell rna-seq highlights intra-tumoral heterogeneity and malignant
+      progression in pancreatic ductal adenocarcinoma. Cell research, 29(9):725–738, 2019.
+ [31] Junbin Qian, Siel Olbrecht, Bram Boeckx, Hanne Vos, Damya Laoui, Emre Etlioglu, Els Wauters, Valentina
+-     Pomella, Sara Verbandt, Pieter Busschaert, et al. A pan-cancer blueprint of the heterogeneous tumor
+-     microenvironment revealed by single-cell profiling. Cell research, 30(9):745–762, 2020.
++     Pomella, Sara Verbandt, Pieter Busschaert, et al. A pan-cancer blueprint of the heterogeneous tumor mi-
++     croenvironment revealed by single-cell profiling. Cell research, 30(9):745–762, 2020.
++
+ [32] Yuan Sh, Xiuli Zhang, Zhimin Yang, Jierong Dong, Yuanzhuo Wang, Ying Zhou, Xuejie Li, Caixia Guo, and
+      Zhiyuan Hu. Casee: A lightning transfer-learning model directly used to discriminate cancer/normal cells
+      from scrna-seq. Oncogene, 41(44):4866–4876, 2022.
+ [33] Qiaoni Yu, Yuan-Yuan Li, and Yunqin Chen. scmalignantfinder distinguishes malignant cells in single-cell
+      and spatial transcriptomics by leveraging cancer signatures. Communications Biology, 8(1):504, 2025.
++
+ [34] Mark Everingham, Luc Van Gool, Christopher KI Williams, John Winn, and Andrew Zisserman. The pascal
+      visual object classes (voc) challenge. International journal of computer vision, 88(2):303–338, 2010.
++
+ [35] Tamim Abdelaal, Christiaan Klijn, and Matt Hancock. Benchmarking of automated cancer cell annotation
+      methods for scrna-seq data reveals consensus annotation as the preferred method. bioRxiv, pages 2025–01,
+      2025.
+-[36] Jan Gorodkin. Comparing two k-category assignments by a k-category correlation coefficient. Computational
++
++[36] Jan Gorodkin. Comparing two k-category assignments by a k-category correlation coeﬀicient. Computational
+      biology and chemistry, 28(5-6):367–374, 2004.
+ [37] Matthew Brendel, Chang Su, Zilong Bai, Hao Zhang, Olivier Elemento, and Fei Wang. Application of
+      deep learning on single-cell rna sequencing data analysis: a review. Genomics, proteomics & bioinformatics,
+      20(5):814–835, 2022.
+-
+-[38] Yuyao Song, Zhichao Miao, Alvis Brazma, and Irene Papatheodorou. Benchmarking strategies for cross-species
+-     integration of single-cell rna sequencing data. Nature Communications, 14(1):6495, 2023.
+-
++[38] Yuyao Song, Zhichao Miao, Alvis Brazma, and Irene Papatheodorou. Benchmarking strategies for cross-
++     species integration of single-cell rna sequencing data. Nature Communications, 14(1):6495, 2023.
+ [39] Haoyang Li, Juexiao Zhou, Zhongxiao Li, Siyuan Chen, Xingyu Liao, Bin Zhang, Ruochi Zhang, Yu Wang,
+      Shiwei Sun, and Xin Gao. A comprehensive benchmarking with practical guidelines for cellular deconvolution
+      of spatial transcriptomics. Nature communications, 14(1):1548, 2023.
+ [40] Luca Alessandri, Francesca Cordero, Marco Beccuti, Nicola Licheri, Maddalena Arigoni, Martina Olivero,
+      Maria Flavia Di Renzo, Anna Sapino, and Raffaele Calogero. Sparsely-connected autoencoder (sca) for single
+      cell rnaseq data mining. NPJ systems biology and applications, 7(1):1, 2021.
+-
+ [41] Gang Li, Yuchen Yang, Eric Van Buren, and Yun Li. Dropout imputation and batch effect correction for
+      single-cell rna sequencing data. Journal of Bio-X Research, 2(04):169–177, 2019.
+ [42] Ignacio Varela, Pablo Menendez, and Alejandra Sanjuan-Pla. Intratumoral heterogeneity and clonal evolution
+      in blood malignancies and solid tumors. Oncotarget, 8(39):66742, 2017.
+-
+-[43] Kai Chen, Qi Wang, Mingzhe Li, Huahu Guo, Weikang Liu, Feng Wang, Xiaodong Tian, and Yinmo
+-     Yang. Single-cell rna-seq reveals dynamic change in tumor microenvironment during pancreatic ductal
+-     adenocarcinoma malignant progression. EBioMedicine, 66, 2021.
+-
+-
+-
++[43] Kai Chen, Qi Wang, Mingzhe Li, Huahu Guo, Weikang Liu, Feng Wang, Xiaodong Tian, and Yinmo Yang.
++     Single-cell rna-seq reveals dynamic change in tumor microenvironment during pancreatic ductal adenocarci-
++     noma malignant progression. EBioMedicine, 66, 2021.
+ 
+ [44] Zhihong Huang, Chao Wu, Xinkui Liu, Shan Lu, Leiming You, Fengying Guo, Antony Stalin, Jingyuan
+-
+-
+-
+-
+      Zhang, Fanqin Zhang, Zhishan Wu, et al. Single-cell and bulk rna sequencing reveal malignant epithelial cell
+-
+-
+-
+-
+      heterogeneity and prognosis signatures in gastric carcinoma. Cells, 11(16):2550, 2022.
+ [45] Mahmoud Labib and Shana O Kelley. Single-cell analysis targeting the proteome. Nature Reviews Chemistry,
+-
+-
+-
+-
+      4(3):143–158, 2020.
++
+ [46] Xiang Chen, Fang-Xiang Wu, Jin Chen, and Min Li. Dorc: Discovery of rare cells from ultra-large scrna-seq
+      data. In 2019 IEEE International Conference on Bioinformatics and Biomedicine (BIBM), pages 111–116.
+      IEEE, 2019.
+ [47] Fengying Wu, Jue Fan, Yayi He, Anwen Xiong, Jia Yu, Yixin Li, Yan Zhang, Wencheng Zhao, Fei Zhou, Wei
+      Li, et al. Single-cell profiling of tumor heterogeneity and the microenvironment in advanced non-small cell
+      lung cancer. Nature communications, 12(1):2540, 2021.
+-
+ [48] Juexin Wang, Anjun Ma, Yuzhou Chang, Jianting Gong, Yuexu Jiang, Ren Qi, Cankun Wang, Hongjun Fu,
+      Qin Ma, and Dong Xu. scgnn is a novel graph neural network framework for single-cell rna-seq analyses.
+      Nature communications, 12(1):1882, 2021.
+-[49] Zhuohan Yu, Yifu Lu, Yunhe Wang, Fan Tang, Ka-Chun Wong, and Xiangtao Li. Zinb-based graph
+-     embedding autoencoder for single-cell rna-seq interpretations. In Proceedings of the AAAI conference on
+-     artificial intelligence, volume 36, pages 4671–4679, 2022.
++
++[49] Zhuohan Yu, Yifu Lu, Yunhe Wang, Fan Tang, Ka-Chun Wong, and Xiangtao Li. Zinb-based graph embed-
++     ding autoencoder for single-cell rna-seq interpretations. In Proceedings of the AAAI conference on artificial
++     intelligence, volume 36, pages 4671–4679, 2022.

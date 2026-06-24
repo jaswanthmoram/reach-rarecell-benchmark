@@ -1,0 +1,794 @@
+\documentclass[10pt]{article}
+\usepackage[margin=0.85in]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[table]{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{placeins}
+\usepackage{float}
+\usepackage{microtype}
+\usepackage{subcaption}
+\captionsetup[subfigure]{labelformat=empty}
+\usepackage{authblk}
+\usepackage{titlesec}
+\titlespacing*{\section}{0pt}{1.0\baselineskip}{0.4\baselineskip}
+\titlespacing*{\subsection}{0pt}{0.7\baselineskip}{0.25\baselineskip}
+\titlespacing*{\subsubsection}{0pt}{0.5\baselineskip}{0.2\baselineskip}
+\setlength{\textfloatsep}{6pt plus 1pt minus 1pt}
+\setlength{\floatsep}{6pt plus 1pt minus 1pt}
+\setlength{\intextsep}{6pt plus 1pt minus 1pt}
+\setlength{\abovecaptionskip}{2pt}
+\setlength{\belowcaptionskip}{0pt}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!55!black,
+  citecolor=blue!55!black,
+  urlcolor=blue!55!black
+}
+
+\captionsetup{font=small, labelfont=bf, skip=4pt}
+
+\title{\textbf{REACH: A Reproducible Benchmark for Rare Malignant Cell
+Detection in Single Cell RNA Sequencing}}
+
+\author[1]{Moram Venkata Satya Jaswanth}
+\author[1]{Amruthaluri Gavin}
+\author[1]{Padarthi Aakash}
+\author[1]{Muttha Tejesh Kumar}
+\author[1,*]{Abhijit Dasgupta}
+
+\affil[1]{Department of Computer Science and Engineering, SRM University, Andhra Pradesh, India}
+
+\affil[*]{Correspondence: abhijitju06@gmail.com or abhijit.d@srmap.edu.in}
+\date{}
+
+\usepackage{xcolor}
+\usepackage[normalem]{ulem}
+\definecolor{trackred}{RGB}{200,0,0}
+\newcommand{\added}[1]{{\color{trackred}#1}}
+\newcommand{\deleted}[1]{{\color{trackred}\sout{#1}}}
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\begin{document}
+\section{REACH: A Reproducible Benchmark for Rare Malignant-Cell
+Detection in Single-Cell RNA
+Sequencing}\label{reach-a-reproducible-benchmark-for-rare-malignant-cell-detection-in-single-cell-rna-sequencing} \begin{quote}
+\textbf{Article type:} Original Research \textbar{} \textbf{Version:}
+v1.2.0 \textbar{} \textbf{Date:} 2026-04-30
+\end{quote} \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center} \subsection{Abstract}\label{abstract} Rare malignant cells in single-cell RNA sequencing (scRNA-seq) can
+represent circulating tumor cells, minimal residual disease,
+drug-tolerant persisters, metastatic intermediates, or small tumor
+compartments embedded in a complex microenvironment. REACH targets the
+specific problem of \textbf{rare malignant-cell detection in a
+heterogeneous tumour microenvironment (TME)}: positives are malignant
+cells embedded in an immune/stromal background, and the task is
+\textbf{imbalanced cell-level ranking}, not intra-lineage sub-state
+discovery. REACH therefore evaluates how well methods surface scarce
+malignant cells above an abundant TME background under controlled
+prevalence, synthetic stress, null-control, and label-noise conditions.
+These populations are biologically important but statistically
+difficult: the positive class is scarce, labels are assembled from
+imperfect evidence, and a high AUROC can coexist with poor recovery of
+top-ranked cells. We present REACH, not a new detector but a
+reproducible benchmark and software/data resource for rare
+malignant-cell detection that treats the task as imbalanced cell-level
+ranking. REACH v1.2.0 combines ten curated public scRNA-seq datasets
+(approx. 360,000 cells), six evaluation tracks (A--F), ten standardized
+method wrappers, confidence-tiered multi-arm labels, fallback-aware
+metrics, nonparametric paired statistics, and figure regeneration from
+frozen result tables. Across 1,125 benchmark units, REACH produced
+11,250 method-unit evaluations. On the primary controlled real-cell
+Track A endpoint, the supervised in-sample \texttt{hvg\_logreg} ceiling
+reached median average precision (AP) 1.000 (mean 0.909, mean AUROC
+0.953), showing that high-confidence labels often retain recoverable
+expression signal. The exploratory comparator \texttt{CaSee} reached
+median AP 0.512 but is reported separately from ranked published
+detectors. Among ranked published methods, \texttt{FiRE} had the highest
+primary median AP (0.313), while paired tests showed it was not
+significantly different from \texttt{expr\_threshold} or
+\texttt{scMalignantFinder}. Global Track A method differences were
+strongly supported on the 140-unit common subset (Friedman χ²=695.05,
+p=8.0×10⁻¹⁴⁴; Iman-Davenport F=171.01, p=8.4×10⁻²¹¹). REACH exposes a
+large gap between supervised separability and current unsupervised
+ranking, substantial prevalence sensitivity, dataset-specific winners,
+and method reliability issues that would be hidden by a single
+leaderboard number. \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center} \subsection{Public Release Scope}\label{public-release-scope} This repository contains source code, tests, method wrappers, workflow
+entrypoints, toy data, lightweight Phase 11 CSV snapshots, Phase 12 PNG
+previews, and submission-ready figures. Large processed datasets, track
+units, full prediction outputs, and complete result archives are
+external Zenodo/GitHub release assets. \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center} \subsection{Contributions}\label{contributions} \begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  REACH formalises \textbf{rare malignant-cell detection in
+  heterogeneous tumour microenvironments} as a per-unit, imbalanced
+  ranking task over high-confidence positive malignant cells and
+  background TME cells --- explicitly an inter-lineage contrast, not
+  intra-lineage sub-state discovery.
+\item
+  It defines confidence-tiered labels from multiple evidence arms rather
+  than treating a single annotation column as ground truth.
+\item
+  It separates primary ranking from exploratory comparators, supervised
+  ceilings, null controls, label-noise diagnostics, and method-failure
+  audits, so that each row in the leaderboard answers a clearly scoped
+  question.
+\item
+  It ships as a reproducible benchmark release with public source code,
+  a release-pinned Docker image, four Zenodo archives, deterministic
+  snapshot regeneration, and submission-ready figures and tables.
+\end{enumerate} \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center} \subsection{Datasets}\label{datasets} 10 curated scRNA-seq datasets across 8 solid-tumour types and 2 blood
+malignancies: \begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1800}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2400}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2400}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1400}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Dataset
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Cancer type
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Platform
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Track role
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Cells
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+hnscc\_puram & Head and neck SCC & SMART-seq2 & A/B/C/E & 5,902 \\
+bcc\_yost & Basal cell carcinoma & 10x Chromium & A/B/C/E &
+\textasciitilde47,000 \\
+hcc\_wei & Hepatocellular carcinoma & 10x Chromium & A/B/C/E & 19,382 \\
+luad\_laughney & Lung adenocarcinoma & 10x Chromium & A/B/C/E &
+33,782 \\
+pdac\_peng & Pancreatic ductal adenocarcinoma & 10x Chromium & A/B/C/E &
+123,488 \\
+crc\_lee & Colorectal cancer & 10x Chromium & A/B/C/E/F & 55,551 \\
+rcc\_multi & Renal cell carcinoma & 10x Chromium & A/B/C/E & 33,574 \\
+ov\_izar\_tirosh & Ovarian cancer ascites & 10x Chromium & A/B/C/E &
+9,482 \\
+mm\_ledergor & Multiple myeloma & 10x Chromium & D & 31,181 \\
+breast\_ctc\_szczerba & Breast cancer CTCs & SMART-seq2 & D & 357 \\
+\end{longtable} \begin{figure}
+\centering
+\includegraphics{images/Fig0_Phase11_Summary_Heatmap.png}
+\caption{Figure 0. Phase 11 summary heatmap: mean AP by method and
+dataset.}
+\end{figure} \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center} \subsection{Evaluation Tracks}\label{evaluation-tracks} All tracks are constructed around the inter-lineage malignant-vs-TME
+contrast (malignant epithelial/CTC positives against immune/stromal
+background), framed as imbalanced cell-level ranking. The intra-lineage
+setting (malignant vs normal epithelial of the same lineage) is
+addressed separately by the new Track F (R3-4/R3-5). \begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.1944}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.1944}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.4444}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Track
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Type
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Units
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Interpretation
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+A & Controlled real-cell spike-ins (4 prevalence tiers) & 160 & Primary
+endpoint \\
+B & Synthetic Splatter stress-test & 120 & Secondary, not blended into
+primary leaderboard \\
+C & Background-dominated null controls & 160 & False-positive
+diagnostic \\
+D & Natural blood/CTC prevalence & 30 & Supplementary primary \\
+E & Noisy-label robustness & 640 & Supervised-only interpretive track
+and label-noise diagnostic \\
+F & Intra-lineage malignant vs normal epithelial (3 prevalence tiers) &
+15 & Inter-lineage-contrast removal test; not part of primary
+leaderboard \\
+\end{longtable} \textbf{Track B interpretation.} Track B is a synthetic Splatter
+stress-test and is \textbf{not} blended into the primary Track A
+leaderboard. The method-level rank correlation between Track A and Track
+B is ρ = 0.042 (p = 0.907;
+\texttt{data/results/revision/sens2\_sens3\_extract.txt}),
+i.e.~statistically indistinguishable from zero, with large rank
+reordering across methods (CaSee 2→6, scMalignantFinder 5→10, RareQ 7→2,
+scCAD 8→4). Synthetic-track rankings therefore do not replicate
+real-cell rankings, justifying Track B's secondary, non-blended role as
+a controlled robustness probe rather than a primary endpoint. \textbf{Track E interpretation.} Track E is a supervised-only
+interpretive track and label-noise diagnostic. It is interpreted as
+algorithmic robustness only for \texttt{hvg\_logreg}, which consumes
+labels. For unsupervised methods, Track E reflects metric sensitivity to
+corrupted labels, not algorithmic robustness. Track E is therefore not
+part of the primary unsupervised method ranking. \textbf{Track F: Intra-Lineage Malignant Detection.} In response to
+R3-4/R3-5, we introduce Track F, where the background is restricted to
+normal-diploid epithelial cells from the same tissue of origin as the
+malignant positives, removing the inter-lineage TME contrast that
+defines Tracks A--E. Units are generated at three prevalences (0.1\%,
+0.5\%, 1.0\%) with 5 replicates each --- 15 units total. Unit sizes are
+adaptive: 2,000 cells for the 0.1\% level (to preserve the ultra-rare
+ceiling-drop signal with ≥2 positives) and 400 cells for the 0.5\% and
+1.0\% levels (to reduce background duplication below the 20\% design
+cap). Background is sampled without replacement first, then fills the
+remainder with replacement only if the unique pool is exhausted. All 10
+methods were evaluated (150/150 predictions complete; DeepScena on Colab
+T4 GPU). Track F is constructed from the \textbf{crc\_lee} (colorectal
+cancer) dataset only, because it is the only REACH dataset carrying both
+epithelial \texttt{cell\_type} annotations and normal/tumor
+\texttt{tissue\_origin} labels; we audited all other 9 datasets and none
+have the required metadata even via marker-based fallback (EPCAM+ ∩
+low-CNV ∩ source-negative yields 0--70 cells --- insufficient for valid
+units). Track F is a diagnostic track and is \textbf{not} blended into
+the primary Track A leaderboard. \textbf{Intra-lineage principle.} Track A--E performance is built on the
+inter-lineage malignant-vs-TME contrast and does \textbf{not} imply the
+ability to distinguish malignant from normal cells of the \emph{same}
+lineage. Track F confirms this: at 0.1\% prevalence, nine of ten methods
+fall to median AP ≤ 0.009 on Track F (most at 0.001, the chance floor),
+while only scMalignantFinder retains power (AP = 1.000) --- and even
+that result is cancer-type-specific (see R3-5 caveat below).
+Inter-lineage leaderboards therefore cannot be extrapolated to
+intra-lineage sub-state detection. \begin{figure}
+\centering
+\includegraphics{images/Fig9_Track_Design.png}
+\caption{Figure 9. Track design overview including the new Track F
+(intra-lineage).}
+\end{figure} \begin{figure}
+\centering
+\includegraphics{images/Fig8_REACH_Pipeline_Overview.png}
+\caption{Figure 8. REACH pipeline overview with the real CNV inference
+arm.}
+\end{figure} \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center} \subsection{Included Methods}\label{included-methods} \begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.4167}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.2500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Method
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Category
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Role
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+hvg\_logreg & Supervised & In-sample ceiling (not a deployable
+competitor) \\
+CaSee & Exploratory & Exploratory comparator (separate from ranked
+detectors) \\
+FiRE & Ranked & Published comparator \\
+DeepScena & Ranked & Published comparator \\
+RareQ & Ranked & Published comparator \\
+cellsius & Ranked & Published comparator \\
+scCAD & Ranked & Published comparator \\
+scMalignantFinder & Ranked & Published comparator \\
+expr\_threshold & Naive & Naive biological baseline \\
+random\_baseline & Naive & Floor baseline \\
+\end{longtable} \textbf{Excluded methods (7):} CopyKAT, MACE, SCANER, SCEVAN, RaceID3,
+scATOMIC, GiniClust3 --- excluded for modality mismatch, score-contract
+mismatch, OOM, timeout, or degenerate outputs. \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center} \subsection{Method Inclusion and
+Exclusion}\label{method-inclusion-and-exclusion} REACH considered 17 candidate methods. Ten produced evaluable outputs
+under the standardised score contract. The remaining seven were
+excluded. \begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1538}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1538}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1923}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.3462}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1538}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Status
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Method
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Category
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Wrapper Fidelity
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Reason
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Included & hvg\_logreg & Supervised Ceiling & Faithful & In-sample
+logistic ceiling \\
+Included & CaSee & Exploratory & Faithful recreation &
+Autoencoder-Isolation Forest (Yu et al., 2022) \\
+Included & FiRE & Ranked & Faithful & Frequency-based rarity (Jindal et
+al., 2018) \\
+Included & DeepScena & Ranked & Proxy & Deep clustering/SSL (Lei et al.,
+2023) \\
+Included & RareQ & Ranked & Faithful & Neighbourhood rarity (R
+package) \\
+Included & cellsius & Ranked & Faithful & Rarity statistic (Wegmann et
+al., 2019) \\
+Included & scCAD & Ranked & Proxy & Anomaly scorer (Xu et al., 2024) \\
+Included & scMalignantFinder & Ranked & Proxy & Malignancy probability
+(Yu et al., 2025) \\
+Included & expr\_threshold & Naive Baseline & Faithful &
+Total-UMI/expression rank baseline \\
+Included & random\_baseline & Naive Baseline & Faithful & Random uniform
+floor \\
+Excluded & CopyKAT & --- & --- & CNV modality mismatch (requires raw
+counts + gene positions) \\
+Excluded & MACE & --- & --- & Score contract mismatch (bulk-level
+annotation) \\
+Excluded & SCANER & --- & --- & Score contract mismatch (cluster-level,
+not cell-level) \\
+Excluded & SCEVAN & --- & --- & CNV modality mismatch \\
+Excluded & RaceID3 & --- & --- & Score contract mismatch (cluster-level
+rare-cell identification) \\
+Excluded & scATOMIC & --- & --- & Score contract mismatch (multi-class
+classifier) \\
+Excluded & GiniClust3 & --- & --- & Score contract mismatch
+(cluster-level, not cell-level) \\
+\end{longtable} \subsubsection{Wrapper Fidelity Notes}\label{wrapper-fidelity-notes} \begin{itemize}
+\tightlist
+\item
+  \textbf{Faithful:} The wrapper executes the original published
+  software package with default parameters and documented
+  configurations.
+\item
+  \textbf{Proxy:} The wrapper reimplements the published algorithm from
+  the paper description. Performance may differ from the original
+  implementation.
+\item
+  \textbf{Faithful recreation:} CaSee's original repository (Yu et al.,
+  2022) was cloned, but the executed wrapper uses a built-in CPU
+  fallback runner that faithfully recreates the published autoencoder +
+  isolation-forest pipeline rather than invoking the original
+  GPU-dependent code. Scores are real model outputs (varied, not
+  random). See \texttt{data/results/revision/VERIFICATION\_ISSUES.md}
+  §5.5.
+\end{itemize} \subsubsection{Supervised Ceiling
+Justification}\label{supervised-ceiling-justification} hvg\_logreg is a supervised logistic regression trained in-sample on
+2,000 highly variable genes using the true positive/background labels of
+each unit. It is \textbf{not} a peer competitor to unsupervised methods;
+it is a calibration ceiling that quantifies the gap between supervised
+separability and current unsupervised ranking (≈0.687 median AP: 1.000
+vs 0.313 on Track A). Importantly, the ceiling is \textbf{not trivially
+achievable across all tasks}: on the new intra-lineage Track F
+(malignant vs normal epithelial cells, same lineage), hvg\_logreg's
+median AP collapses from 1.000 (Track A) to 0.001 at 0.1\% prevalence (Δ
+= −0.999;
+\texttt{data/results/revision/track\_f/track\_a\_vs\_f\_comparison.csv}).
+The ceiling is therefore specific to the inter-lineage TME task that
+REACH is designed to probe; it ceases to be informative once the
+inter-lineage contrast is removed. We \textbf{concede} Reviewer 3's point: the inter-lineage supervised
+ceiling is trivial for the intra-lineage problem. hvg\_logreg was
+trained on inter-lineage labels (malignant vs TME); on Track F
+(malignant epithelial vs normal epithelial, same lineage) it outputs a
+constant 0.5 score for every cell, yielding median AP = 0.001 and AUROC
+= 0.500 at all three prevalences
+(\texttt{data/results/revision/track\_f/track\_f\_leaderboard.csv}). Its
+ceiling therefore drops by Δ = −0.999 from Track A to Track F. The
+inter-lineage ceiling is meaningful \textbf{only as an upper bound for
+the TME-separation task REACH is designed to assess}; it is not a
+general statement about the discriminability of malignant cells. Track F
+(below) provides the intra-lineage evidence the ceiling cannot. \begin{figure}
+\centering
+\includegraphics{images/Fig10_Method_QC_Audit.png}
+\caption{Figure 10. Method QC audit: failure modes and degenerate output
+rates.}
+\end{figure} \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center} \subsection{Primary Leaderboard (Track
+A)}\label{primary-leaderboard-track-a} \begin{longtable}[]{@{}lllllll@{}}
+\toprule\noalign{}
+Rank & Method & Median AP & Mean AP & AUROC & Runtime (s) & Role \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+-- & hvg\_logreg & 1.000 & 0.909 & 0.953 & 3.3 & Supervised ceiling \\
+-- & CaSee & 0.512 & 0.441 & 0.869 & 357.5 & Exploratory \\
+-- & expr\_threshold & 0.317 & 0.361 & 0.737 & 15.3 & Naive baseline \\
+1 & FiRE & 0.313 & 0.385 & 0.885 & 118.1 & Published \\
+2 & cellsius & 0.259 & 0.270 & 0.832 & 39.8 & Published \\
+3 & scMalignantFinder & 0.235 & 0.319 & 0.804 & 7.6 & Published \\
+4 & RareQ & 0.196 & 0.256 & 0.818 & 78.2 & Published \\
+5 & scCAD & 0.130 & 0.226 & 0.771 & 123.4 & Published \\
+-- & random\_baseline & 0.019 & 0.037 & 0.511 & 11.6 & Floor \\
+6 & DeepScena & 0.018 & 0.029 & 0.471 & 80.6 & Published \\
+\end{longtable} \textbf{CaSee exploratory note.} CaSee is reported as exploratory and is
+excluded from the numbered published-method ranking. CaSee median AP
+across all 160 Track A units is 0.512; on 20 of those units CaSee
+returned degenerate constant-score predictions (score SD ≈ 0) and
+excluding them raises its median AP to 0.606
+(\texttt{data/results/revision/casee\_filtered\_leaderboard.csv}).
+Because CaSee's autoencoder is trained on the test unit's own cells
+without external reference labels, it is not a deployable detector and
+is kept separate from the ranked published comparators. \begin{figure}
+\centering
+\includegraphics{images/Fig1_Leaderboard.png}
+\caption{Figure 1. Primary leaderboard (Track A): median average
+precision per method.}
+\end{figure} \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center} \subsection{Key Statistical Results}\label{key-statistical-results} \begin{itemize}
+\tightlist
+\item
+  \textbf{Global test (140-unit common Track A subset):} Friedman χ² =
+  695.05, p = 8.0×10⁻¹⁴⁴; Iman-Davenport F = 171.01, p = 8.4×10⁻²¹¹
+\item
+  \textbf{Bootstrap rank intervals (2,000 resamples):} hvg\_logreg and
+  CaSee stable at ranks 1 and 2; FiRE median rank 3 (95\% CI {[}3, 4{]})
+\item
+  \textbf{Pairwise vs FiRE:} FiRE significantly better than DeepScena,
+  random\_baseline, scCAD, RareQ, cellsius (BH FDR \textless{} 0.05).
+  FiRE NOT significantly different from scMalignantFinder (p=0.812) or
+  expr\_threshold (p=0.836). CaSee significantly higher than FiRE (Δmean
+  AP = -0.139, BH FDR = 6.1×10⁻⁸) but remains exploratory.
+\item
+  \textbf{Track B vs Track A:} Spearman ρ = 0.042, p = 0.907 (no rank
+  correlation --- Track B is a separate stress test)
+\item
+  \textbf{Track E (supervised only):} hvg\_logreg mean AP drops from
+  0.909 to 0.460--0.829 under four label perturbation conditions
+\item
+  \textbf{Track C null FPR:} On all-negative null units, every
+  unsupervised and naive method controls the false-positive rate near
+  the expected \textasciitilde3\% floor: RareQ 0.0293, cellsius 0.0295,
+  CaSee 0.0301, scCAD 0.0301, random\_baseline 0.0309, expr\_threshold
+  0.0310, DeepScena 0.0306, scMalignantFinder 0.0315, FiRE 0.0315
+  (\texttt{data/results/revision/sens2\_sens3\_extract.txt}). The
+  supervised ceiling hvg\_logreg is the lone outlier at FPR = 0.788
+  (78.8\%) because it trains in-sample on the null unit's own expression
+  features and overfits to the absence of signal --- a known
+  cross-validation pathology on all-negative data that does not affect
+  its Track A performance. Track C thus functions as a specificity
+  diagnostic: a method that cannot keep its null FPR near 3\% is unfit
+  for deployment in low-prevalence screening.
+\item
+  \textbf{Pairwise Cliff's δ effect sizes} quantify the practical
+  magnitude of method differences (full matrix:
+  \texttt{data/results/revision/cliff\_delta\_matrix.csv}). The
+  supervised ceiling dominates every unsupervised method by a large
+  effect (hvg\_logreg vs FiRE δ = 0.796, vs DeepScena δ = 0.929, vs
+  random\_baseline δ = 0.917). Among ranked published methods, FiRE's
+  advantage over the naive expr\_threshold baseline is negligible (δ =
+  0.068), meaning that despite FiRE's higher mean AP its per-unit
+  advantage is inconsistent --- many units show comparable performance.
+  By contrast, CaSee vs DeepScena (δ = 0.702) and FiRE vs DeepScena (δ =
+  0.775) are large effects, confirming a real capability gap between top
+  and bottom ranked detectors.
+\item
+  \textbf{Track F (intra-lineage, crc\_lee only;
+  \texttt{data/results/revision/track\_f/track\_f\_leaderboard.csv}):}
+  At 0.1\% prevalence the pretrained pan-cancer classifier
+  scMalignantFinder achieves median AP = 1.000, while every other method
+  falls to the chance floor --- hvg\_logreg AP = 0.001 (constant 0.5
+  scores), expr\_threshold 0.008, FiRE 0.004, CaSee 0.003,
+  random\_baseline 0.002, DeepScena 0.001, and cellsius/RareQ/scCAD all
+  0.001. scMalignantFinder stays dominant at 0.5\% (AP = 1.000) and 1\%
+  (AP = 0.917). \textbf{Two caveats}
+  (\texttt{data/results/revision/VERIFICATION\_ISSUES.md}): (1) Track F
+  uses only crc\_lee --- scMalignantFinder's Track A AP ranges 0.015
+  (hnscc\_puram) to 0.943 (crc\_lee) across cancer types, so its Track F
+  AP = 1.000 is colorectal-cancer-specific and \textbf{must not} be
+  generalised; no other REACH dataset has the required normal-epithelial
+  annotations even via marker-based fallback (audited: EPCAM+ ∩ low-CNV
+  ∩ source-negative yields 0--70 cells across all 9 other datasets). (2)
+  Background duplication: at the 0.1\% level (2,000-cell units),
+  crc\_lee's 340 normal epithelial cells produce 83\% duplicate
+  background IDs; at the 0.5\% and 1.0\% levels (400-cell units),
+  duplication drops to 14.6\% and 14.1\% respectively --- both under the
+  20\% design cap. The 0.1\% duplication slightly inflates absolute AP
+  but affects all methods identically, so relative comparisons remain
+  valid. Future work should curate additional datasets with normal
+  epithelial references to enable cross-cancer Track F evaluation.
+\end{itemize} \begin{figure}
+\centering
+\includegraphics{images/Fig2_Sensitivity_Robustness.png}
+\caption{Figure 2. Sensitivity and robustness analysis (Track E
+label-noise).}
+\end{figure} \begin{figure}
+\centering
+\includegraphics{images/Fig3_Critical_Difference.png}
+\caption{Figure 3. Critical difference diagram for method ranking.}
+\end{figure} \begin{figure}
+\centering
+\includegraphics{images/Fig4_AP_Prevalence.png}
+\caption{Figure 4. Average precision stratified by rare-cell
+prevalence.}
+\end{figure} \begin{figure}
+\centering
+\includegraphics{images/Fig5_TrackC_Null_Calibration.png}
+\caption{Figure 5. Track C null-control calibration: per-method
+false-positive rate.}
+\end{figure} \begin{figure}
+\centering
+\includegraphics{images/Fig6_Runtime_Scalability_Pareto.png}
+\caption{Figure 6. Runtime scalability Pareto: runtime vs dataset size.}
+\end{figure} \begin{figure}
+\centering
+\includegraphics{images/Fig7_Rank_Bootstrap_Forest.png}
+\caption{Figure 7. Rank bootstrap forest: rank stability across
+datasets.}
+\end{figure} \begin{figure}
+\centering
+\includegraphics{images/Fig11_Track_F_vs_Track_A.png}
+\caption{Figure 11. Track F (intra-lineage) vs Track A (inter-lineage)
+median AP per method. hvg\_logreg ceiling collapses from 1.000 to 0.001;
+scMalignantFinder inverts (0.235 to 1.000).}
+\end{figure} \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center} \subsection{Dataset-Level Winners}\label{dataset-level-winners} \begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+Dataset & Best non-ceiling & AP \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+bcc\_yost & CaSee & 0.6079 \\
+hnscc\_puram & expr\_threshold & 0.7872 \\
+pdac\_peng & CaSee & 0.4488 \\
+rcc\_multi & cellsius & 0.1931 \\
+crc\_lee & scMalignantFinder & 0.8373 \\
+luad\_laughney & CaSee & 0.5378 \\
+hcc\_wei & CaSee & 0.4908 \\
+ov\_izar\_tirosh & expr\_threshold & 0.5717 \\
+\end{longtable} \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center} \subsection{Limitations}\label{limitations} \begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{CNV evidence, circularity check, and validation.} Version 1
+  uses infercnvpy (v0.6.1) as the sole copy-number inference arm. To
+  assess whether the CNV arm circularly inflates the method ranking, we
+  re-derived HC labels using only tissue-of-origin, AUCell signature
+  scores, and kNN neighbourhood purity --- dropping the CNV criterion
+  entirely --- and recomputed median AP for each method. Removing CNV
+  from the label criteria collapses median AP to the chance floor
+  (0.009--0.010) for every method including the supervised ceiling,
+  indicating that CNV is the primary discriminative signal in the HC
+  label set. The rank ordering under CNV-free labels correlates with the
+  published ranking (Spearman ρ = 0.648, p = 0.043;
+  \texttt{data/results/revision/circularity\_ranking.csv}), but this
+  correlation is computed over near-tied chance-level values, so it
+  should be interpreted cautiously: the rank order is broadly preserved,
+  but the absolute performance differences vanish without CNV. We
+  therefore frame CNV as the dominant but not sole label component ---
+  tissue-of-origin and signature scores contribute to the HC set but CNV
+  drives the discriminability. We also validated inferred CNV burden
+  (mean absolute deviation from the diploid baseline) against published
+  source malignancy annotations across 9 datasets (57,811 cells; 5,010
+  positive; 52,801 background;
+  \texttt{data/results/revision/cnv\_concordance.csv}). CNV burden
+  discriminated source-annotated malignant from non-malignant cells with
+  overall AUROC = 0.782 and MCC = 0.361. Per-dataset AUROC ranged from
+  0.747 (hcc\_wei) to 0.960 (luad\_laughney), with five datasets
+  exceeding 0.86 (luad\_laughney 0.960, pdac\_peng 0.934, crc\_lee
+  0.892, hnscc\_puram 0.906, ov\_izar\_tirosh 0.868). An earlier version
+  of this analysis reported hnscc\_puram at AUROC = 0.500 because its
+  \texttt{cell\_type} labels (e.g.~\texttt{"0.0"},
+  \texttt{"Fibroblast"}, \texttt{"T\ cell"}) did not match infercnvpy's
+  default reference categories (\texttt{T\ cells}, \texttt{B\ cells},
+  \texttt{Myeloids}, \ldots) and CNV scores were zero; we corrected the
+  reference categories to include the singular label forms present in
+  this dataset and regenerated its CNV, yielding AUROC = 0.906 (MCC =
+  0.763). CNV is therefore used as one of three independent HC-label
+  components, not as a standalone ground truth. Cross-validation with
+  CopyKAT, Numbat, or SCEVAN would further strengthen CNV evidence but
+  was not feasible at this scale.
+\item
+  \textbf{Imperfect ground truth.} High-confidence labels (P\_HC/B\_HC)
+  rely on consensus across four evidence arms. False positives in source
+  annotation or CNV calls can propagate. The tier-assignment system
+  mitigates this by using only P\_HC vs B\_HC for primary AP
+  computation.
+\item
+  \textbf{Fallback and degenerate rates.} Across all methods, 249 units
+  produced fallback scores and 377 units produced degenerate outputs.
+  These rates are high and reflect current engineering stability
+  limitations of method wrappers rather than algorithmic quality.
+\item
+  \textbf{Dataset diversity.} The 10 datasets span 8 solid-tumour types
+  and 2 blood malignancies but are dominated by 10x Chromium (8/10).
+  SMART-seq2 is represented in only 2 datasets. No spatial
+  transcriptomics or multi-omics data are included.
+\item
+  \textbf{Track D size.} Natural prevalence evaluation (Track D)
+  contains only 30 units from 2 datasets, limiting statistical power for
+  this track.
+\item
+  \textbf{No held-out datasets.} All datasets are public. Method
+  developers can tune against the leaderboard, though REACH's
+  multi-track design with null controls and label-noise tracks makes
+  simple overfitting harder.
+\item
+  \textbf{Single contributor.} The benchmark was developed by a single
+  author. Independent verification by additional researchers would
+  strengthen reproducibility claims.
+\item
+  \textbf{Cancer-type scope.} Several therapeutically important cancer
+  types (glioblastoma, prostate adenocarcinoma, gastric cancer) are not
+  represented.
+\item
+  \textbf{Label-threshold sensitivity.} To test whether the qualitative
+  method ordering depends on the AUCell score threshold and kNN
+  neighbourhood-purity cutoff, we varied both across nine combinations
+  (AUCell 0.10/0.15/0.20 × kNN 0.40/0.50/0.60) while holding CNV scores
+  fixed, and recomputed rankings. On the five datasets yielding a valid
+  Spearman ρ, the high-confidence label sets were insensitive to these
+  threshold variations --- the same cells were selected at every setting
+  --- so the resulting method rankings are identical within each dataset
+  (ρ per dataset: luad\_laughney 0.685, pdac\_peng 0.758, bcc\_yost
+  0.818, hcc\_wei 0.879, crc\_lee 0.939). The cross-dataset ρ range
+  {[}0.685, 0.939{]} therefore reflects dataset-level variation in label
+  separability, not threshold sensitivity. Two datasets
+  (ov\_izar\_tirosh, rcc\_multi) could not form a high-confidence
+  background at any setting (n\_B\_HC = 0) and are excluded. The
+  label-construction pipeline is thus stable to the tested threshold
+  parameters, though this analysis does not demonstrate ranking
+  robustness to threshold changes that would actually alter the label
+  set (\texttt{data/results/revision/threshold\_sensitivity.csv}).
+\item
+  \textbf{TME overlap and the false-positive scope choice.} Because
+  REACH measures detection against a heterogeneous TME background,
+  methods trained or implicitly calibrated on the malignant-vs-TME
+  contrast may flag TME subpopulations whose expression partially
+  overlaps malignant signatures (e.g.~activated macrophages,
+  plasmablasts, cycling fibroblasts) as false positives. This is a
+  deliberate scope choice: REACH models the realistic low-prevalence
+  screening scenario in which TME is the background and tolerance to
+  such false positives is modulated by precision@k. Track C confirms
+  that, on pure all-negative null units, every unsupervised method keeps
+  its mean FPR near 3\%
+  (\texttt{data/results/revision/sens2\_sens3\_extract.txt}), so
+  elevated FPR on mixed-TME units reflects biological overlap, not
+  metric pathology. The new intra-lineage Track F (R3-4/R3-5) begins to
+  disentangle behaviour on pure-epithelial versus mixed-TME backgrounds.
+\end{enumerate} \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center} \subsection{Comparison to Related
+Benchmarks}\label{comparison-to-related-benchmarks} \begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.1304}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.1739}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.3043}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.3913}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Feature
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+REACH v1.2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+scIB (Luecken 2022)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+OpenProblems (Lance 2024)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Task & Rare malignant cell detection & Batch correction, clustering,
+integration & Multi-task (denoising, DE, etc.) \\
+Tracks & 6 (spike-in, synthetic, null, natural, noise, intra-lineage) &
+Multi-metric per task & Per-task metrics \\
+Labels & Multi-arm confidence tiers (P\_HC-B\_LC) & Canonical cell-type
+labels & Truth from data generators \\
+Null controls & Yes (Track C) & Not standard & Not standard \\
+Label noise & Yes (Track E, supervised only) & Not included & Not
+included \\
+Supervised ceiling & Yes (hvg\_logreg) & Not standard & Not standard \\
+Fallback handling & Filtered from primary AP & Not standardised &
+Varies \\
+Containerisation & Docker + GHCR & Docker & Docker + Nextflow \\
+\end{longtable} \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center} \subsection{Data and Code
+Availability}\label{data-and-code-availability} \begin{itemize}
+\tightlist
+\item
+  \textbf{Source code:}
+  https://github.com/jaswanthmoram/reach-rarecell-benchmark
+\item
+  \textbf{Concept DOI:} https://doi.org/10.5281/zenodo.19847108
+\item
+  \textbf{Processed datasets (7.3 GB):}
+  https://doi.org/10.5281/zenodo.19850652
+\item
+  \textbf{Track Units A-C (9.7 GB):}
+  https://doi.org/10.5281/zenodo.19850972
+\item
+  \textbf{Track Units D-E (2.2 GB):}
+  https://doi.org/10.5281/zenodo.19851287
+\item
+  \textbf{Complete results (425 MB):}
+  https://doi.org/10.5281/zenodo.19851710
+\item
+  \textbf{Docker image:}
+  ghcr.io/jaswanthmoram/reach-rarecell-benchmark:latest
+\item
+  \textbf{License:} MIT
+\item
+  \textbf{GEO accessions:} GSE103322, GSE123813, GSE149614, GSE123902,
+  GSE202051, GSE132465, GSE159115, GSE146026, GSE161801, GSE109761
+\end{itemize} Git alone is sufficient for toy workflows and public snapshot
+reproduction. Full processed-data, track-unit, prediction, and
+complete-result reruns require restoring the external Zenodo archives
+listed above. \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center} \subsection{Reproducibility}\label{reproducibility} \subsubsection{Snapshot Reproduction (Git-only, no external
+data)}\label{snapshot-reproduction-git-only-no-external-data} \begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{rcb}\NormalTok{ smoke{-}test}
+\ExtensionTok{python}\NormalTok{ scripts/run\_all.py }\AttributeTok{{-}{-}toy}
+\ExtensionTok{python}\NormalTok{ scripts/phase11\_statistics.py }\AttributeTok{{-}{-}from{-}snapshots}
+\ExtensionTok{python}\NormalTok{ scripts/reproduce\_from\_snapshots.py}
+\ExtensionTok{snakemake} \AttributeTok{{-}n} \AttributeTok{{-}{-}cores}\NormalTok{ 1}
+\ExtensionTok{dvc}\NormalTok{ repro }\AttributeTok{{-}{-}dry}
+\end{Highlighting}
+\end{Shaded} See \texttt{docs/reproducibility\_receipt.md} for the verified execution
+record, environment details, and expected outputs. \subsubsection{Revision compute
+environment}\label{revision-compute-environment} The sensitivity, CNV-validation, Track F, and concordance analyses in
+this revision were executed on a single CPU-only node: AMD EPYC 7B12 (16
+vCPUs), 62 GiB RAM, Debian GNU/Linux 13 trixie, Python 3.13.5, R 4.5.0,
+with scanpy 1.12.1, scikit-learn 1.9.0, infercnvpy 0.6.1, anndata
+0.11.4, torch 2.12.1 (CPU). R packages FiRE, CellSIUS, RareQ, and Seurat
+were installed and ran natively. \textbf{No GPU was available on this
+node.} DeepScena, whose TensorFlow/Torch pipeline requires CUDA, was run
+separately on a Google Colab Tesla T4 GPU; its predictions were
+transferred back and scored identically to all other methods. Full
+environment capture:
+\texttt{data/results/revision/environment\_capture.txt}. (The original
+v1.2.0 preprocessing cited in the Acknowledgements used GCP high-memory
+CPU and NVIDIA L4 GPU instances; that remains the record for dataset
+pre-processing, while the revision compute above is the record for the
+new analyses.) \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center} \subsection{Author}\label{author} \textbf{Moram Venkata Satya Jaswanth} Department of Computer Science and
+Engineering, SRM University AP, Amaravati, Andhra Pradesh, India Email:
+jaswanthmoram@gmail.com ORCID: 0009-0003-2369-1692 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center} \subsection{Author Contributions}\label{author-contributions} M.V.S.J. conceived the benchmark, designed the evaluation framework,
+curated datasets, implemented the software, executed the analyses,
+generated figures, interpreted results, and wrote the manuscript. \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center} \subsection{Acknowledgements}\label{acknowledgements} The author thanks the original dataset creators and method developers
+whose public data and software made REACH possible. This work used
+Google Cloud Platform high-memory CPU instances (30 vCPU / 240 GB RAM
+and 60 vCPU / 480 GB RAM) and NVIDIA L4 GPU instances for preprocessing,
+track generation, method execution, and result aggregation. The author
+also acknowledges the open-source Scanpy, scikit-learn, Snakemake, DVC,
+Docker, and Python scientific-computing communities. Degenerate and failed method runs (CopyKAT, MACE, SCANER, SCEVAN,
+RaceID3, scATOMIC, GiniClust3) were identified on these systems and
+documented in the excluded-methods table. \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center} \subsection{Funding}\label{funding} No external funding was received for this work. \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center} \subsection{Competing Interests}\label{competing-interests} The author declares no competing interests. \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center} \subsection{Supplementary Material}\label{supplementary-material} \begin{itemize}
+\tightlist
+\item
+  Excluded-method notes:
+  \texttt{data/results/manuscript/supplementary/EXCLUDED\_METHODS.md}
+\item
+  Sensitivity-analysis notes:
+  \texttt{data/results/manuscript/supplementary/SENSITIVITY\_ANALYSES.md}
+\item
+  Statistical-method notes:
+  \texttt{data/results/manuscript/supplementary/STATISTICAL\_METHODS.md}
+\item
+  Phase 11 tables: \texttt{data/results/tables/phase11/}
+\item
+  Phase 12 figures: \texttt{data/results/figures/phase12/}
+\end{itemize} \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center} \subsection{Contribution to the Field}\label{contribution-to-the-field} Rare malignant cells are central to tumor progression, treatment
+resistance, and circulating tumor-cell biology, but computational
+methods for detecting them in scRNA-seq data are difficult to compare
+fairly. REACH addresses this gap by providing a reproducible,
+cancer-focused benchmark that evaluates rare malignant-cell detection as
+a ranked retrieval problem rather than a standard balanced
+classification task. The benchmark combines multi-evidence confidence
+labels, controlled real-cell rarity, synthetic stress tests,
+null-control behavior, natural-prevalence evaluation, label-noise
+analysis, standardized method wrappers, and explicit failure auditing.
+By releasing code, figures, tables, Docker assets, and Zenodo archives,
+REACH provides a transparent baseline for method developers and a
+practical guide for researchers selecting rare malignant-cell detection
+tools. \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center} \subsection{Version History}\label{version-history} \begin{itemize}
+\tightlist
+\item
+  \textbf{v1.2.0 (2026-04-29):} Publication-ready snapshot. 10 datasets,
+  10 methods, 1,125 units, 11,250 evaluations. Added public Phase 11/12
+  tables and figures, label-based evaluation, all method wrappers
+  exposed through registry, paper.md, and reproducibility receipt.
+\item
+  \textbf{v1.1.0 (2026-04-28):} Initial public release. Code, configs,
+  tests, Docker, CI/CD, toy-data generation, frozen CSV snapshots,
+  Zenodo DOIs.
+\end{itemize}
+
+\end{document}
