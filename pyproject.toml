@@ -92,6 +92,16 @@ addopts = "-q --tb=short"
 
 [tool.ruff]
 line-length = 88
+# Vendored third-party code and agent tooling are not part of the package and
+# must not gate our lint (External-Methods is cloned upstream repos).
+extend-exclude = [
+    "External-Methods",
+    ".agents",
+    ".agent",
+    "scratch",
+    ".specify",
+    ".opencode",
+]
 
 [tool.ruff.lint]
 select = ["E", "F"]

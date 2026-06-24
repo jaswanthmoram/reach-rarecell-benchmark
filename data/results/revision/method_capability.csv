@@ -2,10 +2,10 @@ method_id,kind,runnable_here,reason
 random_baseline,native,YES,built-in
 expr_threshold,native,YES,built-in
 hvg_logreg,native,YES,built-in
-FiRE,external,NO,Rscript missing (requires R+renv)
+FiRE,external,YES,R 4.5.0 + FiRE package installed, running faithfully via Rscript
 scCAD,external,YES,python-louvain package installed, running faithfully
-cellsius,external,NO,Rscript missing (requires R+renv)
-RareQ,external,NO,Rscript missing (requires R+renv)
+cellsius,external,YES,R 4.5.0 + CellSIUS + Seurat installed, running faithfully via Rscript
+RareQ,external,YES,R 4.5.0 + RareQ + Seurat installed, running faithfully via Rscript
 scMalignantFinder,external,YES,squidpy and model files configured, running faithfully
-DeepScena,external,NO,GPU required (runner exits on CPU-only hosts)
+DeepScena,external,YES,Ran on Google Colab T4 GPU (this VM has no GPU), real cluster-based scores
 CaSee,external,YES,running faithfully via CPU-compatible wrapper recreation

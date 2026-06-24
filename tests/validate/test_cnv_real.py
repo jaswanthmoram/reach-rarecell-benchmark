@@ -16,7 +16,8 @@ def _toy_adata(n=200, g=400, seed=0):
     obs = pd.DataFrame(index=[f"c{i}" for i in range(n)])
     obs["cell_type"] = ["malignant"] * (n // 2) + ["T cells"] * (n - n // 2)
     a = AnnData(X=X, obs=obs, var=var)
-    sc.pp.normalize_total(a, target_sum=1e4); sc.pp.log1p(a)
+    sc.pp.normalize_total(a, target_sum=1e4)
+    sc.pp.log1p(a)
     return a
 
 

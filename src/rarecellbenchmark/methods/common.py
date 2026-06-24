@@ -14,6 +14,7 @@ def load_blind_adata(input_h5ad: Path) -> AnnData:
     adata = anndata.read_h5ad(input_h5ad)
     if "y_true" in adata.obs.columns:
         raise ValueError("Blind adata must not contain ground-truth labels ('y_true')")
+    adata.obs_names_make_unique()
     return adata
 
 

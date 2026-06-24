@@ -39,9 +39,21 @@ def main():
     merged["delta_ap_0.1pct"] = merged["track_f_median_ap_0.1pct"] - merged["track_a_median_ap"]
     merged["delta_ap_overall"] = merged["track_f_median_ap_overall"] - merged["track_a_median_ap"]
 
-    comparison_file = Path("data/results/revision/track_a_vs_f_comparison.csv")
-    merged.to_csv(comparison_file, index=False)
-    print(f"Wrote Track A vs F comparison to {comparison_file}")
+    # `delta` is the figure/response-doc alias for the 0.1% prevalence delta.
+    merged["delta"] = merged["delta_ap_0.1pct"]
+
+    # Write to BOTH cited paths from the single source so the figure generator
+    # and RESPONSE_TO_REVIEWERS citations never desync (was: a stale track_f/
+    # copy carried the 160-unit scCAD/DeepScena medians, contradicting the
+    # 140-unit leaderboard values used in the manuscript).
+    comparison_files = [
+        Path("data/results/revision/track_a_vs_f_comparison.csv"),
+        Path("data/results/revision/track_f/track_a_vs_f_comparison.csv"),
+    ]
+    for comparison_file in comparison_files:
+        comparison_file.parent.mkdir(parents=True, exist_ok=True)
+        merged.to_csv(comparison_file, index=False)
+        print(f"Wrote Track A vs F comparison to {comparison_file}")
     print("\nComparison Table:")
     print(merged.to_string(index=False))
 

@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import pytest
 from anndata import AnnData
 from rarecellbenchmark.tracks.track_f_generator import TrackFGenerator
 

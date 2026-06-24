@@ -55,7 +55,7 @@ def main():
             
         print(f"  Validating {dataset_id}...")
         try:
-            report_path = run_phase3(
+            run_phase3(
                 processed_h5ad=h5ad_path,
                 dataset_id=dataset_id,
                 out_dir=validation_dir,

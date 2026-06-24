@@ -605,6 +605,97 @@ git commit -m "feat: R3-5 Track F full method predictions (synced from GPU VM)"
 
 ---
 
+# PHASE 4-NEW — Push R1-2 and R3-5 from "disclosed limitation" to 100%
+
+> **Added 2026-06-22 after the Phase 0–8 verification pass.** Two points are currently only *mitigated-and-disclosed*, not fully resolved:
+> - **R1-2 (~85%)** — `hnscc_puram` CNV is all-zeros (AUROC 0.500) because its `cell_type` labels don't match infercnvpy's reference categories, dragging overall AUROC to 0.731.
+> - **R3-5 (~70%, the weakest point)** — Track F runs on a **single dataset** (`crc_lee`) with **83% duplicate background cells** (340-cell pool resampled to 2000).
+>
+> This phase closes both. **Each task has a documented GO/NO-GO gate:** if the data genuinely cannot support the fix, the task converts the result into an *honest, explicitly-bounded* exclusion rather than a fabricated improvement. Never invent a dataset, a label, or a number.
+>
+> **Source-of-truth rule still applies:** every new number must come from a regenerated file under `data/results/revision/`.
+
+## Task 4N.1: R1-2 → 100% — repair `hnscc_puram` CNV reference set
+
+**Why:** infercnvpy returned zeros for `hnscc_puram` because no cells matched the default reference categories (`T cells`, `B cells`, …). Its real labels are singular/abbreviated (`"Fibroblast"`, `"T cell"`, `"0.0"`). Supplying the correct reference categories should yield real CNV and lift both its per-dataset AUROC and the overall concordance.
+
+**Files:** `scripts/regenerate_cnv.py` (or a one-off `scripts/fix_hnscc_cnv.py`); re-run `scripts/cnv_concordance.py`. Possibly extend `_DEFAULT_REFERENCE_CATS` in `src/rarecellbenchmark/validate/cnv.py` to include singular forms.
+
+- [ ] **Step 1 (GO/NO-GO gate): Inspect the real labels.**
+```bash
+.venv/bin/python -c "import anndata as ad; a=ad.read_h5ad('data/processed/hnscc_puram.h5ad'); print(a.obs['cell_type'].value_counts())"
+```
+**GO** if ≥1 clearly non-malignant population exists (Fibroblast / T cell / B cell / Macrophage / Endothelial / Mast / Dendritic). **NO-GO** if every cell is malignant or unlabeled (`"0.0"` only) → skip to Step 5-NoGo.
+
+- [ ] **Step 2: Re-run CNV for `hnscc_puram` only**, passing explicit `reference_cats` built from the non-malignant labels found in Step 1 (singular forms). Assert the output is nonzero:
+```bash
+.venv/bin/python - <<'PY'
+# load hnscc_puram, annotate gene positions, compute_cnv_score(adata, reference_cats=[...actual labels...])
+# assert (cnv != 0).mean() > 0.5 ; write data/results/revision/cnv_scores/hnscc_puram_cnv.parquet
+PY
+```
+Also add the matched singular forms to `_DEFAULT_REFERENCE_CATS` so the fix is permanent and reproducible (not a one-off arg).
+
+- [ ] **Step 3: Re-run concordance** `.venv/bin/python scripts/cnv_concordance.py`; record the **new `hnscc_puram` AUROC/MCC** and the **new overall AUROC/MCC** (overall was 0.731). Paste both into PROGRESS.
+
+- [ ] **Step 4: Commit** `fix: repair hnscc_puram CNV reference categories (R1-2)`.
+
+- [ ] **Step 5-NoGo (only if Step 1 = NO-GO):** Drop `hnscc_puram` from the concordance table (9→8 datasets), recompute overall AUROC on the 8 datasets that have valid references, and rewrite the R1-2 text to state it as an explicit data-availability exclusion. Commit `docs: exclude hnscc_puram from CNV concordance (no reference cells available)`.
+
+## Task 4N.2: R3-5 → 100% — add a second Track F dataset and cut duplication
+
+**Why:** A single-dataset, 83%-duplicate Track F is the one result a strict Reviewer 3 can still reject. Closing this needs (a) ≥1 additional dataset, and (b) duplication driven below the generator's intended 20% cap.
+
+**Files:** `scripts/run_track_f.py`, `src/rarecellbenchmark/tracks/track_f_generator.py`.
+
+- [ ] **Step 1 (GO/NO-GO gate): Audit all 10 datasets for Track F eligibility.**
+```bash
+.venv/bin/python - <<'PY'
+import anndata as ad, glob, os
+for p in sorted(glob.glob('data/processed/*.h5ad')):
+    a = ad.read_h5ad(p); obs = a.obs
+    epi = obs.get('cell_type', '').astype(str).str.contains('pithel').sum()
+    has_origin = 'tissue_origin' in obs.columns
+    normal = (obs['tissue_origin'].astype(str).str.contains('ormal').sum() if has_origin else 0)
+    print(f"{os.path.basename(p):24s} epithelial={epi:6d} tissue_origin={has_origin} normal_cells={normal}")
+PY
+```
+**GO** if ≥1 dataset besides `crc_lee` has both epithelial cells and a normal-tissue background. **NO-GO** if none do → Step 2b (marker-based) → if that also fails, Step 5-NoGo.
+
+- [ ] **Step 2a: Add the qualifying dataset(s)** to `run_track_f.py --datasets crc_lee <new>`; build malignant/normal-epi masks the same way (`tissue_origin`-based).
+
+- [ ] **Step 2b (fallback if no second dataset has `tissue_origin`): marker-based normal epithelium.** Identify normal epithelial background as epithelial cells that are (i) `EPCAM+`, (ii) low CNV burden (bottom tercile of the Phase-1 `cnv_score`), and (iii) source-negative. Document the heuristic and its thresholds in the script docstring and FIGURE/MANUSCRIPT change docs. This is a *defined, reproducible* proxy — not a guess.
+
+- [ ] **Step 3: Reduce duplication** in `track_f_generator.py`: sample background **without replacement**, capping `unit_size` at the available unique-background pool (e.g. `unit_size = min(2000, n_unique_background / (1 - prevalence))`). Target dup fraction < 0.20 (the original design cap). If a dataset's pool is too small for 2000, emit smaller units and record the real N per unit.
+
+- [ ] **Step 4: Re-run Track F** for all 10 methods on the new/expanded units (CPU methods locally; DeepScena predictions already exist — re-run only if its units changed, else mark carried-over). Verify prediction integrity (length, no-NaN, cell_id match) as in Phase 4 Task 4.3 Step 4b.
+
+- [ ] **Step 5: Commit** `feat: Track F second dataset + without-replacement sampling (R3-5)`.
+
+- [ ] **Step 5-NoGo (only if Step 1 AND 2b fail):** Keep single-dataset Track F, but tighten the limitation text to state it is a **hard data-availability ceiling** (no other REACH dataset has normal-epithelial annotations even by markers), and report the duplication-reduction from Step 3 alone (smaller units, lower dup) as the partial improvement. Commit `docs: bound Track F single-dataset limitation as data ceiling`.
+
+## Downstream re-run cascade (which master-plan phases to re-run)
+
+Because both fixes change result files, the later phases must be **re-run, in this order** (this is the answer to "from which phase?" — **start at Phase 5**, plus the two targeted upstream sub-steps):
+
+| Trigger | Re-run | Why |
+|---|---|---|
+| 4N.1 (hnscc CNV) | **Phase 1 (hnscc only)** → **Phase 3.1** | new CNV parquet → new concordance/overall AUROC |
+| 4N.2 (Track F) | **Phase 4 evaluate** | new units/predictions |
+| both | **Phase 5.1 + 5.2** | rebuild `track_f_leaderboard.csv`, `track_a_vs_f_comparison.csv`, `REVISION_RESULTS_INDEX.md`, freeze new snapshot |
+| both | **Phase 6.2 + 6.3** | regenerate **Fig11** (now ≥2 datasets, lower dup) and Fig9 Track F panel + captions |
+| both | **Phase 7.1** | update R1-2 AUROC, R3-4/R3-5 numbers; soften/remove the single-dataset + 83%-duplicate caveats; update `RESPONSE_TO_REVIEWERS.md` |
+| both | **Phase 8 (all gates)** | pytest/ruff/mypy/smoke green + numbers-consistency (every cited file matches) |
+
+> Phases 0, 2, and 3.2 are **unaffected** and must NOT be re-run.
+
+**Phase 4-NEW exit criteria:**
+- R1-2: `hnscc_puram` CNV nonzero (or honest 8-dataset exclusion); new overall AUROC recorded in PROGRESS.
+- R3-5: Track F covers ≥2 datasets (or documented data-ceiling) AND duplication < 20% on at least the new units.
+- Phases 5→8 re-run; `REVISION_RESULTS_INDEX.md` and `RESPONSE_TO_REVIEWERS.md` reflect the new numbers; Phase 8 numbers-consistency = `MISSING SOURCE FILES: none`.
+
+---
+
 # PHASE 5 — Result consolidation
 
 ### Task 5.1: Track F leaderboard + A-vs-F comparison

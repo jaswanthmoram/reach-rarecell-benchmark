@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import pytest
 from anndata import AnnData
 from rarecellbenchmark.validate.tiers import rederive_hc_labels_no_cnv
 

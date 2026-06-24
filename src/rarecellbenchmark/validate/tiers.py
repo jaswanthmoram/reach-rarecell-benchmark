@@ -7,6 +7,7 @@ T1-T4 confidence tiers.
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 from typing import Optional
 
 import numpy as np
@@ -156,8 +157,8 @@ def assign_tiers(
             s = s[:-1]
         return s
 
-    normalized_pos = {normalize_label(l) for l in pos_labels}
-    normalized_bg = {normalize_label(l) for l in bg_labels}
+    normalized_pos = {normalize_label(lbl) for lbl in pos_labels}
+    normalized_bg = {normalize_label(lbl) for lbl in bg_labels}
 
     # Special fallbacks
     if dataset_id == "hnscc_puram":
@@ -332,8 +333,8 @@ def _extract_source(adata: AnnData) -> pd.Series:
             s = s[:-1]
         return s
         
-    normalized_pos = {normalize_label(l) for l in pos_labels}
-    normalized_bg = {normalize_label(l) for l in bg_labels}
+    normalized_pos = {normalize_label(lbl) for lbl in pos_labels}
+    normalized_bg = {normalize_label(lbl) for lbl in bg_labels}
     
     if dataset_id == "hnscc_puram":
         normalized_pos.add("0.0")

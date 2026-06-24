@@ -5,19 +5,30 @@ Thread(s) per core:                      2
 Socket(s):                               1
 ## MEM
                total        used        free      shared  buff/cache   available
-Mem:            62Gi       3.2Gi        46Gi       139Mi        14Gi        59Gi
+Mem:            62Gi       5.0Gi        46Gi       2.2Gi        14Gi        57Gi
 ## OS
 Linux instance-20260620-105708 6.12.90+deb13.1-cloud-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.12.90-2 (2026-05-27) x86_64 GNU/Linux
 PRETTY_NAME="Debian GNU/Linux 13 (trixie)"
 NAME="Debian GNU/Linux"
 ## GPU
-NO GPU DETECTED
+NO GPU DETECTED (CPU-only VM)
 ## PY
 Python 3.13.5
+## R
+R version 4.5.0 (2025-04-11) -- "How About a Twenty-Six"
+## R PACKAGES
+FiRE: TRUE 
+CellSIUS: TRUE 
+RareQ: TRUE 
+Seurat: TRUE 
 ## LIBS
 anndata==0.11.4
+infercnvpy==0.6.1
 numpy==2.4.6
 scanpy==1.12.1
 scikit-learn==1.9.0
 scipy==1.18.0
 torch==2.12.1
+torchvision==0.27.1
+## DEEPSCENA
+Ran on Google Colab T4 GPU (Tesla T4) via google-colab-cli. This VM has no GPU.
