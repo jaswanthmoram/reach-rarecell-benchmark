@@ -1,0 +1,29 @@
+=== TRACK A VS B LEADERBOARD RANK CORRELATION (SENS2) ===
+Rank Correlation (Spearman r): 0.042424
+P-value: 0.907364
+
+Rankings comparison:
+method_id,track_a_rank,track_b_rank
+hvg_logreg,1.0,1.0
+CaSee,2.0,6.0
+FiRE,3.0,7.0
+expr_threshold,4.0,9.0
+scMalignantFinder,5.0,10.0
+cellsius,6.0,3.0
+RareQ,7.0,2.0
+scCAD,8.0,4.0
+random_baseline,9.0,8.0
+DeepScena,10.0,5.0
+
+=== TRACK C NULL FALSE POSITIVE RATE (SENS3) ===
+method_id,mean_fp_rate
+CaSee,0.030080
+DeepScena,0.030583
+FiRE,0.031487
+RareQ,0.029328
+cellsius,0.029545
+expr_threshold,0.031000
+hvg_logreg,0.788341
+random_baseline,0.030884
+scCAD,0.030108
+scMalignantFinder,0.031486
