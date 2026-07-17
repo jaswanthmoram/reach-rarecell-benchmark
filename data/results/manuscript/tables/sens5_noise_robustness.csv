@@ -1,0 +1,5 @@
+method_id,noise_condition,ap
+hvg_logreg,asym_neg,0.5342051284694096
+hvg_logreg,asym_pos,0.8286731174421886
+hvg_logreg,noise10,0.48052210085339275
+hvg_logreg,noise20,0.4604345761500598

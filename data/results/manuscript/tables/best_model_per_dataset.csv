@@ -1,0 +1,9 @@
+dataset_id,best_overall_method,best_overall_ap,best_unsupervised_method,best_unsupervised_ap
+bcc_yost,hvg_logreg,1.0,CaSee,0.6079
+hnscc_puram,hvg_logreg,1.0,expr_threshold,0.7872
+pdac_peng,hvg_logreg,1.0,CaSee,0.4488
+rcc_multi,hvg_logreg,1.0,cellsius,0.1931
+crc_lee,hvg_logreg,0.9998,scMalignantFinder,0.8373
+luad_laughney,hvg_logreg,0.9983,CaSee,0.5378
+hcc_wei,hvg_logreg,0.9948,CaSee,0.4908
+ov_izar_tirosh,expr_threshold,0.5717,expr_threshold,0.5717

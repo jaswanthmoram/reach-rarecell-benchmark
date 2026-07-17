@@ -1,0 +1,11 @@
+method_id,max_rank_delta,mean_abs_rank_delta,n_datasets_left_out
+CaSee,0,0.0,8
+DeepScena,1,0.25,8
+FiRE,1,0.25,8
+RareQ,1,0.25,8
+cellsius,1,0.125,8
+expr_threshold,4,0.75,8
+hvg_logreg,0,0.0,8
+random_baseline,1,0.25,8
+scCAD,0,0.0,8
+scMalignantFinder,3,0.625,8
