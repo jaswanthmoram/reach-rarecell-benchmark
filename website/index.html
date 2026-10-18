@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b0d11" media="(prefers-color-scheme: dark)" />
+    <title>REACH Benchmark: Rare-cell Evaluation Across Cancer Heterogeneity</title>
+    <meta name="description" content="A reproducible benchmark of rare malignant cell detection in single-cell RNA-seq: 10 oncology cohorts, 6 evaluation tracks, 10 methods, 1,125 benchmark units. Frontiers in Bioinformatics, 2026." />
+    <meta property="og:title" content="REACH Benchmark" />
+    <meta property="og:description" content="Which methods actually find rare malignant cells in scRNA-seq? 10 cohorts · 6 tracks · 10 methods." />
+    <meta property="og:image" content="https://jaswanthmoram.github.io/reach-rarecell-benchmark/images/og.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet" />
+    <script>
+      // Set theme before paint to avoid a flash.
+      // Respect a theme the host already set (e.g. the artifact viewer), else stored choice, else OS.
+      try { const d = document.documentElement; const t = localStorage.getItem('reach-theme'); if (!d.dataset.theme || t) d.dataset.theme = t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); } catch { document.documentElement.dataset.theme = 'light'; }
+    </script>
+  </head>
+  <body class="bg-canvas text-ink">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
