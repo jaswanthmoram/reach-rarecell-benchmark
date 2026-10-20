@@ -119,7 +119,7 @@ function intraPicks(): Pick[] {
       `Track F AP ${trackFRange(s1.expectedAP)} on crc_lee (${fmt.ap(smf.trackF01AP)} at 0.1% prevalence).`,
     ],
     caveats: [
-      'Colorectal-specific: Track A AP 0.015 on hnscc_puram against 0.943 on crc_lee. The paper says it must not be generalized.',
+      'Colorectal-specific: Track A AP 0.015 on hnscc_puram against 0.943 on crc_lee. The paper says it must not be generalised.',
       'Proxy: REACH runs its own wrapper of the published model.',
     ],
   }];

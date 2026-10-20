@@ -1,15 +1,15 @@
 import { useSyncExternalStore } from 'react';
 
 // ponytail: hash routing: GitHub Pages has no SPA rewrite, so #/path avoids 404s on reload.
-// Order matters: the first five are the primary nav, the rest live in "More".
+// Order matters: the first six are the primary nav, the rest live in "More".
 export const ROUTES = [
   { path: '/', label: 'Overview', icon: 'house', desc: 'The question, the headline result and how the benchmark is built' },
   { path: '/leaderboard', label: 'Leaderboard', icon: 'ranking', desc: 'Six ranked published detectors by median Track A AP, with references' },
   { path: '/tracks', label: 'Tracks', icon: 'stack', desc: 'Six evaluation tracks, A to F, and how to read each one' },
   { path: '/datasets', label: 'Datasets', icon: 'database', desc: 'Ten oncology cohorts and the four-arm label evidence' },
   { path: '/methods', label: 'Methods', icon: 'flask', desc: 'Ten methods, the inclusion audit and cost against accuracy' },
+  { path: '/docs', label: 'Reproduce', icon: 'book-open-text', desc: 'Install, run one unit, reproduce the paper, add a method' },
   { path: '/figures', label: 'Figures', icon: 'images-square', desc: 'The six published figures, full size' },
-  { path: '/docs', label: 'Docs', icon: 'book-open-text', desc: 'Install, run one unit, reproduce the paper, add a method' },
   { path: '/cite', label: 'Cite', icon: 'quotes', desc: 'Citation formats, archives and licences' },
   { path: '/use-cases', label: 'Use cases', icon: 'users', desc: 'Five readers, the questions they bring and their route through the site' },
   { path: '/system', label: 'System', icon: 'squares-four', desc: 'Brand, tokens, components and the page rules behind this site' },

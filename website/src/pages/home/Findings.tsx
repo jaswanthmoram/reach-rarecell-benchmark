@@ -120,7 +120,7 @@ function RankShift({ focus }: { focus: string[] }) {
   return (
     <figure className="mt-8">
       <figcaption className="mb-3 font-mono text-[11px] leading-relaxed text-ink-2">
-        Within-unit rank, all {rows.length} methods (Figure 4b)
+        Within-unit rank, all {rows.length} methods (Figure 4b, Table 1b)
       </figcaption>
       <ul className="space-y-0.5">
         {rows.map(({ m, shift }) => {
@@ -203,7 +203,7 @@ function buildFindings(): Finding[] {
     n: '04', icon: 'dna', wide: true, figure: `${TRACK_F_COLLAPSED} of ${METHOD_COUNT}`,
     unit: <>methods at median AP ≤ {TRACK_F_LOW} · Track F, 0.1% tier</>,
     title: 'Remove lineage contrast and most detectors fail.',
-    body: <>Track F spikes malignant epithelium into normal epithelium. At 0.1% prevalence only scMalignantFinder holds up ({fmt.ap(SMF.trackF01AP)}, on crc_lee only, so not to be generalized); FiRE drops to {fmt.ap(FIRE.trackF01AP)}. Track A partly measures epithelial-vs-immune contrast.</>,
+    body: <>Track F spikes malignant epithelium into normal epithelium. At 0.1% prevalence only scMalignantFinder holds up ({fmt.ap(SMF.trackF01AP)}, on crc_lee only, so not to be generalised); FiRE drops to {fmt.ap(FIRE.trackF01AP)}. Track A partly measures epithelial-vs-immune contrast.</>,
     to: trackLink('F'), cta: 'Inspect Track F',
     viz: <DropLines rows={ORDERED.filter((m) => [FIRE, EXPLORATORY, CEILING, SMF].includes(m))} />,
   });

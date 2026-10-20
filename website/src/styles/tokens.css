@@ -173,6 +173,20 @@
 .loader-signal { animation: cell-found 1800ms var(--ease-out) infinite both; }
 .loader-ring { animation: ring-found 1800ms var(--ease-out) infinite both; }
 
+/* Header mark: every 6s the reticle swings in and locks on the signal cell, the neighbours dip in a wave
+   and the signal pulses on lock (transform/opacity only). Hover: the reticle tightens and turns toward the cell.
+   Reduced motion: the complete static mark (animation off, not shortened, so the reticle stays visible). */
+@keyframes mark-find { 0% { opacity: 0; transform: rotate(-70deg) scale(1.55); } 14% { opacity: 1; transform: rotate(0) scale(1); } 84% { opacity: 1; transform: rotate(0) scale(1); } 94%, 100% { opacity: 0; transform: rotate(0) scale(1); } }
+@keyframes mark-signal { 0%, 12%, 100% { transform: scale(1); } 17% { transform: scale(1.28); } 24% { transform: scale(1); } }
+@keyframes mark-cell { 0%, 100% { transform: scale(1); } 6% { transform: scale(0.62); } 14% { transform: scale(1); } }
+.mark-ring, .mark-signal, .mark-cell, .mark-ring-hover { transform-box: fill-box; transform-origin: center; }
+.mark-ring { animation: mark-find 6s var(--ease-out) infinite both; }
+.mark-signal { animation: mark-signal 6s var(--ease-out) infinite both; }
+.mark-cell { animation: mark-cell 6s var(--ease-out) infinite both; }
+.mark-ring-hover { transition: transform 240ms var(--ease-out); }
+@media (hover: hover) and (pointer: fine) { .mark-host:hover .mark-ring-hover { transform: rotate(40deg) scale(0.86); } }
+@media (prefers-reduced-motion: reduce) { .mark-ring, .mark-signal, .mark-cell { animation: none !important; } .mark-ring-hover { transition: none; } }
+
 /* Skeleton shimmer: a translucent band slides across (transform only). */
 @keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
 .skeleton { position: relative; overflow: hidden; background: var(--surface-sunk); }

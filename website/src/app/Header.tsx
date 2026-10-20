@@ -5,8 +5,8 @@ import { ROUTES, href, type Route } from './router';
 import { MOD_KEY, openCommandPalette, toggleTheme, useTheme } from './theme';
 
 const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(' ');
-const PRIMARY = ROUTES.slice(0, 5);
-const MORE = ROUTES.slice(5);
+const PRIMARY = ROUTES.slice(0, 6);
+const MORE = ROUTES.slice(6);
 const GITHUB_URL = GLOBAL_STATS.githubUrl;
 
 function ThemeToggle({ withLabel }: { withLabel?: boolean }) {
@@ -109,7 +109,7 @@ function useIndicator(route: Route, moreActive: boolean) {
     const key = moreActive ? 'more' : route;
     const el = nav.querySelector<HTMLElement>(`[data-nav="${key}"]`);
     if (!el) { setBox(null); return; }
-    const pad = 10;
+    const pad = parseFloat(getComputedStyle(el).paddingLeft) || 10;
     setBox((b) => ({ x: el.offsetLeft + pad, w: el.offsetWidth - pad * 2, ready: b !== null }));
   }, [route, moreActive]);
   useLayoutEffect(() => { measure(); }, [measure]);
@@ -174,7 +174,7 @@ function MobileSheet({ route, onClose, openerRef }: { route: Route; onClose: () 
           className="mb-5 flex h-11 items-center gap-2.5 rounded-card border border-line bg-surface px-3 text-left text-sm text-ink-3">
           <Icon name="magnifying-glass" size={16} /> Search pages, methods, cohorts
         </button>
-        <p className="label mb-1">Results</p>
+        <p className="label mb-1">Main</p>
         <ul className="mb-6">{PRIMARY.map(row)}</ul>
         <p className="label mb-1">More</p>
         <ul>{MORE.map(row)}</ul>
@@ -215,17 +215,17 @@ export function Header({ route }: { route: Route }) {
     return () => document.removeEventListener('pointerdown', onDown);
   }, [moreOpen, navRef]);
 
-  const linkCls = (on: boolean) => cx('relative flex h-14 items-center px-2.5 text-sm transition-colors duration-150',
+  const linkCls = (on: boolean) => cx('relative flex h-14 items-center px-1.5 text-sm transition-colors duration-150 lg:px-2.5',
     on ? 'text-ink' : 'text-ink-2 hover:text-ink');
 
   return (
     <header className="sticky top-0 z-40">
-      {/* Scroll state: the hairline and blur fade in after 8px (opacity only). */}
-      <div aria-hidden="true" className={cx('absolute inset-0 -z-10 border-b border-line bg-canvas/80 backdrop-blur-md transition-opacity duration-300', scrolled ? 'opacity-100' : 'opacity-0')} />
-      <Container className="flex h-14 items-center gap-4 lg:gap-7">
-        <span className="flex lg:hidden"><Lockup size={22} link descriptor={false} /></span>
-        <span className="hidden lg:flex"><Lockup size={22} link /></span>
-        <nav aria-label="Main" className="relative hidden h-14 flex-1 items-center md:flex" ref={navRef}>
+      {/* Scroll state: the blur fades in after 8px (opacity only); no hairline. */}
+      <div aria-hidden="true" className={cx('absolute inset-0 -z-10 bg-canvas/80 backdrop-blur-md transition-opacity duration-300', scrolled ? 'opacity-100' : 'opacity-0')} />
+      <div className="flex h-14 w-full items-center gap-3 px-4 sm:px-6 lg:gap-7 lg:px-8">
+        <span className="flex lg:hidden"><Lockup size={24} link descriptor={false} animated /></span>
+        <span className="hidden lg:flex"><Lockup size={26} link animated /></span>
+        <nav aria-label="Main" className="relative hidden h-14 flex-1 items-center justify-center md:flex" ref={navRef}>
           {PRIMARY.map((r) => (
             <a key={r.path} data-nav={r.path} href={href(r.path)} aria-current={route === r.path ? 'page' : undefined} className={linkCls(route === r.path)}>
               <span className="rounded-chip px-0 py-1">{r.label}</span>
@@ -257,7 +257,7 @@ export function Header({ route }: { route: Route }) {
             <Icon name="list" size={20} />
           </button>
         </div>
-      </Container>
+      </div>
       {sheet && <MobileSheet route={route} onClose={closeSheet} openerRef={openBtn} />}
     </header>
   );

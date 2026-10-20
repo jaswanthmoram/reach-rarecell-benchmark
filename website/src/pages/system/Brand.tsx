@@ -18,8 +18,8 @@ function Dont({ label, children }: { label: string; children: React.ReactNode })
 export function Brand() {
   return (
     <SysSection id="brand" title="Brand"
-      lead="The mark is the benchmark’s question drawn as a plate: a grid of graphite cells and one signal cell, found by an open cobalt reticle. Cells fade with distance from the found cell, so the eye lands there first.">
-      <Sub title="Mark at every size" note="Below 28px the grid drops from 4×4 to 3×3 so cells stay distinct">
+      lead="The mark is the benchmark’s question drawn as a plate: eight graphite cells around one signal cell, found by an open cobalt reticle. Edge cells read darker than the corners, so the eye lands in the middle.">
+      <Sub title="Mark at every size" note="One 3×3 geometry at every size; cells stay distinct down to 16px">
         <div className="grid gap-3 sm:grid-cols-2">
           {(['light', 'dark'] as const).map((t) => (
             <div key={t} data-theme={t} className="rounded-card border border-line bg-canvas p-5">
@@ -37,7 +37,7 @@ export function Brand() {
         </div>
       </Sub>
 
-      <Sub title="Lockup" note="Mark + Geist 600 wordmark (+1.2% tracking) + Geist Mono descriptor after a hairline">
+      <Sub title="Lockup" note="Mark + Geist 600 wordmark (+1.2% tracking) + Geist Mono descriptor">
         <ThemePair>{() => <Lockup size={32} />}</ThemePair>
         <div className="mt-3 grid gap-3 sm:grid-cols-3">
           <Well dense label="nav, 22px"><Lockup size={22} /></Well>
@@ -45,7 +45,7 @@ export function Brand() {
           <Well dense label="wordmark detail"><Wordmark size={44} /></Well>
         </div>
         <p className="mt-3 max-w-[66ch] text-sm leading-relaxed text-ink-2">
-          The found cell sits in the counter of the C, the one open letter in the name: the mark’s idea at type size.
+          The wordmark stays plain: the found cell lives in the mark only, so it never reads as a stray dot in the name.
           It is the only place the signal colour touches type.
         </p>
       </Sub>
@@ -84,7 +84,7 @@ export function Brand() {
       <Sub title="Use">
         <Usage>{`import { Mark, Lockup, Wordmark } from '../ui';
 <Lockup size={22} link />            // nav: mark + wordmark + descriptor, links home
-<Mark size={16} />                   // inline, footer, favicon (3×3 grid)
+<Mark size={16} />                   // inline, footer, favicon (same 3×3 plate)
 <Mark size={40} found={false} />     // empty and not-found states: no cell found
 <Mark size={32} animated />          // what <Loader> renders`}</Usage>
         <p className="mt-3 text-sm text-ink-2">Favicon: <code className="font-mono text-[13px] text-ink">public/favicon.svg</code>, the 3×3 mark with its own light and dark fills.</p>
