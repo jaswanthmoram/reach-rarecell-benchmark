@@ -4,7 +4,7 @@ import type { IconName } from '../ui/Icon';
 import { ROUTES, navigate } from './router';
 import { toggleTheme } from './theme';
 
-export type CommandGroup = 'Pages' | 'Tracks' | 'Methods' | 'Cohorts' | 'Docs' | 'Actions';
+export type CommandGroup = 'Pages' | 'Tracks' | 'Methods' | 'Cohorts' | 'Reproduce' | 'Actions';
 export interface Command {
   id: string;
   group: CommandGroup;
@@ -47,7 +47,7 @@ export const COMMANDS: Command[] = [
     keywords: `${d.tissueCategory} ${d.platform}`, cohort: d.id, run: () => navigate('/datasets'),
   })),
   ...DOC_ENTRIES.map((e): Command => ({
-    id: `doc:${e.id}`, group: 'Docs', label: e.title, desc: e.subs.map((s) => s.title).join(' · '),
+    id: `doc:${e.id}`, group: 'Reproduce', label: e.title, desc: e.subs.map((s) => s.title).join(' · '),
     icon: e.icon as IconName, run: () => navigate('/docs', { anchor: e.id }),
   })),
   { id: 'act:theme', group: 'Actions', label: 'Toggle light and dark theme', desc: 'Switch the colour theme for this site', keywords: 'dark mode light mode appearance', icon: 'moon', run: () => toggleTheme() },
@@ -76,4 +76,4 @@ export function score(c: Command, query: string): number {
   return total + (c.group === 'Pages' ? 0.5 : 0);
 }
 
-export const GROUP_ORDER: CommandGroup[] = ['Pages', 'Methods', 'Tracks', 'Cohorts', 'Docs', 'Actions'];
+export const GROUP_ORDER: CommandGroup[] = ['Pages', 'Methods', 'Tracks', 'Cohorts', 'Reproduce', 'Actions'];

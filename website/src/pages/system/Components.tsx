@@ -121,7 +121,7 @@ export function Components() {
         <Spec id="button" name="Button" use="Ink fill for the one primary action in a view, hairline secondary for the rest, ghost inside toolbars. An href renders a link."
           states="default · hover · focus-visible ring · active (1px press) · disabled"
           usage={`<Button icon="download-simple">Download CSV</Button>
-<Button variant="secondary" size="sm" href={href('/docs')} iconRight="arrow-right">Docs</Button>
+<Button variant="secondary" size="sm" href={href('/docs')} iconRight="arrow-right">Reproduce</Button>
 <Button disabled>Unavailable</Button>`}>
           <Well>
             <Button icon="download-simple">Download CSV</Button>

@@ -13,7 +13,7 @@ const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).jo
 export function Loader({ size = 32, label = 'Loading', showLabel, className }: { size?: number; label?: string; showLabel?: boolean; className?: string }) {
   return (
     <span role="status" className={cx('inline-flex items-center gap-3', className)}>
-      <Mark size={size} animated variant={size >= 24 ? 'full' : 'compact'} />
+      <Mark size={size} animated />
       {showLabel ? <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-3">{label}</span> : <span className="sr-only">{label}</span>}
     </span>
   );
@@ -139,7 +139,7 @@ export function ErrorState({ title = 'This part of the page did not load', child
           {onRetry && (
             <button type="button" onClick={retry} disabled={busy} aria-busy={busy}
               className="inline-flex h-10 items-center gap-2 rounded-chip bg-ink px-4 text-sm font-medium text-canvas transition-[background,transform] duration-150 hover:bg-ink/85 active:translate-y-px disabled:cursor-progress disabled:bg-ink/60">
-              {busy ? <><Mark size={16} animated variant="compact" /><span>Retrying</span></> : retryLabel}
+              {busy ? <><Mark size={16} animated /><span>Retrying</span></> : retryLabel}
             </button>
           )}
           {action}

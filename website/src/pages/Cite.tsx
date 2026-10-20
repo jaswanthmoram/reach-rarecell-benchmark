@@ -61,7 +61,7 @@ function DoiCard() {
         {!G.doiConfirmed && <Badge>Pending</Badge>}
       </div>
       <p className="mt-2 font-mono text-[15px] text-ink [overflow-wrap:normal]"><BreakAtSlash text={G.doi} /></p>
-      {!G.doiConfirmed && <p className="mt-1.5 text-xs leading-relaxed text-ink-2">Reserved by the journal. It resolves once Crossref registers it.</p>}
+      {!G.doiConfirmed && <p className="mt-1.5 text-xs leading-relaxed text-ink-2">Expected from the Frontiers DOI pattern; the proof prints no DOI yet. It resolves once Crossref registers it.</p>}
       <div className="-ml-2 mt-2"><CopyButton text={G.doi} label="Copy DOI" toast={`DOI ${G.doi} copied`} /></div>
     </div>
   );

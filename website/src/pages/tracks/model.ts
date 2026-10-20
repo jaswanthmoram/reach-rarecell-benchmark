@@ -126,7 +126,7 @@ export const TOP: Partial<Record<string, { label: string; items: Performer[]; no
   F: {
     label: 'Track F, 0.1% prevalence',
     items: [{ id: 'scMalignantFinder', value: fmt.ap(M.scMalignantFinder.trackF01AP), note: 'median AP' }],
-    note: 'A colorectal-specific result on one cohort. The paper says it must not be generalized.',
+    note: 'A colorectal-specific result on one cohort. The paper says it must not be generalised.',
   },
 };
 

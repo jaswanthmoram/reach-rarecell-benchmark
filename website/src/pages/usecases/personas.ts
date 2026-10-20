@@ -54,11 +54,11 @@ const D = {
   figures: { path: '/figures', label: 'Figures' },
   overview: { path: '/', label: 'Overview' },
   cite: { path: '/cite', label: 'Cite' },
-  install: { path: '/docs', anchor: 'install', label: 'Docs · Install' },
-  quickstart: { path: '/docs', anchor: 'quickstart', label: 'Docs · Quickstart' },
-  reproduce: { path: '/docs', anchor: 'reproduce', label: 'Docs · Reproduce' },
-  addMethod: { path: '/docs', anchor: 'add-method', label: 'Docs · Add a method' },
-  data: { path: '/docs', anchor: 'data', label: 'Docs · Data and archives' },
+  install: { path: '/docs', anchor: 'install', label: 'Reproduce · Install' },
+  quickstart: { path: '/docs', anchor: 'quickstart', label: 'Reproduce · Quickstart' },
+  reproduce: { path: '/docs', anchor: 'reproduce', label: 'Reproduce · The paper' },
+  addMethod: { path: '/docs', anchor: 'add-method', label: 'Reproduce · Add a method' },
+  data: { path: '/docs', anchor: 'data', label: 'Reproduce · Data and archives' },
 } satisfies Record<string, Dest>;
 
 const intraLineage = scenario('intra-lineage');
@@ -204,7 +204,7 @@ export const PERSONAS: Persona[] = [
 export const PAGE_COLUMNS: { path: RoutePath; label: string }[] = [
   { path: '/', label: 'Overview' }, { path: '/leaderboard', label: 'Leaderboard' }, { path: '/tracks', label: 'Tracks' },
   { path: '/datasets', label: 'Datasets' }, { path: '/methods', label: 'Methods' }, { path: '/figures', label: 'Figures' },
-  { path: '/docs', label: 'Docs' }, { path: '/cite', label: 'Cite' },
+  { path: '/docs', label: 'Reproduce' }, { path: '/cite', label: 'Cite' },
 ];
 export const KEY_PAGE: Record<string, RoutePath> = { analyst: '/tracks', developer: '/docs', reviewer: '/leaderboard', lead: '/tracks', student: '/docs' };
 /** Pages that answer at least one reader, in site order (the hero's journey destinations). */

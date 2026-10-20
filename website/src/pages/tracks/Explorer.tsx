@@ -81,7 +81,7 @@ function visualFor(l: string): Visual {
       body: <GroupedDotRows label="Track A median AP per method" value={(m) => m.medianAP} text={(m) => fmt.ap(m.medianAP)} domain={[0, 0.6]} />,
     };
     case 'B': return {
-      icon: 'flow-arrow', title: 'Within-unit rank, all 10 methods (Figure 4b)',
+      icon: 'flow-arrow', title: 'Within-unit rank, all 10 methods (Figure 4b, Table 1b)',
       caption: 'Mean within-unit rank (1 = best), Track A real spike-ins against Track B Splatter units. The repository records no Track B AP per method, so ranks are the published view. Hover a line to isolate it.',
       body: <SlopeChart />,
     };
