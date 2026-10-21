@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import traceback
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import typer
 
@@ -235,7 +235,58 @@ def run_track(
 
     output_dir = output_dir or REPO_ROOT / "data" / "tracks" / track
     output_dir.mkdir(parents=True, exist_ok=True)
-    config = {"global_seed": 42, "n_replicates": 5}
+    
+    import pandas as pd
+    config: dict[str, Any] = {"base_seed": 42, "n_replicates": 5}
+    dataset_id = dataset or processed_h5ad.stem
+
+    if generator_key in ("A", "C", "E", "F"):
+        val_path = REPO_ROOT / "data" / "validation" / f"{dataset_id}_tier_assignments.parquet"
+        if val_path.exists():
+            config["tier_assignments"] = pd.read_parquet(val_path)
+        else:
+            typer.echo(
+                f"Warning: Tier assignments not found for dataset '{dataset_id}' at {val_path}. "
+                f"Proceeding without tier assignments — generator may use defaults.",
+                err=True,
+            )
+
+    if generator_key == "D":
+        config["ctc_mask"] = "ctc"
+        try:
+            import anndata as ad
+            ad_tmp = ad.read_h5ad(processed_h5ad, backed="r")
+            obs_cols = list(ad_tmp.obs.columns)
+            ad_tmp.file.close()
+            for col in ("ctc", "is_ctc", "ctc_label", "cell_type"):
+                if col in obs_cols:
+                    config["ctc_mask"] = col
+                    break
+        except Exception:
+            pass
+
+    if generator_key == "E":
+        config["track_a_dir"] = str(output_dir.parent / "a")
+
+    if generator_key == "F":
+        config["malignant_mask"] = "malignant"
+        config["normal_epi_mask"] = "normal_epithelial"
+        try:
+            import anndata as ad
+            ad_tmp = ad.read_h5ad(processed_h5ad, backed="r")
+            obs_cols = list(ad_tmp.obs.columns)
+            ad_tmp.file.close()
+            for col in ("malignant", "is_malignant", "malignant_label"):
+                if col in obs_cols:
+                    config["malignant_mask"] = col
+                    break
+            for col in ("normal_epithelial", "normal_epi", "is_normal_epi"):
+                if col in obs_cols:
+                    config["normal_epi_mask"] = col
+                    break
+        except Exception:
+            pass
+
     generator = gen_cls()
     units = generator.generate(dataset or "unknown", processed_h5ad, output_dir, config)
     typer.echo(f"Track {track.upper()}: generated {len(units)} unit(s)")
@@ -353,13 +404,17 @@ def evaluate(
 
     # Collect predictions from directory
     pred_files = sorted(predictions_dir.rglob("*_predictions.csv"))
+    if track.lower() == "f":
+        # Track F uses a specific naming convention with _track_f_ in the filename
+        track_suffix = "_track_f_"
+        pred_files = [path for path in pred_files if track_suffix in path.name]
     if method is not None:
         pred_files = [
             path for path in pred_files
             if path.parent.name == method or path.stem.startswith(f"{method}_")
         ]
     if not pred_files:
-        typer.echo(f"Error: no prediction files found in {predictions_dir}", err=True)
+        typer.echo(f"Error: no prediction files found in {predictions_dir} for track {track.upper()}", err=True)
         raise typer.Exit(1)
 
     typer.echo(f"Found {len(pred_files)} prediction file(s)")

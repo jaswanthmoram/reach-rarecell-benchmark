@@ -1,0 +1,63 @@
+/* Datasets page: hero loops and press/hover details. Transform and opacity only, on a handful of wrapper layers (one
+ * spin per well, one touring ring, three far-field layers); the dots themselves are static SVG paths.
+ * The hero section carries useLoopGate's data-loop, so every loop holds off screen, in a hidden tab and under Pause motion
+ * (app.css). Entrances use the shared .rise / Reveal kit. */
+@keyframes ds-spin { to { transform: rotate(360deg); } }
+@keyframes ds-found { 0% { opacity: 0; transform: scale(2.4); } 55% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1); } }
+@keyframes ds-hold { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.55; transform: scale(1.25); } }
+@keyframes ds-drift { from { transform: translateX(0); } to { transform: translateX(64px); } }
+
+.ds-spin { animation: ds-spin 90s linear infinite; }
+.ds-spin-fast { animation: ds-spin 28s linear infinite; }
+/* The ring tours the wells (SpecimenHero useRingTour): one finite run each time a well gets data-found. */
+.ds-ring { opacity: 0; }
+.ds-ring[data-found] { animation: ds-found 1.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.ds-ring-hot { animation: ds-hold 1.6s ease-in-out infinite; }
+/* The hero's loop gate holds every animation inside the section (app.css). The A/B slot badge is a one-shot entrance,
+ * so it must still play while held (Pause motion), or it stays at its first frame: invisible. */
+[data-loop="hold"] .pop-in { animation-play-state: running !important; }
+.ds-far { animation: ds-drift 18s ease-in-out infinite alternate; }
+.ds-well { border-color: var(--line-strong); transition: border-color var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out); }
+/* Plate cells: a colour layer cut by the well's dot mask (plate.ts), one rule per state on the well. */
+.ds-mask { position: absolute; inset: 0; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+.ds-dots { background: var(--ink-3); opacity: 0.8; }
+.ds-sig-dots { background: var(--signal); }
+.ds-far-dots { background: var(--cell); }
+.ds-well[data-lit] .ds-dots { background: var(--ink); }
+.ds-well[data-dim] .ds-dots { opacity: 0.35; }
+.ds-chev { transition: transform var(--dur-1) var(--ease-out); }
+[aria-expanded="true"] > .ds-chev { transform: rotate(180deg); }
+
+/* The far-field dots fade out behind the text column. */
+.ds-veil { background: linear-gradient(90deg, var(--canvas) 0%, rgb(250 250 250 / 0.88) 38%, rgb(250 250 250 / 0) 70%); }
+@media (max-width: 1023px) { .ds-veil { background: linear-gradient(180deg, var(--canvas) 0%, rgb(250 250 250 / 0.9) 45%, rgb(250 250 250 / 0.6) 100%); } }
+
+/* Press: a 1px settle, no scale. */
+.ds-press:active { transform: translateY(1px); }
+
+@media (hover: hover) and (pointer: fine) {
+  .ds-well-btn:hover .ds-well { border-color: var(--cell); transform: scale(1.04); }
+  .ds-nudge svg { transition: transform var(--dur-1) var(--ease-out); }
+  .ds-nudge:hover svg { transform: translateX(2px); }
+}
+/* Lit (hovered, focused or picked) overrides plain hover, as the inline style used to. */
+.ds-well-btn .ds-well[data-lit] { border-color: var(--accent); transform: scale(1.04); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-spin, .ds-spin-fast, .ds-ring, .ds-ring-hot, .ds-far { animation: none !important; }
+  .ds-ring { opacity: 0; }
+  .ds-well, .ds-chev { transition: none; }
+  .ds-press:active { transform: none; }
+}
+
+/* Compare bars grow from their origin when a pair appears; the inline scaleX is the final value. */
+@keyframes ds-grow { from { transform: scaleX(0); } }
+.ds-grow { animation: ds-grow var(--dur-4) var(--ease-out) backwards; }
+@media (prefers-reduced-motion: reduce) { .ds-grow { animation: none; } }
+
+/* r9: the lead evidence arm keeps a cobalt hairline at rest and on hover (beats .fx-card's own border colours). */
+.ds-lead.fx-card { border-color: rgb(47 91 234 / 0.4); }
+@media (hover: hover) and (pointer: fine) { .ds-lead.fx-card:hover { border-color: rgb(47 91 234 / 0.6); } }
+
+/* r9: the compare placeholder draws the grid to come as dotted cells, at the same height as the filled view. */
+.ds-ghost { display: block; border: 1px dashed var(--line-strong); border-radius: 3px; background: rgb(255 255 255 / 0.6); }

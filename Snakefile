@@ -33,6 +33,10 @@ PHASE12_FIGURES = [
     f"{PHASE12_DIR}/Fig5_TrackC_Null_Calibration.png",
     f"{PHASE12_DIR}/Fig6_Runtime_Scalability_Pareto.png",
     f"{PHASE12_DIR}/Fig7_Rank_Bootstrap_Forest.png",
+    f"{PHASE12_DIR}/Fig8_REACH_Pipeline_Overview.png",
+    f"{PHASE12_DIR}/Fig9_Track_Design.png",
+    f"{PHASE12_DIR}/Fig10_Method_QC_Audit.png",
+    f"{PHASE12_DIR}/Fig11_Track_F_vs_Track_A.png",
 ]
 
 
@@ -59,9 +63,18 @@ rule public_phase12:
         SNAPSHOTS,
         f"{PHASE11_DIR}/leaderboard.csv",
     output:
-        PHASE12_FIGURES,
+        [f for f in PHASE12_FIGURES if "Fig11_" not in f],
     shell:
         "python scripts/reproduce_from_snapshots.py"
+
+
+rule public_fig11:
+    input:
+        "data/results/track_f/track_a_vs_f_comparison.csv",
+    output:
+        f"{PHASE12_DIR}/Fig11_Track_F_vs_Track_A.png",
+    shell:
+        "python scripts/generate_track_f_figure.py --comparison {input} --output {output}"
 
 
 rule toy_data:

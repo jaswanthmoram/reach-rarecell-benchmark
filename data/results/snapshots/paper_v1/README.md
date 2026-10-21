@@ -2,7 +2,7 @@
 
 The `results_snapshots/` folder in the original workspace contained:
 
-- `all_metrics.parquet` - 11,100 rows × 27 columns (unit-level metrics)
+- `all_metrics.parquet` - 11,250 rows × 27 columns (unit-level metrics)
 - `results_per_unit.csv`
 - `results_per_method.csv`
 - `results_per_dataset.csv`

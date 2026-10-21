@@ -88,3 +88,25 @@ def critical_difference_ranks(method_ap_matrix: pd.DataFrame) -> pd.Series:
     ranks = method_ap_matrix.rank(axis=1, ascending=False, method="average")
     avg_ranks = ranks.mean(axis=0).sort_values()
     return avg_ranks
+
+
+def cliff_delta(a: np.ndarray | pd.Series, b: np.ndarray | pd.Series) -> float:
+    """Compute Cliff's delta effect size between two arrays.
+
+    Formula: (sum(sign(a[i] - b[j]))) / (n * m)
+    It ranges from -1 (all b > a) to 1 (all a > b).
+    """
+    a = np.asarray(a)
+    b = np.asarray(b)
+    # Remove NaNs
+    a = a[np.isfinite(a)]
+    b = b[np.isfinite(b)]
+    n = len(a)
+    m = len(b)
+    if n == 0 or m == 0:
+        return 0.0
+    
+    diffs = a[:, None] - b[None, :]
+    signs = np.sign(diffs)
+    return float(np.sum(signs) / (n * m))
+

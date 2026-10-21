@@ -47,7 +47,7 @@ def plot_pipeline(out_path: Path) -> None:
     ax.text(50, 96.5, "REACH benchmark pipeline",
             ha="center", va="center", fontsize=15, fontweight="bold", color=neutral)
     ax.text(50, 92.5,
-            "10 datasets  •  5 tracks  •  10 methods  •  1,110 units  •  11,100 evaluations",
+            "10 datasets  •  6 tracks  •  10 methods  •  1,125 units  •  11,250 evaluations",
             ha="center", va="center", fontsize=10, color="#475569")
 
     # Row 1: Datasets
@@ -75,17 +75,18 @@ def plot_pipeline(out_path: Path) -> None:
     _box(60, 47.6, 26, 4.5, "B_HC  /  B_MC  /  B_LC", "#f5f3ff", fontsize=8.7)
     _arrow(50, 47.4, 50, 42.5)
 
-    # Row 4: Five tracks
+    # Row 4: Six tracks
     track_y = 32
     track_h = 8.5
     tracks = [
         ("Track A\nReal spike-in\n160 units",   3,  bg["track_a"]),
-        ("Track B\nSplatter stress\n120 units", 22, bg["track_b"]),
-        ("Track C\nNull controls\n160 units",   41, bg["track_c"]),
-        ("Track D\nNatural blood/CTC\n30 units", 60, bg["track_d"]),
-        ("Track E\nLabel noise\n640 units",     79, bg["track_e"]),
+        ("Track B\nSplatter stress\n120 units", 19, bg["track_b"]),
+        ("Track C\nNull controls\n160 units",   35, bg["track_c"]),
+        ("Track D\nNatural blood/CTC\n30 units", 51, bg["track_d"]),
+        ("Track E\nLabel noise\n640 units",     67, bg["track_e"]),
+        ("Track F\nIntra-lineage\n15 units",    83, bg["track_f"]),
     ]
-    track_w = 18
+    track_w = 15
     for label, x, fc in tracks:
         _box(x, track_y, track_w, track_h, label, fc,
              fontsize=8.7, fontweight="bold", radius=0.20)
@@ -104,7 +105,7 @@ def plot_pipeline(out_path: Path) -> None:
 
     # Row 6: outputs
     _box(4, 2.5, 30, 6,
-         "Predictions\n(11,100 evaluations)\nFallback / degenerate flags",
+         "Predictions\n(11,250 evaluations)\nFallback / degenerate flags",
          bg["predictions"], fontsize=8.8, radius=0.18)
     _box(36, 2.5, 28, 6,
          "Metrics & statistics\nAP / nAP / AUROC / MCC@k\nFriedman, Wilcoxon, bootstrap",

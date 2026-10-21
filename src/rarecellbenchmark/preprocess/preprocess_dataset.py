@@ -115,8 +115,12 @@ def _load_10x_mtx(raw_dir: Path) -> AnnData:
             continue
         try:
             with tarfile.open(archive) as tf:
-                tf.extractall(str(target_dir))
-        except Exception:
+                if hasattr(tarfile, "data_filter"):
+                    tf.extractall(str(target_dir), filter="data")
+                else:
+                    tf.extractall(str(target_dir))
+        except (tarfile.TarError, OSError) as exc:
+            logger.warning("Failed to extract %s: %s", archive, exc)
             continue
 
     mtx_files: list[Path] = []

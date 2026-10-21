@@ -61,11 +61,11 @@ class TrackAGenerator(BaseTrackGenerator):
         target_n_total = config.get("target_n_total", 2000)
 
         positive_mask = pd.Series(
-            tier_assignments["tier"].isin(["P_HC"]).values,
+            tier_assignments["tier"].isin(["T1", "P_HC"]).values,
             index=tier_assignments.index if hasattr(tier_assignments, "index") else adata.obs.index,
         )
         background_mask = pd.Series(
-            tier_assignments["tier"].isin(["B_HC"]).values,
+            tier_assignments["tier"].isin(["T4", "B_HC"]).values,
             index=tier_assignments.index if hasattr(tier_assignments, "index") else adata.obs.index,
         )
 
@@ -202,6 +202,25 @@ class TrackAGenerator(BaseTrackGenerator):
         for col in ["true_label", "is_positive", "label", "cell_origin", "source_annotation"]:
             if col in unit_adata.obs.columns:
                 del unit_adata.obs[col]
+
+        unit_adata.obs.index = unit_adata.obs.index.astype(object)
+        unit_adata.var.index = unit_adata.var.index.astype(object)
+
+        for col in unit_adata.obs.columns:
+            if isinstance(unit_adata.obs[col].dtype, pd.CategoricalDtype):
+                unit_adata.obs[col] = unit_adata.obs[col].cat.rename_categories(
+                    unit_adata.obs[col].cat.categories.astype(object)
+                )
+            elif not pd.api.types.is_numeric_dtype(unit_adata.obs[col]):
+                unit_adata.obs[col] = unit_adata.obs[col].astype(object)
+
+        for col in unit_adata.var.columns:
+            if isinstance(unit_adata.var[col].dtype, pd.CategoricalDtype):
+                unit_adata.var[col] = unit_adata.var[col].cat.rename_categories(
+                    unit_adata.var[col].cat.categories.astype(object)
+                )
+            elif not pd.api.types.is_numeric_dtype(unit_adata.var[col]):
+                unit_adata.var[col] = unit_adata.var[col].astype(object)
 
         labels_path = out_dir / f"{unit_id}_labels.parquet"
         true_labels.to_frame("true_label").to_parquet(labels_path)

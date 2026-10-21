@@ -46,7 +46,11 @@ def score_signatures(
             return pd.DataFrame(index=adata.obs.index)
         with open(sig_path, "r", encoding="utf-8") as fh:
             raw = yaml.safe_load(fh)
-        sig_list = raw.get("signatures", []) if isinstance(raw, dict) else []
+        raw_sig = raw.get("signatures", []) if isinstance(raw, dict) else []
+        if isinstance(raw_sig, dict):
+            sig_list = [{"name": k, "genes": v.get("genes", [])} for k, v in raw_sig.items()]
+        else:
+            sig_list = raw_sig
     else:
         sig_list = signatures
 

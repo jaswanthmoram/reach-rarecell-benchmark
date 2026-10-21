@@ -14,7 +14,7 @@ REACH is a systematic, reproducible evaluation framework for computational metho
 
 - **Datasets:** 10 curated scRNA-seq datasets spanning 8 solid-tumour types and 2 blood/hematological malignancies.
 - **Methods evaluated:** 10 included methods (6 ranked published detectors, 2 naive baselines, 1 supervised ceiling, 1 exploratory faithful method). Seven additional selected methods were excluded after output-quality control and are documented separately.
-- **Benchmark units:** 1,110 total units across 5 tracks (A-E), producing 11,100 method-unit evaluations.
+- **Benchmark units:** 1,125 total units across 6 tracks (A-E), producing 11,250 method-unit evaluations.
 - **Primary endpoint:** Median Average Precision (AP) on Track A, computed on high-confidence positive (P_HC) versus high-confidence background (B_HC) cells.
 
 ### Design Principles
@@ -268,7 +268,7 @@ Results (CSV)
 - **Strategy:** Resource-aware batching - naive baselines first, then fast Python methods, then R-based methods, then GPU-heavy methods (never simultaneously), then exploratory methods.
 - **Failure handling:** Failed runs produce failure JSONs. Successful runs are never overwritten (`skip_existing=True`).
 - **Outputs:** `results/<method_id>/<unit_id>/predictions.csv` + `runmeta.json`.
-- **Scale:** 10 methods × 1,110 units = 11,100 prediction jobs.
+- **Scale:** 10 methods × 1,125 units = 11,250 prediction jobs.
 
 ### Phase 11 - Evaluation and Statistics
 - **Purpose:** Compute metrics, aggregate leaderboards, run statistical tests, and generate sensitivity analyses.
@@ -449,7 +449,7 @@ Label corruption while expression is held constant. Valid only for supervised me
 - **Uniform input contract:** Every method receives the same blind `expression.h5ad` file with ground-truth labels stripped. `load_blind_adata()` raises an error if labels are accidentally present.
 - **No modality mixing:** All methods operate on gene expression (log-normalised counts). CNV-based methods (CopyKAT, Numbat) are acknowledged but excluded because they access a fundamentally different data layer.
 - **Supervised ceiling excluded from ranking:** `hvg_logreg` sees labels but is not a competitor — it calibrates the upper bound of what is learnable from expression data.
-- **Per-unit evaluation:** All metrics are computed per benchmark unit (N=1,110 independent observations), avoiding pseudoreplication.
+- **Per-unit evaluation:** All metrics are computed per benchmark unit (N=1,125 independent observations), avoiding pseudoreplication.
 - **Fallback transparency:** Failed and degenerate runs are documented in `data/results/snapshots/paper_v1/degenerate_predictions_report.csv`.
 - **Seed determinism:** All track seeds are derived deterministically from a single global seed (`42`), ensuring reproducibility across runs.
 

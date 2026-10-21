@@ -12,6 +12,7 @@ pydantic>=2
 pyyaml
 loguru
 rich
+infercnvpy
 
 # Development tools
 pytest

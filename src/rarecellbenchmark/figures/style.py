@@ -58,6 +58,7 @@ TRACK_COLORS = {
     "C": "#4CAF50",
     "D": "#FF5722",
     "E": "#9C27B0",
+    "F": "#E91E63",
 }
 
 # Schematic figure color palette (used by pipeline, track_design, method_audit)
@@ -70,6 +71,7 @@ SCHEMATIC_BG = {
     "track_c": "#fef3c7",
     "track_d": "#bbf7d0",
     "track_e": "#ddd6fe",
+    "track_f": "#fbcfe8",
     "methods": "#e2e8f0",
     "predictions": "#fee2e2",
     "metrics": "#dcfce7",
