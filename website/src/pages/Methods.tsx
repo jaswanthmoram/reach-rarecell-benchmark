@@ -1,26 +1,24 @@
-import MethodMatrix from './methods/MethodMatrix';
-import CostAccuracy from './methods/CostAccuracy';
-import Audit from './methods/Audit';
-import Guidance from './methods/Guidance';
-import Pipeline from './methods/Pipeline';
-import { JumpBar, Rail } from './methods/PageNav';
-import { useActiveSection } from './methods/useActiveSection';
-import Hero from './methods/Hero';
+import { SectionNav } from '../ui/SectionNav';
+import { CostScatter } from './methods/CostScatter';
+import { InclusionAudit } from './methods/InclusionAudit';
+import { LensHero } from './methods/LensHero';
+import { MethodMatrix } from './methods/MethodMatrix';
+import { MethodPicker } from './methods/MethodPicker';
+import { NAV } from './methods/model';
+import './methods/methods.css';
+
+const NAV_ITEMS = NAV.map(([id, label]) => ({ id, label }));
 
 export default function Methods() {
-  const active = useActiveSection();
   return (
-    <div>
-      <Hero />
-      <JumpBar active={active} />
-      {/* Sections keep the site container (right edge level with the header); from 1600px the rail sits in the left gutter. */}
-      <div className="relative">
-        <aside className="absolute inset-y-0 right-[calc(50%+612px)] hidden w-[168px] min-[1600px]:block"><Rail active={active} /></aside>
+    <div className="bg-canvas text-ink">
+      <LensHero />
+      <SectionNav label="Methods sections" items={NAV_ITEMS} />
+      <div className="mx-auto max-w-[1240px] px-4 sm:px-6">
         <MethodMatrix />
-        <CostAccuracy />
-        <Audit />
-        <Guidance />
-        <Pipeline />
+        <CostScatter />
+        <InclusionAudit />
+        <MethodPicker />
       </div>
     </div>
   );

@@ -1,0 +1,43 @@
+/* Tracks page: hero lanes (P03 board keyframes) and the dot-chart glide. Transform and opacity only.
+ * Lane dots are mask images on colour layers (lanes.ts); only those layers move (one stream per lane, three jitter phases on lane B, one
+ * flip layer per phase on lane E, the active lane's rings). The strip carries useLoopGate's data-loop (app.css holds it). */
+@keyframes tr-stream { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes tr-jit { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(0, -2px); } 75% { transform: translate(0, 2px); } }
+@keyframes tr-flip { 0%, 45% { opacity: 0; } 55%, 100% { opacity: 1; } }
+@keyframes tr-find { 0% { transform: scale(2.2); opacity: 0; } 35% { opacity: 1; } 70% { transform: scale(1); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+@keyframes tr-miss { 0% { transform: scale(1.8); opacity: 0; } 40% { opacity: 0.9; } 100% { transform: scale(0.8); opacity: 0; } }
+@keyframes tr-seg-in { from { opacity: 0; } to { opacity: 0.55; } }
+
+/* ---------- Hero lanes ---------- */
+.tr-track { position: absolute; inset: 0 auto 0 0; width: 200%; animation: tr-stream linear infinite; }
+.tr-mask { position: absolute; inset: 0; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+.tr-tone-cell { background: var(--cell); }
+.tr-tone-sig { background: var(--signal); }
+.tr-jit { animation: tr-jit 0.9s ease-in-out infinite; }
+/* The board animates background; here a signal-coloured layer flips in over the grey cells instead. */
+.tr-flip { opacity: 0; animation: tr-flip 2.4s steps(1, end) infinite alternate; }
+.tr-ring { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border: 1.2px solid var(--accent); border-radius: 50%; animation: tr-find 1.8s cubic-bezier(0.16, 1, 0.3, 1) infinite; }
+.tr-miss { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border: 1.2px dashed var(--accent); border-radius: 50%; animation: tr-miss 1.8s ease-out infinite; }
+.tr-scene, .tr-band { transition: opacity var(--dur-2) var(--ease-out); }
+
+/* ---------- Dot chart ----------
+ * Each mark sits at the left of its axis and moves by transform in container units, so switching tracks glides the
+ * dots from the old value to the new one (audit P1) without animating layout. */
+.tr-axis { container-type: inline-size; }
+.tr-mark { position: absolute; top: 50%; left: 0; width: 0; height: 0; transform: translateX(calc(var(--x) * 1cqw)); transition: transform 360ms var(--ease-out); }
+.tr-seg { animation: tr-seg-in var(--dur-2) var(--ease-out) 240ms both; }
+[data-motion="paused"] .tr-mark { transition: none; }
+[data-motion="paused"] .tr-seg { animation: none; opacity: 0.55; }
+/* Pause motion: the active lane keeps a still ring (as under reduced motion), not a ring frozen on an invisible frame. */
+[data-motion="paused"] :is(.tr-ring, .tr-miss) { animation: none !important; opacity: 0.9; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tr-track, .tr-jit, .tr-flip, .tr-ring, .tr-miss { animation: none !important; }
+  .tr-ring, .tr-miss { opacity: 0.9; }
+  .tr-scene, .tr-band, .tr-mark { transition: none; }
+  .tr-seg { animation: none; opacity: 0.55; }
+}
+
+/* ---------- Track cards (r9): active = elevation 2 + cobalt hairline; inactive rest at 1 and lift on hover ---------- */
+.tr-tab-on { box-shadow: var(--elev-2), inset 0 0 0 0.5px rgba(47, 91, 234, 0.35); }
+.tr-tab-on::before { content: ""; position: absolute; left: 12px; right: 12px; top: -1px; height: 2px; border-radius: 0 0 2px 2px; background: var(--accent); }

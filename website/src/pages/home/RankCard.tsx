@@ -1,155 +1,116 @@
-import type { HTMLAttributes } from 'react';
-import { href } from '../../app/router';
-import type { MethodResult } from '../../data/benchmarkData';
-import { Badge, CIBar, Icon, MethodDot, fmt, methodColor } from '../../ui';
-import {
-  BASELINE, CEILING, EXPLORATORY, FILTERED, FIRE_VS_EXPR, FIRE_VS_SMF, FLOOR, G, RANKED,
-  bootCI, fdr, unitsAfterFallback,
-} from './facts';
-import type { Hot } from './CohortField';
+import { useRef, type FocusEvent, type PointerEvent } from 'react';
+import { GLOBAL_STATS as G } from '../../data/benchmarkData';
+import { cx, fmt } from '../../lib/format';
+import { href, preloadRoute } from '../../lib/router';
+import { ArrowRight, ICON_STROKE } from '../../ui/icons';
+import { MOTION_OK, canAnimate, gsap, useGSAP } from '../../ui/motion';
+import { CARD_NOTE, CEILING, RANKED, REFS, type RankRow } from './model';
 
-type Link = { hot: Hot; onHot: (h: Hot) => void };
-
-/** Row props that drive the hero field: hover or focus previews a method, click or Enter pins it (touch), Escape clears. */
-function linkProps(id: string, dashed: boolean, { hot, onHot }: Link): HTMLAttributes<HTMLTableRowElement> {
-  const me = { id, dashed };
-  const on = hot?.id === id;
-  return {
-    tabIndex: 0,
-    'aria-pressed': on,
-    onMouseEnter: () => onHot(me),
-    onMouseLeave: () => onHot(null),
-    onFocus: () => onHot(me),
-    onBlur: () => onHot(null),
-    onClick: () => onHot(on ? null : me),
-    onKeyDown: (e) => { if (e.key === 'Escape') onHot(null); if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onHot(on ? null : me); } },
-    className: `cursor-pointer border-t border-line outline-none transition-colors duration-150 hover:bg-sunk/70 focus-visible:bg-accent-tint ${on ? 'bg-sunk/70' : ''}`,
-  };
+export interface RowHandlers {
+  hotId: string | null;
+  pinnedId: string | null;
+  onPreview: (id: string | null) => void;
+  onPin: (id: string) => void;
 }
 
-interface Ref { m: MethodResult; role: string }
+const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
+const pct = (v: number) => fmt.pct(clamp01(v));
+/** Seconds: the card rises after the hero (CSS delay 1040 ms), then its intervals draw. */
+const DRAW_DELAY = 1.2;
 
-/** v2.2: ceiling pinned above, ranked 1–6 contiguous, then the reference group (each also a mark on the axis). */
-const CEILING_REF: Ref | null = CEILING ? { m: CEILING, role: 'supervised ceiling' } : null;
-const REFS: Ref[] = [
-  EXPLORATORY && { m: EXPLORATORY, role: 'exploratory comparator' },
-  BASELINE && { m: BASELINE, role: 'naive baseline, total UMI' },
-  FLOOR && { m: FLOOR, role: 'floor' },
-].filter((r): r is Ref => Boolean(r));
-
-const pct = (v: number) => `${Math.max(0, Math.min(1, v)) * 100}%`;
-
-/** Bootstrap mean + 95% interval on the shared 0–1 axis; `marks` draws the reference rows as thin verticals. */
-function Bar({ m, dashed, marks }: { m: MethodResult; dashed?: boolean; marks?: boolean }) {
-  const [lo, hi] = bootCI(m);
+function Mark({ row, size }: { row: RankRow; size: number }) {
   return (
-    <div className="relative [&_[role=img]]:min-w-0">
-      {marks && REFS.map((r) => (
-        <span key={r.m.id} aria-hidden="true" className="absolute -inset-y-2.5 border-l border-dashed opacity-80"
-          style={{ left: pct(r.m.bootstrapMeanAP), borderColor: methodColor(r.m.id) }} />
-      ))}
-      <CIBar value={m.bootstrapMeanAP} low={lo} high={hi} color={methodColor(m.id)} dashed={dashed}
-        label={`${m.method}: bootstrap mean Track A AP ${fmt.ap(m.bootstrapMeanAP)}, 95% bootstrap interval ${fmt.ap(lo)} to ${fmt.ap(hi)}`} />
-    </div>
+    <span aria-hidden="true" className="box-border block shrink-0 rounded-full"
+      style={{ width: size, height: size, ...(row.isRef ? { border: `1.5px dashed ${row.color}` } : { background: row.color }) }} />
   );
 }
 
-function ReferenceRow({ r, link }: { r: Ref; link: Link }) {
+/** Interval bar grows out of the mean dot, so its transform origin sits at the dot. */
+function Track({ row }: { row: RankRow }) {
+  const span = Math.max(1e-6, row.hi - row.lo);
+  const origin = `${(clamp01((row.mean - row.lo) / span) * 100).toFixed(1)}% 50%`;
   return (
-    <tr {...linkProps(r.m.id, true, link)}>
-      <td className="w-7 pl-4"><span className="sr-only">not ranked</span></td>
-      <th scope="row" className="min-w-0 py-2 pr-2 text-left align-middle font-normal">
+    <span aria-hidden="true" className="relative h-3 max-[419px]:col-[2/4] max-[419px]:row-start-2 max-[419px]:-mt-0.5 min-[420px]:h-5">
+      <span className="absolute inset-x-0 top-1/2 h-px bg-line" />
+      <span className="rc-ci absolute rounded-[2px]"
+        style={{ left: pct(row.lo), width: `calc(${pct(row.hi)} - ${pct(row.lo)})`, transformOrigin: origin,
+          ...(row.isRef ? { borderTop: `1.5px dashed ${row.color}`, height: 0, top: '50%' } : { background: row.color, opacity: 0.35, height: 4, top: 'calc(50% - 2px)' }) }} />
+      <span className="rc-dot absolute top-1/2 -ml-1 -mt-1 box-border size-2 rounded-full"
+        style={{ left: pct(row.mean), ...(row.isRef ? { border: `1.5px dashed ${row.color}` } : { background: row.color }) }} />
+    </span>
+  );
+}
+
+function Row({ row, hotId, pinnedId, onPreview, onPin }: RowHandlers & { row: RankRow }) {
+  const label = `${row.name}: ${row.isRef ? row.role : `rank ${row.rank}`}, median AP ${fmt.ap(row.median)}`;
+  const enter = (e: PointerEvent) => { if (e.pointerType === 'mouse') onPreview(row.id); };
+  const leave = (e: PointerEvent) => { if (e.pointerType === 'mouse') onPreview(null); };
+  // Keyboard focus previews; a mouse or touch press focuses too, so only :focus-visible counts.
+  const focus = (e: FocusEvent<HTMLButtonElement>) => { if (e.currentTarget.matches(':focus-visible')) onPreview(row.id); };
+  return (
+    <button type="button" aria-pressed={pinnedId === row.id} aria-label={label}
+      onPointerEnter={enter} onPointerLeave={leave} onFocus={focus} onBlur={() => onPreview(null)} onClick={() => onPin(row.id)}
+      className={cx(
+        'grid min-h-11 w-full cursor-pointer grid-cols-[24px_minmax(0,1fr)_52px] items-center gap-x-2 border-0 border-t border-solid border-line px-4 py-[9px] text-left font-[inherit] text-inherit transition-colors duration-[var(--dur-1)]',
+        'min-[420px]:grid-cols-[28px_minmax(0,1fr)_minmax(64px,96px)_56px] sm:grid-cols-[28px_minmax(0,1fr)_minmax(80px,160px)_56px]',
+        hotId === row.id ? 'bg-sunk' : 'bg-transparent hover:bg-[var(--row-hover)]',
+      )}>
+      <span className="font-mono text-xs text-ink-3">{row.rank ?? ''}</span>
+      <span className="flex min-w-0 flex-col">
         <span className="flex min-w-0 items-center gap-2">
-          <MethodDot id={r.m.id} dashed />
-          <span className="truncate font-mono text-xs text-ink xl:text-[13px]">{r.m.method}</span>
+          <Mark row={row} size={9} />
+          <span className="truncate font-mono text-[13px] text-ink">{row.name}</span>
         </span>
-        <span className="mt-0.5 block truncate pl-[18px] text-[11px] leading-4 text-ink-3">{r.role}</span>
-      </th>
-      <td className="py-2 pr-3 align-middle max-[359px]:pr-0 max-[359px]:[&>*]:hidden"><Bar m={r.m} dashed /></td>
-      <td className="py-2 pr-4 text-right align-middle font-mono text-[13px] text-ink-2 tabular">{fmt.ap(r.m.medianAP)}</td>
-    </tr>
+        {row.role && <span className="pl-[17px] text-[11px] text-ink-3">{row.role}</span>}
+      </span>
+      <Track row={row} />
+      <span className="text-right font-mono text-[13px] text-ink">{fmt.ap(row.median)}</span>
+    </button>
   );
 }
 
-function RankedRow({ m, link }: { m: MethodResult & { publishedRankNum: number }; link: Link }) {
+const groupHead = 'eyebrow border-t border-line bg-[var(--row-hover)] px-4 py-1.5';
+
+/** Track A ranking card: ceiling, ranked published detectors 1 to 6, then unranked reference rows. */
+export function RankCard(props: RowHandlers) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Draw-in once (audit S-17): intervals grow out of their mean dot, dots fade in 30 ms apart. Values never move.
+  useGSAP(() => {
+    const mm = gsap.matchMedia();
+    mm.add(MOTION_OK, () => {
+      if (!canAnimate()) return;
+      gsap.from('.rc-ci', { scaleX: 0.4, opacity: 0, duration: 0.6, ease: 'power3.out', stagger: 0.03, delay: DRAW_DELAY, clearProps: 'transform' });
+      gsap.from('.rc-dot', { opacity: 0, duration: 0.3, ease: 'power2.out', stagger: 0.03, delay: DRAW_DELAY, clearProps: 'opacity' });
+    });
+    return () => mm.revert();
+  }, { scope: ref });
+
   return (
-    <tr {...linkProps(m.id, false, link)}>
-      <td className="w-7 pl-4 align-middle font-mono text-xs text-ink-3 tabular">{m.publishedRankNum}</td>
-      <th scope="row" className="min-w-0 py-2.5 pr-2 text-left align-middle font-normal">
-        <span className="flex min-w-0 items-center gap-2">
-          <MethodDot id={m.id} />
-          <span className="truncate font-mono text-xs text-ink xl:text-[13px]">{m.method}</span>
-          {m.paperRole === 'Published/proxy' && <span className="hidden font-mono text-[11px] text-ink-3 sm:inline">proxy</span>}
+    <div ref={ref} id="rank" className="card flex flex-col overflow-hidden">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-line px-4 py-3">
+        <span className="eyebrow">Track A · median AP</span>
+        <span className="ml-auto font-mono text-[11px] text-ink-3">
+          <span className="[@media(hover:hover)]:hidden">tap</span><span className="hidden [@media(hover:hover)]:inline">point at</span> a row to see its cells
         </span>
-      </th>
-      <td className="py-2.5 pr-3 align-middle max-[359px]:pr-0 max-[359px]:[&>*]:hidden"><Bar m={m} marks /></td>
-      <td className="py-2.5 pr-4 text-right align-middle font-mono text-[13px] font-medium text-ink tabular">{fmt.ap(m.medianAP)}</td>
-    </tr>
-  );
-}
-
-function GroupHead({ children }: { children: string }) {
-  return (
-    <tr className="border-t border-line bg-sunk/60">
-      <th scope="rowgroup" colSpan={4} className="px-4 py-1.5 text-left font-normal"><span className="label">{children}</span></th>
-    </tr>
-  );
-}
-
-export default function RankCard(link: Link) {
-  const filteredNames = FILTERED.map((m) => m.method).join(', ');
-  const filteredN = FILTERED[0] ? unitsAfterFallback(FILTERED[0]) : G.trackAUnits;
-  return (
-    <div className="overflow-hidden rounded-card border border-line bg-surface">
-      <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
-        <p className="label">Track A · median AP</p>
-        <span className="ml-auto hidden font-mono text-[11px] text-ink-3 lg:inline">point at a row to see its cells</span>
-        <Badge>ranked 1–{RANKED.length}</Badge>
+        <span className="rounded-chip border border-line px-1.5 py-0.5 font-mono text-[11px] text-ink-2">ranked 1–{G.methodsRankedPublished}</span>
       </div>
-
-      <table className="w-full table-fixed text-sm">
-        <caption className="sr-only">
-          Supervised ceiling (not ranked), then the {RANKED.length} ranked published detectors ordered by Track A median average precision, then three unranked reference rows.
-        </caption>
-        <colgroup>
-          <col className="w-7" />
-          <col />
-          <col className="w-2 min-[360px]:w-28 sm:w-40 lg:w-32 xl:w-44" />
-          <col className="w-14" />
-        </colgroup>
-        <thead className="sr-only">
-          <tr><th scope="col">Rank</th><th scope="col">Method</th><th scope="col">Bootstrap mean AP and 95% interval</th><th scope="col">Median AP</th></tr>
-        </thead>
-        {CEILING_REF && <tbody className="[&>tr]:border-t-0"><ReferenceRow r={CEILING_REF} link={link} /></tbody>}
-        <tbody>
-          <GroupHead>Ranked published detectors</GroupHead>
-          {RANKED.map((m) => <RankedRow key={m.id} m={m} link={link} />)}
-        </tbody>
-        <tbody>
-          <GroupHead>Reference rows · not ranked</GroupHead>
-          {REFS.map((r) => <ReferenceRow key={r.m.id} r={r} link={link} />)}
-        </tbody>
-      </table>
-
-      <div className="space-y-2.5 border-t border-line bg-sunk px-4 py-3.5 text-xs leading-relaxed text-ink-2">
-        {FIRE_VS_EXPR && (
-          <p>
-            <span className="font-mono text-ink">FiRE</span> vs <span className="font-mono text-ink">expr_threshold</span>: not significantly different (BH-FDR {fdr(FIRE_VS_EXPR.pAdjusted)}).
-            {FIRE_VS_SMF && !FIRE_VS_SMF.significant && <> Nor is FiRE vs scMalignantFinder (BH-FDR {fdr(FIRE_VS_SMF.pAdjusted)}).</>}
-          </p>
-        )}
-        <p className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] text-ink-3">
-          <span className="inline-flex items-center gap-1.5"><span className="relative h-1 w-5 rounded-full bg-ink-3/40"><span className="absolute left-1/2 top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink-2" /></span>bootstrap mean, 95% interval</span>
-          <span className="inline-flex items-center gap-1.5"><span className="h-3 border-l border-dashed border-ink-3" />reference row on the axis</span>
+      {CEILING.map((r) => <Row key={r.id} row={r} {...props} />)}
+      <div className={groupHead}>Ranked published detectors</div>
+      {RANKED.map((r) => <Row key={r.id} row={r} {...props} />)}
+      <div className={groupHead}>Reference rows · not ranked</div>
+      {REFS.map((r) => <Row key={r.id} row={r} {...props} />)}
+      <div className="mt-auto flex flex-col gap-2 border-t border-line bg-sunk px-4 py-3.5 text-xs leading-relaxed text-ink-2">
+        <p className="m-0">
+          <span className="font-mono text-ink">FiRE</span> vs <span className="font-mono text-ink">expr_threshold</span>: not significantly different (BH-FDR {CARD_NOTE.fireExpr}). Nor is FiRE vs scMalignantFinder (BH-FDR {CARD_NOTE.fireSmf}).
         </p>
-        <p className="text-ink-3">
-          Ordered and printed by median AP · n = {G.trackAUnits} units per method{FILTERED.length > 0 && <> ({filteredN} for {filteredNames} after fallback filtering)</>}. Inter-lineage contrast only. Track F tests same-lineage.
+        <p className="m-0 text-ink-3">
+          Ranked and printed by median AP. Dots and bars: bootstrap mean AP with 95% interval. n = {CARD_NOTE.units} units per method ({CARD_NOTE.commonUnits} for scCAD, DeepScena after fallback filtering). Inter-lineage contrast only; Track F tests same-lineage.
         </p>
-        <div className="flex justify-end border-t border-line pt-2">
-          <a href={href('/leaderboard')} className="group inline-flex min-h-8 items-center gap-1 font-medium text-accent hover:underline">
-            Full leaderboard<Icon name="arrow-right" size={13} className="transition-transform duration-150 group-hover:translate-x-0.5" />
-          </a>
-        </div>
+        <a href={href('/leaderboard')} onPointerEnter={() => void preloadRoute('/leaderboard')}
+          className="hm-link hm-ul group inline-flex min-h-8 items-center gap-1 self-end font-medium hover:text-ink">
+          <span className="fx-underline">Full leaderboard</span><ArrowRight size={14} strokeWidth={ICON_STROKE} aria-hidden="true" className="hm-nudge" />
+        </a>
       </div>
     </div>
   );

@@ -1,102 +1,153 @@
-import { useId, useState } from 'react';
-import { CopyButton, ErrorState, Icon, Skeleton, asset } from '../../ui';
-import type { GalleryItem } from './catalog';
-import { useImageStatus } from './useImageStatus';
+import { useCallback, useState, type MouseEvent } from 'react';
+import { cx } from '../../lib/format';
+import { Icon3D } from '../../ui/Icon3D';
+import { useLoopGate } from '../../ui/motion/useLoopGate';
+import { ArrowUpRight, Check, ChevronDown, Copy, ExternalLink, ICON_STROKE } from '../../ui/icons';
+import { useCopy } from '../../ui/useCopy';
+import { figCitation, figId, figMeta, figSrc, type PaperFigure } from './catalog';
 
-/** Ring on the figure sheet while the card's open button has keyboard focus (other buttons in the card don't count). */
-const FOCUS_RING = 'group-has-[.fig-open:focus-visible]:border-accent group-has-[.fig-open:focus-visible]:outline-2 group-has-[.fig-open:focus-visible]:outline-offset-2 group-has-[.fig-open:focus-visible]:outline-accent';
+/** One copy slot per card; a failure stays up (sticky) so the selected fallback textarea does not vanish. */
+const CITE_KEY = 'figure-citation';
+const COPY_OPTS = { resetMs: 1600, stickyFailures: true } as const;
+const SR_ONLY = 'absolute h-px w-px overflow-hidden whitespace-nowrap [clip:rect(0_0_0_0)]';
+const MONO_LABEL = 'm-0 font-mono text-[11px] uppercase tracking-[0.08em] text-ink-3';
 
-/**
- * Sheet at the figure's own aspect ratio, so nothing is letterboxed. Paired sheets match in height because the row
- * sizes its columns by the same ratios. Loading shows a skeleton, a failed request shows a retry.
- */
-function FigureFrame({ f }: { f: GalleryItem }) {
-  const src = asset(f.src);
-  const { status, retry, imgProps } = useImageStatus(src);
-  const [w, h] = f.size;
-  const sheet = status === 'loaded' ? 'bg-[#fafafa]' : 'bg-sunk';
+type LoadState = 'loading' | 'ok' | 'error';
+
+/** Figure image with the States board's skeleton (own aspect ratio) and "did not load" recovery. */
+function useImageLoad() {
+  const [state, setState] = useState<LoadState>('loading');
+  const [attempt, setAttempt] = useState(0);
+  const imgRef = useCallback((img: HTMLImageElement | null) => {
+    if (img?.complete) setState(img.naturalWidth > 0 ? 'ok' : 'error');
+  }, []);
+  const retry = () => { setState('loading'); setAttempt((a) => a + 1); };
+  return { state, attempt, imgRef, retry, onLoad: () => setState('ok'), onError: () => setState('error') };
+}
+
+/** Loading shimmer; held (data-loop="hold") while off-screen so lazy cards below the fold do not repaint every frame. */
+function Skeleton() {
+  const { ref, loopProps } = useLoopGate<HTMLSpanElement>();
+  return <span ref={ref} {...loopProps} aria-hidden="true" className="fig-skel loop absolute inset-0" />;
+}
+
+function FailedSheet({ f, onRetry }: { f: PaperFigure; onRetry: () => void }) {
   return (
-    <div aria-busy={status === 'loading'} style={{ aspectRatio: `${w} / ${h}` }}
-      className={`relative mt-4 overflow-hidden rounded-card border border-line transition-colors duration-150 group-hover:border-line-strong ${sheet} ${FOCUS_RING}`}>
-      {status !== 'error' && (
-        <img {...imgProps} width={w} height={h} loading="lazy" decoding="async" alt={`${f.short}: ${f.title}`}
-          className={`absolute inset-0 h-full w-full object-contain p-3 transition-[opacity,transform] duration-300 ease-[var(--ease-out)] group-hover:scale-[1.01] sm:p-5 ${status === 'loaded' ? 'opacity-100' : 'opacity-0'}`} />
-      )}
-      {status === 'loading' && (
-        <span className="absolute inset-0">
-          <Skeleton className="h-full w-full rounded-none" />
-          <span className="sr-only">Loading {f.short}</span>
-        </span>
-      )}
-      {status === 'error' && (
-        <ErrorState compact title={`${f.short} did not load`} onRetry={retry} retryLabel="Retry"
-          className="absolute inset-2 z-20 justify-center"
-          action={
-            <a href={src} target="_blank" rel="noopener noreferrer"
-              className="inline-flex h-10 items-center gap-2 rounded-chip border border-line-strong bg-surface px-4 text-sm font-medium text-ink transition-colors duration-150 hover:border-ink/40 active:translate-y-px">
-              Open file <Icon name="arrow-up-right" size={14} />
-            </a>
-          } />
-      )}
+    <div role="alert" className="mt-4 flex aspect-[4/3] flex-col items-center justify-center gap-3 rounded-card border border-line bg-sunk p-6 text-center">
+      <Icon3D name="bar-chart" size={56} />
+      <p className="m-0 text-[15px] font-semibold">Figure {f.n} did not load</p>
+      <p className="m-0 text-[13px] text-ink-2">The file did not arrive. Try again, or open it in a new tab.</p>
+      <p className="m-0 flex flex-wrap justify-center gap-2">
+        <button type="button" onClick={onRetry} className="fig-press h-11 cursor-pointer rounded-chip border-0 bg-ink px-4 text-sm text-canvas">Retry</button>
+        <a href={figSrc(f)} target="_blank" rel="noopener noreferrer" className="fig-press inline-flex h-11 items-center gap-1.5 rounded-chip border border-line-strong bg-surface px-4 text-sm text-ink no-underline">
+          Open file <ExternalLink size={14} strokeWidth={ICON_STROKE} aria-hidden="true" />
+        </a>
+      </p>
     </div>
   );
 }
 
-/**
- * One published figure. Rows (label, title, sheet, text) sit on the parent grid's subgrid, so the two cards in a
- * pair line up row by row: a two-line title on one side never pushes its sheet below its neighbour's.
- */
-export function FigureCard({ f, onOpen }: { f: GalleryItem; onOpen: (el: HTMLButtonElement) => void }) {
-  const [expanded, setExpanded] = useState(false);
-  const restId = useId();
+interface CardProps {
+  f: PaperFigure;
+  /** Gets the pressed control, so the page can hand focus back to it when the viewer closes. */
+  onOpen: (from: HTMLElement) => void;
+}
+
+export function FigureCard({ f, onOpen }: CardProps) {
+  const [capOpen, setCapOpen] = useState(false);
+  const { state: load, attempt, imgRef, retry, onLoad, onError } = useImageLoad();
+  const copier = useCopy(COPY_OPTS);
+  const open = (e: MouseEvent<HTMLElement>) => onOpen(e.currentTarget);
+  const selectRef = useCallback((el: HTMLTextAreaElement | null) => { if (el) { el.focus(); el.select(); } }, []);
+  const restId = `cap-rest-${f.n}`;
+  const copied = copier.stateOf(CITE_KEY) === 'copied';
+  const manual = copier.stateOf(CITE_KEY) === 'failed';
+  const src = attempt ? `${figSrc(f)}?retry=${attempt}` : figSrc(f);
+
   return (
-    <article className="reveal group relative row-span-4 grid grid-rows-subgrid max-md:not-first:mt-16">
-      <div className="flex items-baseline justify-between gap-3 border-t border-line-strong pt-3">
-        <p className="label">{f.meta}</p>
-        <span aria-hidden="true" className="label hidden text-ink-3 transition-colors duration-150 group-hover:text-accent sm:inline-flex sm:items-center sm:gap-1">
-          Open <Icon name="arrows-out-simple" size={12} />
+    <article id={figId(f)} aria-labelledby={`${figId(f)}-t`} className="fig-card fx-card fx-hairline-gradient flex min-w-0 flex-col p-4 sm:p-6">
+      <span aria-hidden="true" className="fig-flash" />
+      <div className="flex justify-between gap-3">
+        <p className={MONO_LABEL}>{figMeta(f)}</p>
+        <span aria-hidden="true" className={cx(MONO_LABEL, 'fig-open-hint inline-flex items-center gap-1')}>
+          Open <ArrowUpRight className="fig-nudge" size={14} strokeWidth={ICON_STROKE} />
         </span>
       </div>
-
-      <h3 className="mt-2 text-lg font-semibold leading-snug tracking-[-0.015em] text-ink md:text-xl">
-        <button type="button" onClick={(e) => onOpen(e.currentTarget)}
-          className="fig-open text-left after:absolute after:inset-0 after:z-10 after:rounded-card focus-visible:outline-none">
-          {f.title}
-          <span className="sr-only">. Open in the figure viewer</span>
+      <h3 id={`${figId(f)}-t`} className="mt-2 mb-0 text-xl font-semibold leading-[1.3] tracking-[-0.015em]">
+        <button type="button" data-fig-title onClick={open} className="fig-title cursor-pointer rounded-chip border-0 bg-transparent p-0 text-left font-[inherit] tracking-[inherit] text-inherit">
+          {f.title}<span className={SR_ONLY}>. Open in the figure viewer</span>
         </button>
       </h3>
 
-      <FigureFrame f={f} />
+      {load === 'error' ? (
+        <FailedSheet f={f} onRetry={retry} />
+      ) : (
+        <button
+          type="button"
+          onClick={open}
+          aria-label={`Open Figure ${f.n} in the figure viewer`}
+          aria-busy={load === 'loading'}
+          className="fig-sheet relative mt-4 flex aspect-[4/3] w-full cursor-zoom-in overflow-hidden rounded-card border border-line bg-canvas p-0"
+        >
+          {load === 'loading' && <Skeleton />}
+          <img
+            key={attempt}
+            ref={imgRef}
+            data-fig-img
+            src={src}
+            alt={`Figure ${f.n}: ${f.title}`}
+            width={f.w}
+            height={f.h}
+            loading="lazy"
+            decoding="async"
+            onLoad={onLoad}
+            onError={onError}
+            className={cx('box-border h-full w-full object-contain p-4 transition-opacity duration-[var(--dur-3)]', load === 'loading' ? 'opacity-0' : 'opacity-100')}
+          />
+          {load === 'loading' && <span className="absolute bottom-2 left-3 font-mono text-[11px] text-ink-3">Loading Figure {f.n}</span>}
+        </button>
+      )}
 
-      {/* Above the card-wide open target, so the text is selectable and its controls are reachable. The reading
-          (what the figure shows) leads in ink; the proof caption follows as secondary evidence. */}
-      <div className="relative z-20 mt-5 flex flex-col items-start">
-        <div className="max-w-[64ch] border-l border-line-strong pl-4">
-          <p className="label mb-1.5">Reading</p>
-          <p className="text-[15px] leading-relaxed text-ink">{f.takeaway}</p>
-        </div>
-        <p className="mt-4 max-w-[68ch] text-sm leading-relaxed text-ink-2">
-          {f.captionLead}
-          {f.captionRest && <span id={restId} hidden={!expanded}> {f.captionRest}</span>}
-        </p>
-        <div className="-ml-2 mt-2 flex flex-wrap items-center gap-x-3">
-          {f.captionRest && (
-            <button type="button" aria-expanded={expanded} aria-controls={restId} onClick={() => setExpanded((x) => !x)}
-              className="inline-flex h-11 items-center gap-1.5 rounded-chip px-2 text-sm font-medium text-ink transition-colors duration-150 hover:bg-sunk active:translate-y-px">
-              {expanded ? 'Show less' : 'Read full caption'}
-              <Icon name="caret-down" size={14} className={`text-ink-3 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
-            </button>
-          )}
-          {f.link && (
-            <a href={f.link.to}
-              className="inline-flex h-11 items-center gap-1.5 rounded-chip px-2 text-sm font-medium text-ink underline decoration-line-strong underline-offset-4 transition-colors duration-150 hover:decoration-ink active:translate-y-px">
-              {f.link.label} <Icon name="arrow-right" size={14} />
-            </a>
-          )}
-          {/* The shared CopyButton is 28px tall; its own ::before extends the hit area to the 44px minimum. */}
-          <CopyButton text={f.citation} label="Cite this figure" toast={`${f.short} citation copied`} />
-        </div>
-      </div>
+      <p className="mt-5 mb-0 min-h-[4.875em] max-w-[64ch] border-l border-line-strong pl-4 text-[15px] leading-relaxed text-ink">{f.take}</p>
+      <p className={cx('mt-4 mb-0 min-h-[4.875em] max-w-[68ch] text-sm leading-relaxed text-ink-2', !capOpen && 'line-clamp-3')}>
+        {f.lead}
+        <span id={restId} hidden={!capOpen}> {f.rest}</span>
+      </p>
+      <p className="mt-auto mb-0 -ml-2 flex flex-wrap items-center gap-x-3 gap-y-1 pt-1">
+        <button
+          type="button"
+          onClick={() => setCapOpen((o) => !o)}
+          aria-expanded={capOpen}
+          aria-controls={restId}
+          className="fig-act inline-flex min-h-11 cursor-pointer items-center gap-1.5 rounded-chip border-0 bg-transparent px-2 text-sm font-medium text-ink"
+        >
+          {capOpen ? 'Show less' : 'Read full caption'}
+          <span className="fig-caret text-ink-3" data-open={capOpen || undefined}><ChevronDown size={16} strokeWidth={ICON_STROKE} aria-hidden="true" /></span>
+        </button>
+        <button
+          type="button"
+          onClick={() => { void copier.copy(figCitation(f), CITE_KEY); }}
+          className={cx('fig-act inline-flex min-h-11 cursor-pointer items-center gap-1.5 rounded-chip border-0 bg-transparent px-2 text-sm font-medium', copied ? 'text-ok' : 'text-ink-2 hover:text-ink')}
+        >
+          {copied ? <Check size={16} strokeWidth={ICON_STROKE} aria-hidden="true" /> : <Copy size={16} strokeWidth={ICON_STROKE} aria-hidden="true" />}
+          {copied ? 'Copied' : 'Cite this figure'}
+        </button>
+        <span aria-live="polite" className={SR_ONLY}>
+          {copied ? `Figure ${f.n} citation copied` : manual ? 'Copy blocked; the citation is selected below' : ''}
+        </span>
+      </p>
+      {manual && (
+        <label className="mt-2 block text-xs text-ink-2">
+          Copying is blocked here. The citation is selected; press Ctrl+C or ⌘C.
+          <textarea
+            readOnly
+            rows={4}
+            ref={selectRef}
+            value={figCitation(f)}
+            className="mt-1.5 box-border block w-full resize-y rounded-chip border border-line-strong px-2.5 py-2 font-mono text-xs leading-normal text-ink"
+          />
+        </label>
+      )}
     </article>
   );
 }

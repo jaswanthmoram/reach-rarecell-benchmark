@@ -1,8 +1,12 @@
 import numpy as np
+import pytest
 import pandas as pd
 import scanpy as sc
 from anndata import AnnData
 from rarecellbenchmark.validate.cnv import compute_cnv_score
+
+# The real CNV path needs the optional `cnv` extra (pip install -e '.[cnv]').
+pytest.importorskip("infercnvpy")
 
 
 def _toy_adata(n=200, g=400, seed=0):

@@ -1,0 +1,42 @@
+/* Cite page motion: orbit rings spin, the signal pulses, the reticle finds it, the far field drifts. Picked rings
+ * brighten and flash once. Transform and opacity only (fill swaps are paint, not movement). */
+@keyframes cite-spin { to { transform: rotate(360deg); } }
+@keyframes cite-found { 0% { transform: scale(2.2); opacity: 0; } 45% { transform: scale(1); opacity: 1; } 80% { opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+@keyframes cite-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.18); } }
+@keyframes cite-drift { from { transform: translateX(0); } to { transform: translateX(40px); } }
+@keyframes cite-flash { 0% { opacity: 0; } 30% { opacity: 0.32; } 100% { opacity: 0; } }
+
+.cite-spin, .cite-found, .cite-pulse { transform-box: fill-box; transform-origin: center; }
+.cite-spin { animation: cite-spin linear infinite; transition: fill 240ms var(--ease-out); }
+.cite-found { animation: cite-found 2.4s var(--ease-out) infinite; }
+.cite-pulse { animation: cite-pulse 2.4s ease-in-out infinite; }
+.cite-drift { animation: cite-drift 18s linear infinite alternate; }
+.cite-ring { opacity: 0; transition: opacity 240ms var(--ease-out); }
+.cite-ring[data-on] { opacity: 0.95; }
+.cite-flash { opacity: 0; animation: cite-flash 640ms var(--ease-out) both; }
+.cite-label { transition: fill 240ms var(--ease-out); }
+
+/* Off-screen: stop the loops (IntersectionObserver toggles this). */
+.cite-paused, .cite-paused * { animation-play-state: paused !important; }
+
+/* Toggle chips and part rows: designed press and hover, gated by hover capability. */
+.cite-chip { transition: background-color var(--dur-1) ease, border-color var(--dur-1) ease, color var(--dur-1) ease, transform var(--dur-1) var(--ease-out); }
+.cite-chip:active:not([aria-disabled]) { transform: scale(0.97); }
+/* PDF download: border darkens on hover, the arrow drops 2px, press back to rest. */
+.cite-pdf { transition: border-color var(--dur-1) ease, background-color var(--dur-1) ease, transform var(--dur-1) var(--ease-out); }
+.cite-pdf:active { transform: scale(0.99); }
+.cite-pdf-icon { transition: transform var(--dur-1) var(--ease-out); }
+.cite-part-mark, .cite-nudge { transition: transform var(--dur-2) var(--ease-out); }
+@media (hover: hover) and (pointer: fine) {
+  .cite-part:hover .cite-part-mark { transform: rotate(12deg); }
+  .cite-out:hover .cite-nudge { transform: translate(2px, -2px); }
+  .cite-pdf:hover { border-color: var(--ink-3); background: var(--sunk); }
+  .cite-pdf:hover .cite-pdf-icon { transform: translateY(2px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cite-spin, .cite-found, .cite-pulse, .cite-drift, .cite-flash { animation: none !important; }
+  .cite-chip, .cite-part-mark, .cite-nudge, .cite-ring, .cite-pdf, .cite-pdf-icon { transition: none; }
+  .cite-pdf:active, .cite-pdf:hover .cite-pdf-icon { transform: none; }
+  .cite-chip:active, .cite-part:hover .cite-part-mark { transform: none; }
+}
