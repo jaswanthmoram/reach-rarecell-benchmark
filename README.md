@@ -1,11 +1,6 @@
 <div align="center">
 
-<img src="website/public/favicon.svg" alt="REACH mark" width="72" height="72">
-
-# REACH Benchmark
-
-**Rare-cell Evaluation Across Cancer Heterogeneity**<br>
-A reproducible benchmark for detecting rare malignant cells in single-cell RNA sequencing
+<a href="https://jaswanthmoram.github.io/reach-rarecell-benchmark/"><img src="docs/assets/reach-banner.webp" alt="REACH: Rare-cell Evaluation Across Cancer Heterogeneity. A reproducible benchmark for rare malignant cell detection in single-cell RNA-seq. Frontiers in Bioinformatics, 2026." width="100%"></a>
 
 [![Article DOI](https://img.shields.io/badge/Article-10.3389%2Ffbinf.2026.1878538-0b7285.svg)](https://doi.org/10.3389/fbinf.2026.1878538)
 [![Zenodo DOI](https://img.shields.io/badge/Zenodo-10.5281%2Fzenodo.19847108-blue.svg)](https://doi.org/10.5281/zenodo.19847108)
@@ -15,8 +10,6 @@ A reproducible benchmark for detecting rare malignant cells in single-cell RNA s
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **[Website](https://jaswanthmoram.github.io/reach-rarecell-benchmark/)** · **[Article](https://www.frontiersin.org/journals/bioinformatics/articles/10.3389/fbinf.2026.1878538/full)** · **[PDF](https://jaswanthmoram.github.io/reach-rarecell-benchmark/manuscript/reach-fbinf-2026-1878538.pdf)** · **[Zenodo](https://doi.org/10.5281/zenodo.19847108)** · **[Reproduce](#reproduce-locally)** · **[Cite](#cite)** · **[Videos](#videos)**
-
-<img src="website/public/images/home-hero-v3-light.webp" alt="UMAP-style field of single cells with one rare malignant cell ringed" width="100%">
 
 </div>
 

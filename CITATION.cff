@@ -8,6 +8,7 @@ authors:
     email: jaswanthmoram@gmail.com
     orcid: "https://orcid.org/0009-0003-2369-1692"
 repository-code: "https://github.com/jaswanthmoram/reach-rarecell-benchmark"
+url: "https://jaswanthmoram.me/reach-rarecell-benchmark/"
 license: MIT
 version: 1.2.0
 date-released: 2026-04-29
@@ -24,3 +25,28 @@ identifiers:
   - type: doi
     value: 10.5281/zenodo.19847108
     description: "Concept DOI — always resolves to the latest version"
+  - type: doi
+    value: 10.3389/fbinf.2026.1878538
+    description: "Published article, Frontiers in Bioinformatics (2026)"
+preferred-citation:
+  type: article
+  title: "REACH: a reproducible benchmark for inter-lineage rare malignant cell detection in single-cell RNA sequencing"
+  authors:
+    - family-names: Satya Jaswanth
+      given-names: Moram Venkata
+      orcid: "https://orcid.org/0009-0003-2369-1692"
+    - family-names: Gavin
+      given-names: Amruthaluri
+    - family-names: Aakash
+      given-names: Padarthi
+    - family-names: Tejesh Kumar
+      given-names: Muttha
+    - family-names: Dasgupta
+      given-names: Abhijit
+  journal: "Frontiers in Bioinformatics"
+  volume: 6
+  start: 1878538
+  year: 2026
+  month: 10
+  doi: 10.3389/fbinf.2026.1878538
+  url: "https://www.frontiersin.org/journals/bioinformatics/articles/10.3389/fbinf.2026.1878538/full"
