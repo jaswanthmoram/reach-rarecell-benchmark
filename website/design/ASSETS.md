@@ -134,3 +134,127 @@ edit returned a wrong canvas and dimmed heatmap cores). Masters in `$SCRATCH/gen
    (`leaderboard-light.webp`, `methods-light.webp`, `cite-light.webp`, etc.) are untouched and still referenced.
    `home-hero-*` and `home-hero-portrait-*` were overwritten in place. Cite is now 1200x1200 (was 720x720).
 2. Dark variants are a deterministic recolour, not a model edit. If a model-drawn dark set is wanted, it costs 11 edits.
+
+## Round 8: 3D icons
+
+Source: Microsoft Fluent Emoji, 3D style, https://github.com/microsoft/fluentui-emoji (fetched 2026-10-20 from
+`raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/<Name>/3D/<name>_3d.png`, 256x256 RGBA PNG).
+Licence: **MIT**, Copyright (c) Microsoft Corporation. Keep this notice with the files (MIT asks for the copyright
+and permission notice in copies; a credit line "Fluent Emoji 3D (MIT, Microsoft)" in the repo README covers it).
+No attribution link is required on the page.
+
+Encode: `cwebp -q 85 -alpha_q 100 -exact` (alpha kept), 256 px master and `-resize 128 128`. Total 120 KB for 22 files.
+Component: `src/ui/Icon3D.tsx` (`<Icon3D name="microscope" size={56} />`, srcset 128w/256w, lazy, decorative alt="").
+Use at hero, empty-state and use-case-card spots only (48-96 px); never in nav, tables or buttons.
+
+| Name (`public/icons3d/<name>-128.webp`, `-256.webp`) | Fluent source | Intended use |
+|---|---|---|
+| `microscope` | Microscope | Cells, datasets, detection |
+| `dna` | Dna | Expression, cohorts |
+| `test-tube` | Test tube | Spike-in tracks, experiments |
+| `bar-chart` | Bar chart | Results, leaderboard |
+| `bullseye` | Bullseye | Accuracy, ranking without trophies |
+| `straight-ruler` | Straight ruler | Measured metrics, methods |
+| `card-file-box` | Card file box | Dataset catalogue |
+| `open-book` | Open book | Article, docs |
+| `laptop` | Laptop | Reproduce, terminal |
+| `memo` | Memo | Cite |
+| `busts-in-silhouette` | Busts in silhouette | Use cases (no skin-tone variant needed) |
+
+## Round 8: app icon and PWA files
+
+Rendered from the mark geometry in `public/favicon.svg` (3x3 plate, vermilion centre, cobalt reticle) with Pillow,
+8x supersampled: `scratchpad/r8/foundation/make_icons.py`. Graphite dots on a `#FAFAFA` tile, so vermilion stays the
+rare-cell colour and never becomes a brand fill.
+
+| File | Size | Notes |
+|---|---|---|
+| `favicon.ico` | 32 + 16 | 16 px frame drops the reticle (research r8, section 5) |
+| `favicon.svg` | vector | unchanged, has its own dark-scheme block |
+| `apple-touch-icon.png` | 180 | opaque #FAFAFA, about 20 px padding |
+| `icon-192.png`, `icon-512.png` | 192, 512 | `purpose: any`, rounded #FAFAFA tile, transparent corners |
+| `icon-maskable-512.png` | 512 | full bleed; farthest ink 193 px from centre, inside the 204.8 px safe circle |
+| `site.webmanifest` | | relative `src`, `start_url`/`scope` "./", name "REACH Benchmark", theme/background #FAFAFA |
+
+Linked from `index.html` with `%BASE_URL%` so they resolve under `/reach-rarecell-benchmark/`.
+
+## Round 8: hero motion
+
+Generated with ElevenLabs Creative (flow `7w1o9l1f38jRlNaUfakQ`), model **Veo 3.1** (`veo-3.1-generate-001`, 8 s,
+16:9, 720p; chosen over the Seedance default because its guide flags weak results on abstract prompts). 2 attempts,
+31,999 credits each (about USD 3.84 each, 63,997 credits in all).
+
+| Attempt | Prompt (short) | Verdict |
+|---|---|---|
+| 1 `h8jLmwWI6xKMdGLD6fvV` | Flat top-down macro field of graphite dots (#4A5160) on #FAFAFA, a few vermilion (#FF5A1F) rare cells, a thin cobalt (#2F5BEA) ring glides in and locks onto one, slow push-in, flat, shadowless, no text | **Kept, first 3.4 s only.** Frames 0-80 are flat and on-lane; the ring reaches and locks onto a vermilion cell by frame 80. After about frame 85 the model added a black microscope vignette and the ring jumps scale: off-brand, discarded. Ring came out navy and thick, background #F5F5F5. |
+| 2 `5YmJNTluQENSyFoL7Yry` | Same idea, uniform bright paper background, hairline ring, tiny dots | **Rejected.** Halftone moiré grid with motion-blurred smudges and vermilion dots in a rigid lattice; reads as a print pattern, not cells. Ring lock was clean but the field is off-brand. |
+
+Post-processing (`scratchpad/r8/hero/tools/grade.py`, Pillow + NumPy): flat-field correction (max-filtered, blurred
+background divided out, removes the vignette onset), then each pixel mapped to the site tokens by hue class:
+neutrals to the #FAFAFA to #4A5160 ramp, blues to #2F5BEA, reds to #FF5A1F. Output looked at frame by frame.
+
+| File | Notes |
+|---|---|
+| `public/images/hero/frames/f-001..064.webp` | 64 frames sampled evenly from graded frames 0-80, 1280 x 720, cwebp q70, 2.4 MB total. Desktop canvas sequence: load intro plays the first 55%, scroll scrubs the rest to the lock. |
+| `public/images/hero/poster-start.webp` | Frame 0, q80, 64 KB. First paint on desktop and phones (`fetchpriority="high"`); identical to sequence frame 1, so the canvas takes over without a jump. |
+| `public/images/hero/poster.webp` | Frame 80 (ring locked), q80, 26 KB. Static frame under reduced motion and "Pause motion". |
+| `public/video/hero/hero-loop.webm` / `.mp4` | Phones: frames 0-80 played forward then back (ping-pong, seamless), 960 x 540, 6.7 s, no audio. VP9 crf 50 718 KB; H.264 crf 26 faststart 630 KB. Plays muted only while on screen. |
+
+The stage caption says "Illustration": the clip is not per-cell output.
+
+## Round 11: hero v2
+
+Colour UMAP hero on an almost white canvas, to the owner's reference: cobalt/royal blue clusters with near-black navy
+cores, two violet clusters, grey-blue diffuse clusters, a branching stream with buds at the lower centre, pale-blue
+hairline density contours, faint dotted connectors, one vermilion rare cell with a soft pale-orange halo and a dashed
+ring, a dotted orange path of 4 smaller orange dots. Weight in the right 65%, left 30% calm. Light only (no dark pair yet).
+
+Tool: Higgsfield `gpt_image_2_5` sunburst, high, 2k. 2 generations (cap 3), 5.5 credits (1119.35 to 1113.85).
+Finishing (`$SCRATCH/r11/scripts/finish.py`, `python3 -I`, PIL + NumPy): cover-crop, canvas shifted to `#F8F9FC`
+with a distance-weighted offset (colours untouched), pixels within 3 levels snapped to the exact canvas, Lanczos
+resize, `cwebp -q 84 -sharp_yuv`. Decoded canvas reads `#F8FAFB` (1-level YUV drift, invisible).
+
+| File | Size | Job | Prompt (short) | Verdict |
+|---|---|---|---|---|
+| `home-hero-v2-light.webp` | 1920x1080, 218 KB | `74d76c0a-2737-4e38-be5e-3f272463fb03` (2688x1520, crop 4 px top/bottom) | "UMAP-style single-cell embedding, thousands of tiny crisp flat round dots on #F8F9FC; weight in right 65%, left 30% nearly empty; main cobalt cluster (#1F45C7/#2F5BEA/#5B7CFA) with navy core, second cobalt cluster far right, two violet clusters (#6D4AE0 to #8A5CF6), 3-4 grey-blue diffuse clusters, branching stream with buds at lower centre-right; 1px pale-blue density contours; faint dotted connectors; exactly ONE vermilion #FF5A1F rare cell with pale-orange halo and dashed orange ring, dotted orange path with 4-5 small orange dots; soft out-of-focus pale discs; no text, no 3D, no glow" | Accept, first try. Crisp separated dots at full size, no text, left third calm. Minor: violets lean electric (about #5A2BE0 in the cores) |
+| `home-hero-v2-portrait-light.webp` | 1080x1350 (4:5), 156 KB | `51c7fc7c-7c2f-4936-99d9-b9042ac4f809` (1792x2240, edit with the 16:9 job as `image_references`) | "Recompose the reference as 4:5: same style; all clusters in the upper-right two thirds, stream and buds below the main cluster ending at about 65% height; rare cell at the upper-left edge of the main cluster, orange path up-left; lower-left third calm" | Accept. Its own composition, not a crop (a crop of the 16:9 would put a bud in the lower left). Clusters end at about 70% height; lower-left calm |
+
+Positions in `home-hero-v2-light.webp` (% of width, % of height), measured from pixel masks of the final file:
+rare cell 46.2 / 23.2 (887, 251 px); main blue cluster centre 56.9 / 33.8 (navy core 55.8 / 35.1); violet clusters
+upper 83.5 / 16.0 and lower 89.3 / 51.2; branching stream fork 60.5 / 63.9, stream with its 3 buds 59.1 / 79.3.
+
+## Round 11: hero v3
+
+Combines the owner's two reference mockups: reference A's dense UMAP (sky blue to cobalt to navy main cluster, dashed
+elliptical contour with a cobalt ring marker, out-of-focus pale discs) with reference B's layout (hexagonal dot
+texture with a pale-blue outline contour, separate navy cluster upper-left, violet crescent on the right, branching
+stream with round buds, vermilion rare cell near the top centre with a dashed orange path down to the left cluster).
+Weight in the right 62%, left 35% calm (0.07% non-canvas pixels). Light only.
+
+Tool: Higgsfield `gpt_image_2_5` sunburst, high, 2k. 2 generations (cap 3), 5.5 credits (1113.85 to 1108.35).
+Finishing (`$SCRATCH/r11v3/scripts/finish_v3.py`, `python3 -I`, PIL + NumPy): the v2 pipeline (cover-crop, canvas
+shifted to `#F7F8FC` with a distance-weighted offset, pixels within 3 levels snapped, Lanczos) plus a violet soften:
+pixels with hue 250-295 deg keep 85% of their saturation and lift 6% toward white, so the crescent cores sit near
+`#9C6BFF` instead of `#8039EF`. Then `cwebp -q 84 -sharp_yuv`.
+
+| File | Size | Job | Prompt (short) | Verdict |
+|---|---|---|---|---|
+| `home-hero-v3-light.webp` | 1920x1080, 251 KB | `1b40bbc8-a0ed-4712-819b-2550230228f7` (2688x1520, crop 4 px top/bottom; v2 job `74d76c0a` as style-only `image_references`) | "Use the reference ONLY for rendering style, NEW composition; canvas #F7F8FC; weight in right 62%, left 35% only 8-12 faint dots; huge main cluster at 60/42 with crisp hexagonal dot texture, sky blue #8FB8FF left edge to cobalt #2F5BEA to navy #0B1E5B core, 1px pale-blue outline contour; separate navy cluster at 44/30; ONE vermilion #FF5A1F rare cell at 54/13 with soft pink-orange halo and dashed orange ring, dashed orange line curving down-left to the navy cluster; muted violet crescent (#7C4DFF to #9C6BFF) at 86/40; branching stream with 3 buds; oblong cobalt cluster at 82/72 in a dashed ellipse with a bold cobalt ring marker; grey-blue clusters, dotted cobalt marker path; out-of-focus lavender discs lower right; flat, no glow except the halo, no text/UI/logos" | Accept, first try. Crisp separate dots at full size, no text, left calm, every requested element present. Violets came out slightly electric in the cores; softened in finishing |
+| `home-hero-v3-portrait-light.webp` | 1080x1350 (4:5), 180 KB | `d1693a5c-2894-4bd0-9c83-5ea6583e4731` (1792x2240, edit with the 16:9 job as `image_references`) | "Recompose the reference as 4:5, same style and elements; all in the upper-right two thirds: rare cell 50/8, main cluster 62/32, crescent at the right edge, dashed-ellipse cluster 82/50, buds end by 66% height right of 40% width; lower-left third calm" | Accept. Own composition, not a crop. Buds end at about 70% height; lower-left calm apart from a few faint dots and soft discs at the lower right |
+
+Positions in `home-hero-v3-light.webp` (% of width / % of height), centroids of pixel masks in the final file:
+rare cell 55.6 / 8.8; main cluster centre 56.9 / 41.3 (navy core 59.5 / 43.0); upper-left navy cluster 43.0 / 24.5;
+violet crescent 88.5 / 32.6; stream buds 48.9 / 82.3, 61.4 / 90.5, 73.7 / 83.0; dashed-ellipse cluster 86.2 / 73.2
+(ring marker at about 89.9 / 66.2).
+
+## Round 12: films (owner-supplied)
+
+| File | Source | Encode | Size | Used on |
+|---|---|---|---|---|
+| `public/video/reach-overview.mp4` | Owner's 78 s overview film (3824x2160, AAC) | H.264 1920 wide, CRF 26, faststart, AAC 96k | 3.9 MB | Home "REACH in 78 seconds", README |
+| `public/video/reach-overview-960.mp4` | same | H.264 960 wide, CRF 27, AAC 80k | 2.1 MB | Home on screens under 768 px |
+| `public/video/reach-overview-poster.webp` / `.jpg` | frame at 3 s | cwebp q80 / JPEG | 49 / 102 KB | Home poster, README thumbnail |
+| `public/video/reach-anatomy.mp4` | Owner's 8 min film "Anatomy of a benchmark: engineering REACH for scRNA-seq" (1280x720) | H.264 CRF 29, faststart, AAC 80k | 20 MB | Home link, README |
+| `public/video/reach-anatomy-poster.jpg` | frame at 60 s | JPEG | 77 KB | README thumbnail |
+
+The 24 s HyperFrames explainer loop (`reach-explainer*`) and its source are retired; the overview film replaces it.

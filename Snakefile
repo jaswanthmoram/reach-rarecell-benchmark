@@ -63,9 +63,18 @@ rule public_phase12:
         SNAPSHOTS,
         f"{PHASE11_DIR}/leaderboard.csv",
     output:
-        PHASE12_FIGURES,
+        [f for f in PHASE12_FIGURES if "Fig11_" not in f],
     shell:
         "python scripts/reproduce_from_snapshots.py"
+
+
+rule public_fig11:
+    input:
+        "data/results/track_f/track_a_vs_f_comparison.csv",
+    output:
+        f"{PHASE12_DIR}/Fig11_Track_F_vs_Track_A.png",
+    shell:
+        "python scripts/generate_track_f_figure.py --comparison {input} --output {output}"
 
 
 rule toy_data:

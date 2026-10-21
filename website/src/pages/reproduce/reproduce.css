@@ -1,0 +1,8 @@
+/* Reproduce hero band (canvas board P07): the moving cells and the scan are drawn on a canvas (GateBand.tsx);
+   only the lit gates and the sidebar strip transition here. */
+.rp-lit { transition: opacity .3s cubic-bezier(.16, 1, .3, 1); }
+.rp-seg { transition: background-color .3s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rp-lit, .rp-seg { transition: none; }
+}

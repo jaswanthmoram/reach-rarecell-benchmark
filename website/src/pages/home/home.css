@@ -1,0 +1,147 @@
+/* Overview: the live field (cohort clouds sway, haze drifts, rare cells breathe, the cobalt finder rings each in turn).
+ * Every loop is a transform or opacity on an HTML layer that wraps a static SVG, so it runs on the compositor; the
+ * field's useLoopGate holds them all (data-loop="hold") off-screen, in a hidden tab, under reduced or paused motion.
+ * Entrances come from the shared kit (.rise, Reveal, SplitText); only the field and hover details live here. */
+@keyframes hm-found { 0% { transform: scale(2.2); opacity: 0; } 30% { opacity: 1; } 55% { transform: scale(1); opacity: 1; } 85% { opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+@keyframes hm-sway { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(4px, -3px); } }
+@keyframes hm-haze { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-8px, 4px); } }
+@keyframes hm-breathe { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+.hm-cloud { animation: hm-sway 9s ease-in-out infinite; }
+.hm-cloud-1 { animation-duration: 11s; animation-delay: -3s; }
+.hm-cloud-2 { animation-duration: 13s; animation-delay: -6s; }
+.hm-cloud-3 { animation-duration: 10s; animation-delay: -2s; }
+.hm-far { animation: hm-haze 24s ease-in-out infinite; }
+.hm-breathe { animation: hm-breathe 2.6s ease-in-out infinite; }
+.hm-finder-pos { transform: translate(-50%, -50%); pointer-events: none; }
+.hm-finder { border-width: 1.25px; animation: hm-found 1.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* Field card: the field fades out at its top and bottom edges inside its card. */
+.hm-field-mask-y { mask-image: linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent); }
+
+/* Hero media stage: enters once as the headline's first beat lands. */
+@keyframes hm-stage-in { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
+.hm-stage-in { animation: hm-stage-in var(--dur-4) var(--ease-out) 240ms both; }
+
+.hm-pill { transition: border-color var(--dur-1) ease, color var(--dur-1) ease; }
+
+/* Press: 1px settle. Hover details (pointer devices only): arrows nudge 2px, track rows lift their letter chip. */
+.hm-press { transition: transform var(--dur-1) var(--ease-out), background-color var(--dur-1) ease, border-color var(--dur-1) ease, color var(--dur-1) ease; }
+.hm-press:active { transform: translateY(1px); }
+.hm-nudge, .hm-nudge-up { transition: transform var(--dur-1) var(--ease-out); }
+.hm-row { transition: background-color var(--dur-1) ease; }
+.hm-chip { transition: background-color var(--dur-1) ease, color var(--dur-1) ease, border-color var(--dur-1) ease; }
+@media (hover: hover) and (pointer: fine) {
+  .group:hover .hm-nudge { transform: translateX(2px); }
+  .group:hover .hm-nudge-up { transform: translate(2px, -2px); }
+  .hm-row:hover { background-color: var(--row-hover); }
+  .hm-row:hover .hm-chip { background-color: var(--ink); border-color: var(--ink); color: var(--canvas); }
+}
+
+/* Run-it stage tiles: resting card (--elev-1); the selected tile steps up to --elev-2 with a cobalt hairline. Shadow and
+ * colour only, no travel (tabs are a frequently used control). */
+.hm-stage { box-shadow: var(--elev-1); transition: box-shadow var(--dur-1) ease, border-color var(--dur-1) ease; }
+.hm-stage-on { box-shadow: var(--elev-2); border-color: color-mix(in srgb, var(--accent) 62%, var(--line)); }
+
+/* Links whose words carry .fx-underline: the cobalt line follows the whole link (icon and padding included), and a
+ * track row draws it under its title. */
+.hm-ul:focus-visible .fx-underline::after, .hm-row:focus-visible .fx-underline::after { transform: scaleX(1); transform-origin: 0 50%; }
+@media (hover: hover) and (pointer: fine) {
+  .hm-ul:hover .fx-underline::after, .hm-row:hover .fx-underline::after { transform: scaleX(1); transform-origin: 0 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hm-cloud, .hm-far, .hm-breathe { animation: none; }
+  .hm-finder { animation: none; opacity: 0; }
+  .hm-press, .hm-nudge, .hm-nudge-up { transition: none; }
+  .hm-stage-in { animation: none; }
+  .hm-press:active { transform: none; }
+}
+
+/* ---------- Hero ---------- */
+/* Headline: line 1 bold display sans, line 2 italic display serif. Every word rises out of its own mask (padding
+ * keeps ascenders, descenders and the italic overhang inside). */
+.hm-line-1 { font-size: clamp(56px, 7.4vw, 108px); font-weight: 800; line-height: 0.98; letter-spacing: -0.045em; }
+.hm-line-2 { font-family: var(--font-display-serif); font-style: italic; font-weight: 400; font-size: clamp(50px, 6.6vw, 96px); line-height: 1.02; letter-spacing: -0.02em; }
+@keyframes hm-word { from { transform: translateY(112%); } }
+.hm-mask { display: inline-block; overflow: hidden; vertical-align: top; padding: 0.06em 0 0.16em; margin: -0.06em 0 -0.16em; }
+.hm-mask-italic { padding: 0.04em 0.1em 0.2em; margin: -0.04em -0.1em -0.2em; }
+.hm-word { display: inline-block; animation: hm-word 560ms var(--ease-out) var(--d, 0ms) both; }
+/* Line 2: one ramp (cobalt -> blue -> violet, then back, so hover can slide it) painted word by word. Each word's
+ * background is the 2-unit ramp scaled so the word shows its own slice [--p0, --p1] of the first unit; hover shifts
+ * every slice by half a unit. Fallback (no background-clip: text): the darkest stop, 7.4:1 on the canvas; the
+ * lightest stop (#2F5BEA) is 5.3:1, the violet end 5.4:1. */
+.hm-grad { --ga: #1f45c7; --gb: #2f5bea; --gc: #6d4ae0; --gs: 0; color: var(--ga); }
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .hm-grad-word {
+    --f0: calc((var(--p0) + var(--gs)) / 2);
+    --f1: calc((var(--p1) + var(--gs)) / 2);
+    color: transparent;
+    background-image: linear-gradient(90deg, var(--ga) 0%, var(--gb) 25%, var(--gc) 50%, var(--gb) 75%, var(--ga) 100%);
+    background-size: calc(100% / (var(--f1) - var(--f0))) 100%;
+    background-position: calc(100% * var(--f0) / (1 - (var(--f1) - var(--f0)))) 0;
+    background-repeat: no-repeat;
+    -webkit-background-clip: text;
+    background-clip: text;
+    transition: background-position 1.6s var(--ease-in-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .hm-line-2:hover { --gs: 0.5; }
+  }
+}
+/* Vermilion rule under the headline: draws in once the words have landed. */
+@keyframes hm-rule { from { transform: scaleX(0); } }
+.hm-rule { display: block; width: 40px; height: 3px; border-radius: 2px; background: var(--signal); transform-origin: 0 50%; animation: hm-rule 420ms var(--ease-out) 320ms both; }
+
+/* Desktop stage: a size container, so the artwork box can reproduce the image's exact geometry (cards pin to it). */
+.hm-stage-box { container-type: size; --edge: max(24px, calc((100vw - 1240px) / 2 + 24px)); }
+/* 16:9 box sized from the stage so the whole cluster family (34% to 98% of the image width) fits beside the text, and
+ * no taller than the stage allows; the image's empty left 34% sits off the stage's left edge. Vertically centred, but
+ * never so high that the rare cell (8.8% down the image) slips into the top fade. The image fades at its own edges
+ * (the box can sit inside the stage). Cards use % of this box = % of the image. */
+.hm-artbox {
+  --aw: min(156cqw, 160cqh);
+  --ah: calc(var(--aw) * 0.5625);
+  position: absolute;
+  width: var(--aw); height: var(--ah);
+  left: calc(var(--aw) * -0.34);
+  top: max(calc((100cqh - var(--ah)) / 2), calc(11cqh - 0.088 * var(--ah)));
+}
+.hm-bg-fade {
+  -webkit-mask-image: linear-gradient(to right, transparent 34%, #000 42%, #000 95%, transparent), linear-gradient(to bottom, transparent 0, #000 6%, #000 88%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent 34%, #000 42%, #000 95%, transparent), linear-gradient(to bottom, transparent 0, #000 6%, #000 88%, transparent 100%);
+  mask-composite: intersect;
+}
+.hm-bg-art { transform: translate3d(var(--hx, 0), var(--hy, 0), 0); transition: transform 600ms var(--ease-out); }
+
+/* Callout cards: the anchor is a zero-size point on its feature; the card and its leader line hang off it in px. */
+.hm-anchor { position: absolute; width: 0; height: 0; }
+.hm-card { box-shadow: 0 1px 2px rgb(14 17 22 / 0.05), 0 8px 24px -6px rgb(14 17 22 / 0.12); transition: border-color var(--dur-1) ease, box-shadow var(--dur-1) ease; }
+@media (hover: hover) and (pointer: fine) {
+  a.hm-card:hover { border-color: var(--line-strong); box-shadow: 0 1px 2px rgb(14 17 22 / 0.06), 0 12px 28px -6px rgb(14 17 22 / 0.16); }
+}
+/* Leader line: draws from the feature to its card after the card has landed (pathLength 1). */
+@keyframes hm-lead { from { stroke-dashoffset: 1; } }
+.hm-lead { stroke-dasharray: 1; animation: hm-lead 520ms var(--ease-out) var(--d, 0ms) both; }
+@keyframes hm-pin { from { opacity: 0; transform: scale(0.4); } }
+.hm-pin { transform-box: fill-box; transform-origin: center; animation: hm-pin 300ms var(--ease-out) var(--d, 0ms) both; }
+
+/* Under the hero text: a soft pool of the canvas colour over the flow field. */
+.hm-calm { background: radial-gradient(closest-side, rgb(250 250 250 / 0.72), rgb(250 250 250 / 0.45) 60%, transparent); }
+
+/* Phones and tablets: the upper part of the portrait artwork (rare cell, main cluster, violet clusters) behind the
+ * top-right of the text; it fades out above the gradient beat and the subtext so both keep AA over it. */
+.hm-backdrop {
+  width: min(82%, 460px); aspect-ratio: 4 / 5; opacity: 0.62;
+  -webkit-mask-image: linear-gradient(to bottom, #000 20%, transparent 41%), linear-gradient(to left, #000 45%, transparent 96%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to bottom, #000 20%, transparent 41%), linear-gradient(to left, #000 45%, transparent 96%);
+  mask-composite: intersect;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hm-bg-art { transition: none; transform: none; }
+  .hm-word, .hm-rule, .hm-lead, .hm-pin { animation: none; }
+  .hm-grad-word { transition: none; }
+}

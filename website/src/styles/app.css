@@ -1,0 +1,358 @@
+/* REACH web: tokens taken from the "REACH Benchmark · Web" design canvas (light, lab-instrument). */
+@import "tailwindcss";
+
+:root {
+  --canvas: #fafafa;
+  --surface: #ffffff;
+  --sunk: #f2f3f5;
+  --ink: #0e1116;
+  --ink-2: #4a5160;
+  --ink-3: #626977;
+  --line: #e2e4e8;
+  --line-strong: #cdd1d8;
+  --accent: #2f5bea;
+  --accent-ink: #1f45c7;
+  --accent-tint: #eef2fe;
+  --signal: #ff5a1f;
+  --ok: #17734b;
+  --warn: #8f5d0f;
+  --bad: #c0392b;
+  --cell: #8a909c;
+
+  /* Method identity (marks only; text stays ink). References stay neutral and are drawn dashed. */
+  --m-fire: #2563c9;
+  --m-cellsius: #0f8c7e;
+  --m-scmalignantfinder: #9c5b00;
+  --m-rareq: #8a3fc4;
+  --m-sccad: #c2357a;
+  --m-deepscena: #5b6b12;
+  --m-casee: #7a4e2d;
+  --m-expr_threshold: #6b7280;
+  --m-random_baseline: #8a909c;
+  --m-hvg_logreg: #0e1116;
+
+  /* Surfaces for states (audit S-3, S-12). */
+  --nav-active: #ececef;
+  --header-glass: rgb(250 250 250 / 0.82);
+  --row-hover: #f6f7f8;
+  --chip-active: #eceef1;
+
+  /* Motion tokens: one scale for the whole site. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --dur-1: 150ms; /* hover, press */
+  --dur-2: 220ms; /* disclosure, sheets, menus */
+  --dur-3: 420ms; /* entrances */
+  --dur-4: 600ms; /* one authored hero beat */
+
+  /* Sticky chrome: scroll targets clear it (SectionNav adds --section-nav-h while mounted). */
+  --header-h: 60px;
+  color-scheme: light; /* light only this round; there is no dark token set */
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-sunk: var(--sunk);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-tint: var(--accent-tint);
+  --color-signal: var(--signal);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
+  --color-cell: var(--cell);
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Display faces for headings (the Overview hero now; available site-wide as `font-display` and `font-display-serif`). */
+  --font-display: "Inter Tight", "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display-serif: "Instrument Serif", ui-serif, Georgia, "Times New Roman", serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --radius-chip: 4px;
+  --radius-card: 8px;
+  --shadow-pop: 0 12px 32px rgb(14 17 22 / 0.10);
+}
+
+@layer base {
+  html { background: var(--canvas); color: var(--ink); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  body { margin: 0; min-height: 100dvh; overflow-x: clip; }
+  ::selection { background: var(--accent-tint); color: var(--accent-ink); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  a { color: var(--accent-ink); }
+  [id] { scroll-margin-top: calc(var(--header-h) + var(--section-nav-h, 0px) + 16px); }
+  td, th, .tabular { font-variant-numeric: tabular-nums; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  }
+}
+
+@layer components {
+  /* Mono eyebrow, as on every canvas board: "TRACK A · MEDIAN AP". */
+  .eyebrow { font-family: var(--font-mono); font-size: 11px; line-height: 1rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+  .card { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
+}
+
+/* ---------- Shared motion (one stylesheet; pages use these, not their own copies) ---------- */
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+@keyframes fade { from { opacity: 0; } }
+@keyframes pop { from { opacity: 0; transform: scale(0.96) translateY(-4px); } }
+@keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
+@keyframes found { 0%, 40% { transform: scale(1.8); opacity: 0; } 60%, 90% { transform: scale(1); opacity: 1; } 100% { opacity: 0; } }
+@keyframes drift { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(3px, -2px); } }
+@keyframes float3d { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-3px) rotate(-2deg); } }
+/* Entrances on mount: add `[animation-delay:120ms]` for a second beat. In a layer so Tailwind's animation-delay and
+ * animation-duration utilities on the same element win (unlayered, the shorthand reset them to 0s). */
+@layer components {
+  .rise { animation: rise var(--dur-3) var(--ease-out) both; }
+  .fade-in { animation: fade var(--dur-3) var(--ease-out) both; }
+  .pop-in { animation: pop var(--dur-2) var(--ease-out) both; transform-origin: top right; }
+}
+/* Entrance on view without GSAP (shell): parent gets data-reveal="wait" then "in"; children stagger by --i. */
+[data-reveal] > * { transition: opacity var(--dur-3) var(--ease-out), transform var(--dur-3) var(--ease-out); transition-delay: calc(var(--i, 0) * 50ms); }
+[data-reveal="wait"] > * { opacity: 0; transform: translateY(12px); }
+.skeleton { border-radius: 4px; background: linear-gradient(90deg, #eceef1 0%, #f6f7f8 50%, #eceef1 100%); background-size: 400px 100%; animation: shimmer 1.4s linear infinite; }
+.ring-found { animation: found 2.4s var(--ease-out) infinite; transform-origin: center; transform-box: fill-box; }
+.drift { animation: drift 6s ease-in-out infinite; }
+
+/* Kit helpers (src/ui/motion). Nothing is hidden in CSS: headings and sections paint at first paint (r10). */
+.countup { white-space: nowrap; }
+.icon3d { display: inline-block; flex-shrink: 0; }
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .icon3d:hover, .group:hover .icon3d { animation: float3d 1.6s ease-in-out infinite; }
+}
+
+/* Type scale for the shared page primitives (src/ui). */
+.page-title { font-size: clamp(36px, 4.2vw, 56px); line-height: 1.04; letter-spacing: -0.03em; font-weight: 600; view-transition-name: page-title; }
+.section-title { font-size: clamp(26px, 2.6vw, 36px); line-height: 1.1; letter-spacing: -0.02em; font-weight: 600; }
+
+/* Sliding pill (navbar, SectionNav): one element sized to the active item, moved with transform only (FLIP). */
+.slide-pill { position: absolute; left: 0; top: 0; z-index: 0; pointer-events: none; border-radius: 999px; background: var(--nav-active); opacity: 0; transform-origin: 0 0; transition: opacity var(--dur-1) var(--ease-out); }
+.slide-pill[data-ready="1"] { transition: transform var(--dur-3) var(--ease-out), opacity var(--dur-1) var(--ease-out); }
+
+/* PageHeader art parallax: drifts up 6% of its height as the header scrolls away. Scroll-driven (compositor), desktop
+ * with a fine pointer only; still under reduced or paused motion and where scroll timelines are missing. */
+@keyframes ph-drift { to { transform: translateY(-6%); } }
+@supports (animation-timeline: view()) {
+  @media (min-width: 1024px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .ph-view { view-timeline-name: --ph; }
+    .ph-parallax { animation: ph-drift linear both; animation-timeline: --ph; animation-range: exit 0% exit 100%; }
+    [data-motion="paused"] .ph-parallax { animation: none; }
+  }
+}
+
+/* SectionNav: sticky strip under the header. */
+.section-nav { position: sticky; top: var(--header-h); z-index: 20; background: var(--header-glass); backdrop-filter: blur(12px) saturate(1.4); -webkit-backdrop-filter: blur(12px) saturate(1.4); box-shadow: inset 0 -1px 0 var(--line); }
+.section-nav-track { min-height: 44px; scrollbar-width: none; }
+.section-nav-track::-webkit-scrollbar { display: none; }
+
+/* Scrolly: graphic pins (sticky, not scroll-jacked) from 1024px only. */
+.scrolly-pin { position: sticky; top: calc(var(--header-h) + var(--section-nav-h, 0px) + 24px); align-self: start; }
+.scrolly-step { transition: opacity var(--dur-2) var(--ease-out); }
+@media (min-width: 1024px) {
+  .scrolly-step { min-height: 80vh; display: flex; align-items: center; opacity: 0.38; }
+  .scrolly-step[data-active] { opacity: 1; }
+}
+
+/* Header mark (canvas navbar): on load, and once per hover/focus of the home link, the reticle swings in and locks;
+ * neighbours dip; signal pulses. Finite (1.2s): it never loops. data-mark-run alternates a/b to restart it. */
+@keyframes pm-cell-a { 0%, 100% { transform: scale(1); } 30% { transform: scale(0.62); } 62% { transform: scale(1); } }
+@keyframes pm-cell-b { 0%, 100% { transform: scale(1); } 30% { transform: scale(0.62); } 62% { transform: scale(1); } }
+@keyframes pm-signal-a { 0%, 48%, 100% { transform: scale(1); } 66% { transform: scale(1.28); } 86% { transform: scale(1); } }
+@keyframes pm-signal-b { 0%, 48%, 100% { transform: scale(1); } 66% { transform: scale(1.28); } 86% { transform: scale(1); } }
+@keyframes pm-find-a { 0% { opacity: 0; transform: rotate(-70deg) scale(1.55); } 55%, 100% { opacity: 1; transform: none; } }
+@keyframes pm-find-b { 0% { opacity: 0; transform: rotate(-70deg) scale(1.55); } 55%, 100% { opacity: 1; transform: none; } }
+.pm-cell, .pm-signal, .pm-ring { transform-box: fill-box; transform-origin: center; }
+[data-mark-run] .pm-cell { animation: pm-cell-a 1.2s var(--ease-out) both; }
+[data-mark-run] .pm-signal { animation: pm-signal-a 1.2s var(--ease-out) both; }
+[data-mark-run] .pm-ring { animation: pm-find-a 1.2s var(--ease-out) both; }
+[data-mark-run="b"] .pm-cell { animation-name: pm-cell-b; }
+[data-mark-run="b"] .pm-signal { animation-name: pm-signal-b; }
+[data-mark-run="b"] .pm-ring { animation-name: pm-find-b; }
+
+/* ---------- Loading, route progress (src/shell/states.tsx) ----------
+ * Loader: blank for 150ms (a fast chunk never flashes it), then fades in. The reticle sweeps TL, TR, BR and locks on
+ * the signal cell; 1.8s per sweep, six sweeps, then it rests locked. Static blocks, no shimmer. */
+@keyframes ld-in { from { opacity: 0; } }
+@keyframes ld-sweep {
+  0% { opacity: 0; transform: translate(-12px, -12px) scale(0.9); }
+  8% { opacity: 1; }
+  28% { transform: translate(12px, -12px) scale(0.9); }
+  48% { transform: translate(12px, 12px) scale(0.9); }
+  68% { transform: translate(0, 0) scale(1.3); }
+  80%, 100% { opacity: 1; transform: translate(0, 0) scale(1); }
+}
+@keyframes ld-pulse { 0%, 76%, 100% { transform: scale(1); } 86% { transform: scale(1.3); } }
+.ld-root { animation: ld-in 240ms var(--ease-out) 150ms both; }
+.ld-reticle, .ld-signal { transform-box: fill-box; transform-origin: center; }
+.ld-reticle { animation: ld-sweep 1.8s var(--ease-in-out) 150ms 6 both; }
+.ld-signal { animation: ld-pulse 1.8s var(--ease-out) 150ms 6 both; }
+
+/* Route-progress bar: grows while a page change is in flight, sweeps to the end and fades when it lands. */
+@keyframes rp-grow { from { transform: scaleX(0); } to { transform: scaleX(0.86); } }
+.route-progress { position: fixed; left: 0; right: 0; top: 0; z-index: 70; height: 2px; background: var(--accent); transform-origin: 0 50%; transform: scaleX(0); opacity: 0; pointer-events: none; }
+.route-progress[data-state="run"] { opacity: 1; animation: rp-grow 2.4s cubic-bezier(0.1, 0.6, 0.2, 1) 120ms both; }
+.route-progress[data-state="done"] { opacity: 0; transform: scaleX(1); transition: transform 180ms var(--ease-out), opacity 200ms var(--ease-out) 160ms; }
+
+/* ---------- Header chrome ---------- */
+/* Glass and hairline appear only once the page has scrolled (data-scrolled from an IntersectionObserver sentinel). */
+.site-header::before, .site-header::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity var(--dur-2) var(--ease-out); }
+.site-header::before { z-index: -1; background: var(--header-glass); backdrop-filter: blur(14px) saturate(1.5); -webkit-backdrop-filter: blur(14px) saturate(1.5); }
+.site-header::after { top: auto; height: 1px; background: var(--line); }
+.site-header[data-scrolled]::before, .site-header[data-scrolled]::after { opacity: 1; }
+.scroll-progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--accent); transform-origin: 0 50%; transform: scaleX(0); opacity: 0; transition: opacity var(--dur-2) var(--ease-out); pointer-events: none; }
+.site-header[data-scrolled] .scroll-progress { opacity: 1; }
+/* Mobile sheet: slides 8px and fades (220ms); stays mounted so it can animate out. */
+.sheet { position: absolute; left: 0; right: 0; top: 100%; height: calc(100dvh - var(--header-h)); background: rgb(14 17 22 / 0.18); opacity: 0; visibility: hidden; transition: opacity var(--dur-2) var(--ease-out), visibility 0s linear var(--dur-2); }
+.sheet-panel { transform: translateY(-8px); transition: transform var(--dur-2) var(--ease-out); }
+.sheet[data-open] { opacity: 1; visibility: visible; transition: opacity var(--dur-2) var(--ease-out), visibility 0s; }
+.sheet[data-open] .sheet-panel { transform: none; }
+
+/* ---------- Route change ----------
+ * The main column cross-fades with an 8px rise; the header shows only its new state; the page H1 (.page-title) morphs. */
+@keyframes vt-out { to { opacity: 0; } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(8px); } }
+::view-transition-old(page) { animation: vt-out 180ms var(--ease-out) both; }
+::view-transition-new(page) { animation: vt-in 320ms var(--ease-out) 60ms both; }
+::view-transition-group(page) { animation: none; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 180ms; }
+/* The header never cross-fades: its old snapshot is dropped and the live new header (pill already sliding) sits
+ * above the page groups, so it can never show two states or be covered by the outgoing page while scrolled. */
+::view-transition-group(site-header) { animation: none; z-index: 1; }
+::view-transition-old(site-header) { display: none; }
+::view-transition-new(site-header) { animation: none; }
+::view-transition-group(page-title) { animation-duration: 320ms; animation-timing-function: var(--ease-out); }
+/* Named only during a route transition (router adds html.vt-nav): a named element is a backdrop root, so a
+ * permanent name would stop the header glass from blurring the page scrolling under it. */
+.vt-nav .vt-header { view-transition-name: site-header; }
+.vt-main { view-transition-name: page; }
+/* Browsers without View Transitions get the same rise on mount. */
+@supports not (view-transition-name: none) {
+  .route-in { animation: vt-in 320ms var(--ease-out) both; }
+}
+
+/* ---------- Pause motion (WCAG 2.2.2): footer switch sets data-motion="paused" on <html> ----------
+ * Pages: add class "loop" to anything that animates forever; paused.ts also pauses any infinite animation it finds. */
+[data-motion="paused"] :is(.loop, .ring-found, .drift, .skeleton, .icon3d) { animation-play-state: paused !important; }
+/* Finite one-shots (header mark, loader reticle) are simply not played while paused: their rest state is the still mark. */
+[data-motion="paused"] :is(.pm-cell, .pm-signal, .pm-ring, .ld-reticle, .ld-signal) { animation: none !important; }
+
+/* ---------- Loop policy (r10) ----------
+ * Every infinite CSS animation must sit inside a gated element: useLoopGate's loopProps or <LoopHost> (src/ui/motion).
+ * The gate sets data-loop="hold" off-screen, in a hidden tab, under reduced or paused motion; a hidden tab also sets
+ * data-hidden on <html>. Either holds every animation inside. Budget: <= 20 animated elements per scene. */
+[data-loop="hold"], [data-loop="hold"] *, [data-loop="hold"] *::before, [data-loop="hold"] *::after,
+html[data-hidden] *, html[data-hidden] *::before, html[data-hidden] *::after { animation-play-state: paused !important; }
+/* One-shot entrances inside a gated host still play to their end: holding them would leave them on frame 0. */
+[data-loop="hold"] :is(.rise, .fade-in, .pop-in) { animation-play-state: running !important; }
+
+/* After a route change focus lands on the page's h1 (tabindex -1): a reading position, not a control, so no ring. */
+#main :is(h1, [tabindex="-1"]):focus { outline: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pm-cell, .pm-signal, .pm-ring, .ld-reticle, .ld-signal, .skeleton, .ring-found, .drift, .loop, .rise, .fade-in, .pop-in, .route-in { animation: none !important; }
+  [data-reveal="wait"] > * { opacity: 1; transform: none; }
+  ::view-transition-old(page), ::view-transition-new(page), ::view-transition-group(page-title) { animation: none; }
+}
+
+/* ---------- Effects (round 9): src/ui/effects/README section in src/ui/README.md ----------
+ * Elevation, hairlines, grain, sheen and underline. Only transform, opacity and clip-path animate; shadows change by
+ * fading a pre-drawn shadow layer (opacity), never by transitioning box-shadow. Hover is gated by (hover: hover).
+ * Reduced motion and Pause motion keep every state change but drop the travel (no translate). */
+:root {
+  --elev-0: 0 0 0 0 rgb(14 17 22 / 0);                                            /* flat: rows, plates */
+  --elev-1: 0 1px 2px rgb(14 17 22 / 0.05), 0 1px 1px rgb(14 17 22 / 0.03);       /* resting card */
+  --elev-2: 0 8px 20px -6px rgb(14 17 22 / 0.12), 0 2px 6px rgb(14 17 22 / 0.05); /* hover, focus-within */
+  --elev-3: 0 12px 32px rgb(14 17 22 / 0.10);                                     /* menus, popovers (= --shadow-pop) */
+  --lift: -2px;
+  --fx-hairline: linear-gradient(90deg, var(--line) 0%, color-mix(in srgb, var(--accent) 38%, var(--line)) 50%, var(--line) 100%);
+  --fx-hairline-x: linear-gradient(90deg, transparent 0%, var(--line-strong) 14%, color-mix(in srgb, var(--accent) 42%, var(--line-strong)) 50%, var(--line-strong) 86%, transparent 100%);
+  --fx-sheen: color-mix(in srgb, var(--accent) 9%, transparent);
+  --fx-grain-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .055 0 0 0 0 .067 0 0 0 0 .086 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* 1px gradient border via mask (cards, panels). The element keeps its own 1px border colour as the fallback. */
+/* In a layer so utilities (sticky, absolute) on the same element still win. */
+@layer components {
+  .fx-hairline-gradient, .hover-lift, .fx-card, .fx-sheen, .fx-underline { position: relative; }
+}
+.fx-hairline-gradient { border-color: transparent; }
+.fx-hairline-gradient::before {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; pointer-events: none;
+  background: var(--fx-hairline);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+/* Header: the scrolled hairline (site-header::after) becomes a gradient that fades out at both ends. */
+.site-header.fx-header-hairline::after { background: var(--fx-hairline-x); }
+
+/* Elevation steps: rest (--elev-1), hover/focus-within (--elev-2, lifted 2px), press (back to rest, 0.5% smaller).
+ * .hover-lift is the behaviour alone; .fx-card adds the surface (border, radius, white). Uses ::after. */
+.hover-lift, .fx-card { isolation: isolate; box-shadow: var(--elev-1); transition: transform var(--dur-2) var(--ease-out); }
+.fx-card { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
+.hover-lift::after, .fx-card::after {
+  content: ""; position: absolute; inset: -1px; z-index: -1; border-radius: inherit; pointer-events: none;
+  box-shadow: var(--elev-2); opacity: 0; transition: opacity var(--dur-2) var(--ease-out);
+}
+.hover-lift:focus-within::after, .fx-card:focus-within::after { opacity: 1; }
+@media (hover: hover) and (pointer: fine) {
+  .hover-lift:hover, .fx-card:hover { transform: translateY(var(--lift)); }
+  .hover-lift:hover::after, .fx-card:hover::after { opacity: 1; }
+  .fx-card:hover { border-color: var(--line-strong); }
+}
+.hover-lift:active, .fx-card:active { transform: scale(0.995); transition-duration: var(--dur-1); }
+.hover-lift:active::after, .fx-card:active::after { opacity: 0; transition-duration: var(--dur-1); }
+
+/* One-time light sweep on hover (primary cards only). A 3x-wide band translates across while its clip-path moves the
+ * opposite way, so it is clipped to the card without overflow:hidden (the lift shadow stays visible). Uses ::before. */
+.fx-sheen { isolation: isolate; }
+.fx-sheen::before {
+  content: ""; position: absolute; top: 0; bottom: 0; left: -100%; width: 300%; z-index: -1; pointer-events: none;
+  background: linear-gradient(105deg, transparent 44%, var(--fx-sheen) 50%, transparent 56%);
+  transform: translateX(-33.333%); clip-path: inset(0 0 0 66.667% round var(--radius-card));
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .fx-sheen:hover::before { transform: translateX(33.333%); clip-path: inset(0 66.667% 0 0 round var(--radius-card)); transition: transform 900ms var(--ease-out), clip-path 900ms var(--ease-out); }
+}
+
+/* Subtle static SVG noise on the element's own background (sits under its content; keeps background-color). */
+.fx-grain { background-image: var(--fx-grain-img); background-size: 160px 160px; }
+
+/* Animated link underline: faint rest line (::before), accent line grows from the left on hover/focus and leaves to
+ * the right (::after). .fx-underline--bare drops the rest line for nav and footer lists. */
+.fx-underline { text-decoration: none; }
+.fx-underline::before, .fx-underline::after { content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 1px; pointer-events: none; }
+.fx-underline::before { background: currentColor; opacity: 0.3; }
+.fx-underline--bare::before { content: none; }
+.fx-underline::after { background: var(--accent); transform: scaleX(0); transform-origin: 100% 50%; transition: transform var(--dur-3) var(--ease-out); }
+.fx-underline:focus-visible::after { transform: scaleX(1); transform-origin: 0 50%; }
+@media (hover: hover) and (pointer: fine) { .fx-underline:hover::after { transform: scaleX(1); transform-origin: 0 50%; } }
+
+/* ShaderBackdrop (src/ui/effects): the CSS field is the fallback and the layer the canvas fades in over. */
+.fx-shader { overflow: hidden; pointer-events: none; contain: strict; }
+.fx-shader[data-fade="top"] { -webkit-mask-image: linear-gradient(to bottom, transparent, #000 45%); mask-image: linear-gradient(to bottom, transparent, #000 45%); }
+.fx-shader[data-fade="bottom"] { -webkit-mask-image: linear-gradient(to top, transparent, #000 45%); mask-image: linear-gradient(to top, transparent, #000 45%); }
+.fx-shader[data-fade="both"] { -webkit-mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 70%, transparent); mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 70%, transparent); }
+.fx-shader-fallback, .fx-shader-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.fx-shader-fallback {
+  background-color: var(--canvas);
+  background-image: radial-gradient(circle at center, color-mix(in srgb, var(--ink-2) calc(var(--fx-intensity, 0.3) * 30%), transparent) 0.9px, transparent 1.4px);
+  background-size: var(--fx-dot, 14px) var(--fx-dot, 14px);
+}
+.fx-shader-fallback--tint::after {
+  content: ""; position: absolute; inset: 0;
+  background:
+    radial-gradient(60% 90% at 18% 30%, color-mix(in srgb, var(--accent) calc(var(--fx-intensity, 0.3) * 9%), transparent), transparent 70%),
+    radial-gradient(40% 70% at 86% 80%, color-mix(in srgb, var(--signal) calc(var(--fx-intensity, 0.3) * 5%), transparent), transparent 70%);
+}
+.fx-shader-canvas { opacity: 0; transition: opacity var(--dur-4) var(--ease-out); }
+.fx-shader[data-live] .fx-shader-canvas { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hover-lift:hover, .fx-card:hover, .hover-lift:active, .fx-card:active { transform: none; }
+}
+[data-motion="paused"] :is(.hover-lift, .fx-card):is(:hover, :active) { transform: none; }
+[data-motion="paused"] .fx-sheen::before { transition: none !important; }

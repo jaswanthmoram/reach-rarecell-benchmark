@@ -150,11 +150,19 @@ def generate_track_f_figure(
 
 
 if __name__ == "__main__":
-    comparison = Path("data/results/revision/track_f/track_a_vs_f_comparison.csv")
-    out = Path("manuscript_revision/images/Fig11_Track_F_vs_Track_A.png")
+    import argparse
 
-    if not comparison.exists():
-        print(f"ERROR: {comparison} not found.")
+    parser = argparse.ArgumentParser(description="Generate Fig11 (Track F vs Track A)")
+    parser.add_argument("--comparison", type=Path,
+                        default=Path("data/results/track_f/track_a_vs_f_comparison.csv"),
+                        help="Track A vs Track F comparison CSV")
+    parser.add_argument("--output", type=Path,
+                        default=Path("data/results/figures/phase12/Fig11_Track_F_vs_Track_A.png"),
+                        help="Output PNG path")
+    args = parser.parse_args()
+
+    if not args.comparison.exists():
+        print(f"ERROR: {args.comparison} not found.")
         raise SystemExit(1)
 
-    generate_track_f_figure(comparison, out)
+    generate_track_f_figure(args.comparison, args.output)

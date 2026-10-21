@@ -114,3 +114,10 @@ Thumbs.db
 # Logs
 *.log
 logs/
+
+# Local agent tooling and scratch artefacts (not part of the project)
+.agents/
+skills-lock.json
+.benchmarks/
+website/shot.png
+website/design/renders/

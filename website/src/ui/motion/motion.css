@@ -1,0 +1,26 @@
+/*
+ * Motion kit CSS (imported by ./index.ts). Nothing here hides content by default: every attribute below is set
+ * from JS only, and only while an entrance is about to play.
+ */
+
+/* Section top rule: choreo.ts sets data-rule on a section whose border-top is about to draw across. */
+[data-rule] { border-top-color: transparent; }
+[data-rule]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(-1 * var(--rule-w, 1px));
+  height: var(--rule-w, 1px);
+  background: var(--rule-c, currentColor);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+[data-rule="draw"]::before { transform: scaleX(1); transition: transform 420ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)); }
+
+/* Paused or reduced motion: the rule is simply there. */
+[data-motion="paused"] [data-rule]::before { transform: none; transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  [data-rule]::before { transform: none; transition: none; }
+}

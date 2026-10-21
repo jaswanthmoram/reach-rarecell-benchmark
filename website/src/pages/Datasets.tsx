@@ -1,78 +1,60 @@
-import { useEffect, useState } from 'react';
-import { DATASETS_DATA } from '../data/benchmarkData';
-import { href } from '../app/router';
-import { Container, Section, fmt } from '../ui';
-import Catalogue from './datasets/Catalogue';
-import CnvValidation from './datasets/CnvValidation';
-import Compare from './datasets/Compare';
-import Evidence from './datasets/Evidence';
-import OverviewFigure from './datasets/OverviewFigure';
-import SpecimenHero from './datasets/SpecimenHero';
-import { CNV_COHORTS, TOTALS } from './datasets/model';
+/* Datasets page: specimen plate hero, cohort catalogue, two-cohort compare, evidence arms, CNV check, Figure 1. */
+import { useCallback, useState } from 'react';
+import { scrollToId, setQuery, useQuery } from '../lib/router';
+import { SectionNav } from '../ui/SectionNav';
+import { COHORTS } from './datasets/model';
+import { SpecimenHero } from './datasets/SpecimenHero';
+import { Catalogue } from './datasets/Catalogue';
+import { Compare } from './datasets/Compare';
+import { CnvTable, Evidence } from './datasets/Evidence';
+import { PipelineFigure } from './datasets/PipelineFigure';
+import './datasets/datasets.css';
 
-const IDS = new Set(DATASETS_DATA.map((d) => d.id));
-const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+const VALID = new Set(COHORTS.map((c) => c.id));
+const MAX_PAIR = 2;
 
-/** `#/datasets?compare=a,b` opens a comparison. Unknown or repeated ids are dropped; at most two are kept. */
-const pairFromHash = (): string[] => {
-  const raw = new URLSearchParams(window.location.hash.split('?')[1] ?? '').get('compare') ?? '';
-  return [...new Set(raw.split(',').map((s) => s.trim()).filter((s) => IDS.has(s)))].slice(0, 2);
-};
+const SECTIONS = [
+  { id: 'catalogue', label: 'Catalogue' },
+  { id: 'compare', label: 'Compare' },
+  { id: 'evidence', label: 'Labelling rule' },
+  { id: 'cnv', label: 'CNV check' },
+  { id: 'pipeline', label: 'Figure 1' },
+];
+
+/** The compare pair lives in the URL (`/datasets/?compare=a,b`) so "Copy link" reopens the same view. */
+function usePair() {
+  const raw = useQuery().get('compare') ?? '';
+  const pair = [...new Set(raw.split(',').filter((id) => VALID.has(id)))].slice(0, MAX_PAIR);
+  const key = pair.join(',');
+  const setPair = useCallback((next: string[]) => setQuery(next.length ? `compare=${next.join(',')}` : ''), []);
+  const toggle = useCallback((id: string) => {
+    const cur = key ? key.split(',') : [];
+    const without = cur.filter((x) => x !== id);
+    setPair(without.length === cur.length ? [...cur, id].slice(-MAX_PAIR) : without);
+  }, [key, setPair]);
+  return { pair, setPair, toggle };
+}
 
 export default function Datasets() {
-  const [pair, setPair] = useState<string[]>(pairFromHash);
+  const { pair, setPair, toggle } = usePair();
+  const [hot, setHot] = useState<string | null>(null);
 
-  // Keep the comparison shareable without adding history entries.
-  useEffect(() => {
-    const target = href('/datasets', pair.length ? `compare=${pair.join(',')}` : undefined);
-    if (window.location.hash !== target) window.history.replaceState(null, '', target);
-  }, [pair]);
-
-  const toggle = (id: string) => setPair((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id].slice(-2)));
-  /** From a catalogue row: add (never remove) and jump to the comparison. */
   const addAndShow = (id: string) => {
-    setPair((p) => (p.includes(id) ? p : [...p, id].slice(-2)));
-    requestAnimationFrame(() => scrollTo('compare'));
+    setPair(pair.includes(id) ? pair : [...pair, id].slice(-MAX_PAIR));
+    requestAnimationFrame(() => scrollToId('compare'));
   };
 
   return (
     <>
-      <SpecimenHero pair={pair} onToggle={toggle} onCompare={() => scrollTo('compare')} onEvidence={() => scrollTo('evidence')} />
-
-      <section id="catalogue" aria-labelledby="catalogue-h" className="scroll-mt-16 pb-14 pt-6 md:pb-16">
-        <Container>
-          <Catalogue onCompare={addAndShow} />
-        </Container>
-      </section>
-
-      <section id="compare" aria-labelledby="compare-h" className="scroll-mt-16 border-t border-line bg-sunk/50 py-14 md:py-20">
-        <Container>
-          <div className="mb-6 max-w-[68ch]">
-            <h2 id="compare-h" className="text-2xl font-semibold tracking-[-0.02em] text-ink md:text-[2rem]">Two cohorts, side by side</h2>
-            <p className="mt-3 text-base leading-relaxed text-ink-2">
-              Size, CNV-set share, tracks and the best ranked detector line up on one grid. Below it, each of the six ranked detectors gets a small panel on the same 0 to 1 AP scale.
-            </p>
-          </div>
-          <Compare pair={pair} onToggle={toggle} onSet={setPair} />
-        </Container>
-      </section>
-
-      <Section id="evidence" label="Ground truth · Phase 03" className="border-t border-line"
-        title="How a cell earns a label"
-        lead="Four independent arms test every cell. A label is assigned only when all four agree; any disagreement leaves the cell out of the positive set.">
+      <SpecimenHero pair={pair} hot={hot} onToggle={toggle} onHot={setHot} />
+      <SectionNav label="Datasets sections" items={SECTIONS} />
+      <div className="mx-auto max-w-[1240px] px-4 sm:px-6">
+        <Catalogue pair={pair} hot={hot} onHot={setHot} onCompare={addAndShow} />
+        <Compare pair={pair} hot={hot} onToggle={toggle} onHot={setHot} setPair={setPair} />
         <Evidence />
-      </Section>
-
-      <Section id="cnv" label="Arm 2 validation · Table 9b" className="border-t border-line"
-        title="How well does the CNV arm agree with authors?"
-        lead={`infercnvpy calls were checked against published source annotations on ${fmt.int(TOTALS.cnvCells)} cells from ${CNV_COHORTS.length} cohorts.`}>
-        <CnvValidation />
-      </Section>
-
-      <Section id="overview" label="Paper figure" className="border-t border-line"
-        title="Where the cohorts sit in the pipeline">
-        <OverviewFigure />
-      </Section>
+        <CnvTable />
+        <PipelineFigure />
+      </div>
     </>
   );
 }

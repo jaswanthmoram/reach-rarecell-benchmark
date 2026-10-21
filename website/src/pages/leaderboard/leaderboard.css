@@ -1,0 +1,30 @@
+/* P02 Leaderboard: hero loops and control states (transform / opacity only). Entrances use the shared .rise/.fade-in. */
+
+/* Resample draws: two loops, then they rest at 0.3 (0% and 100% are the same frame, so the stop is seamless). */
+@keyframes lb-resample { 0%, 100% { opacity: 0.3; transform: none; } 45% { opacity: 0.85; transform: translateY(-2px); } }
+@keyframes lb-drift { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(14px, -6px); } }
+
+.lb-rs { opacity: 0.3; transform-box: fill-box; }
+.lb-rs-run { animation: lb-resample 2.6s ease-in-out 2 both; }
+.lb-drift { animation: lb-drift 18s ease-in-out infinite; }
+
+.lb-row { transition: background-color var(--dur-1) ease; }
+.lb-row:focus-within { background: var(--row-hover); }
+.lb-caret { display: inline-block; transition: transform var(--dur-2) var(--ease-out); }
+.lb-press { transition: background-color var(--dur-1) ease, color var(--dur-1) ease, border-color var(--dur-1) ease, transform 120ms ease; }
+.lb-press:active { transform: translateY(1px); }
+.lb-nudge { transition: transform var(--dur-1) var(--ease-out); }
+
+@media (hover: hover) and (pointer: fine) {
+  .lb-row:hover { background: var(--row-hover); }
+  .lb-btn:hover { background: var(--sunk); color: var(--ink); }
+  .lb-btn:hover .lb-nudge { transform: rotate(90deg) translateX(2px); }
+  .lb-sort:hover { color: var(--ink); }
+  .lb-chip:hover { border-color: var(--cell); }
+  .lb-tab[aria-selected="false"]:hover { background: var(--sunk); color: var(--ink); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lb-rs-run, .lb-drift { animation: none !important; }
+  .lb-row, .lb-caret, .lb-press, .lb-nudge { transition: none; }
+}

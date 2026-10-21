@@ -1,0 +1,56 @@
+/* Use cases page: route-map loops from the P10 board (each carries .loop so "Pause motion" holds it), the scroll-lit
+ * route stops, and the edge-case accordion. Transform, opacity and stroke-dashoffset only, plus the audit's
+ * grid-template-rows disclosure. */
+@keyframes uc-march { to { stroke-dashoffset: -32; } }
+@keyframes uc-travel { to { stroke-dashoffset: -64.1; } }
+@keyframes uc-drift { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(5px, -4px); } }
+@keyframes uc-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.25); } }
+@keyframes uc-ring { 0% { transform: scale(0.6); opacity: 1; } 100% { transform: scale(2.6); opacity: 0; } }
+
+.uc-march { animation: uc-march 3.2s linear infinite; }
+.uc-cells { animation: uc-travel 2.6s linear infinite; }
+.uc-c1 { animation-duration: 2.9s; }
+.uc-c2 { animation-duration: 2.3s; }
+.uc-c3 { animation-duration: 3.1s; }
+.uc-c4 { animation-duration: 2.7s; }
+.uc-far { animation: uc-drift 9s ease-in-out infinite; }
+.uc-sig { animation: uc-pulse 2.2s ease-in-out infinite; }
+.uc-ring { animation: uc-ring 2.4s var(--ease-out) infinite; }
+
+/* Route stops: once JS has measured them (data-armed), a stop is quiet until it passes the reading line. */
+.uc-rail { transform-origin: top; transform: scaleY(1); }
+.uc-stops[data-armed] .uc-rail { transform: scaleY(0); }
+.uc-stop { transition: opacity var(--dur-2) var(--ease-out), border-color var(--dur-2) ease, color var(--dur-2) ease, box-shadow var(--dur-2) ease; }
+.uc-stops[data-armed] .uc-stop:not([data-lit]) { border-color: var(--line-strong); color: var(--ink-3); box-shadow: none; opacity: 0.7; }
+
+/* Reader rows (fx-card): the picked reader sits one elevation step up with a cobalt border and tint. fx-card is
+ * unlayered CSS, so the picked state is set here rather than with utilities. */
+.uc-tab.fx-card { background: color-mix(in srgb, var(--surface) 85%, transparent); }
+.uc-tab.fx-card[aria-checked='true'] { border-color: color-mix(in srgb, var(--accent) 55%, transparent); background: var(--accent-tint); box-shadow: var(--elev-2); }
+.uc-tab.fx-card[aria-checked='true']::after { opacity: 0; }
+/* Key route step: the hairline plate keeps a plain border as its fallback colour. */
+.uc-key { border-color: var(--line); }
+
+/* Edge-case answers. */
+.uc-acc { display: grid; grid-template-rows: 0fr; visibility: hidden; transition: grid-template-rows var(--dur-2) var(--ease-out), visibility 0s linear var(--dur-2); }
+.uc-acc[data-open] { grid-template-rows: 1fr; visibility: visible; transition: grid-template-rows var(--dur-2) var(--ease-out), visibility 0s; }
+.uc-acc > div > div { opacity: 0; transition: opacity var(--dur-2) var(--ease-out); }
+.uc-acc[data-open] > div > div { opacity: 1; }
+.uc-chev { transition: transform var(--dur-2) var(--ease-out); }
+.uc-chev[data-open] { transform: rotate(180deg); }
+
+.uc-arr { display: inline-block; transition: transform var(--dur-1) var(--ease-out); }
+.uc-chip, .uc-ghost, .uc-tab, .uc-link { transition: border-color var(--dur-1) ease, background-color var(--dur-1) ease, color var(--dur-1) ease, transform var(--dur-1) var(--ease-out); }
+.uc-tab:active, .uc-ghost:active { transform: scale(0.99); }
+@media (hover: hover) and (pointer: fine) {
+  .uc-chip:hover { border-color: color-mix(in srgb, var(--accent) 45%, transparent) !important; }
+  .uc-chip:hover .uc-arr, .uc-tab:hover .uc-arr { transform: translateX(2px); }
+  .uc-ghost:hover, .uc-tab:not([aria-checked='true']):hover { border-color: var(--line-strong) !important; }
+  .uc-link:hover { color: var(--accent-ink) !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .uc-march, .uc-cells, .uc-far, .uc-sig, .uc-ring { animation: none !important; }
+  .uc-chev, .uc-arr, .uc-acc, .uc-acc > div > div, .uc-stop, .uc-tab, .uc-ghost { transition: none; }
+  .uc-tab:active, .uc-ghost:active { transform: none; }
+}

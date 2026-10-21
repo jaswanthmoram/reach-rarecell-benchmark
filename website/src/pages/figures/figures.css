@@ -1,0 +1,87 @@
+/* Figures page: contact-sheet hero, figure cards, viewer. Transform, opacity and clip-path only; tokens from app.css. */
+@keyframes fig-asm { 0% { transform: translate(var(--dx), var(--dy)); opacity: 0.15; } 100% { transform: none; opacity: 1; } }
+@keyframes fig-drift { 0% { transform: translateX(-30px); } 100% { transform: translateX(30px); } }
+@keyframes fig-ring { 0%, 30% { opacity: 0; } 55%, 85% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes fig-mini-in { from { opacity: 0.35; transform: scale(0.94); } to { opacity: 1; transform: none; } }
+@keyframes fig-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fig-lb-rise { from { opacity: 0; transform: translateY(8px) scale(0.99); } to { opacity: 1; transform: none; } }
+/* Contact-sheet jump: one accent ring around the target card, then gone (audit Figures P1). */
+@keyframes fig-flash { 0% { opacity: 0; transform: scale(1.012); } 18% { opacity: 1; transform: none; } 70% { opacity: 1; } 100% { opacity: 0; } }
+
+/* Hero far field: two cell layers drift against each other and the reticle layer fades in and out. Each is one
+ * transform/opacity loop on an HTML layer (compositor); Field's useLoopGate holds them (data-loop="hold"). */
+.fig-drift-a { animation: fig-drift 14s ease-in-out infinite alternate; }
+.fig-drift-b { animation: fig-drift 19s ease-in-out -7s infinite alternate-reverse; }
+.fig-ring { animation: fig-ring 2.4s var(--ease-out) infinite; }
+
+/* Contact sheet tiles: dimmed until on, hovered or focused. */
+.fig-tile { opacity: 0.62; transition: opacity var(--dur-3) var(--ease-out), background-color var(--dur-1) ease; }
+/* The selected tile carries a cobalt hairline, not a fill (DESIGN-r9 Figures). */
+.fig-tile.on { opacity: 1; box-shadow: inset 0 0 0 1px var(--accent); }
+.fig-tile.on .fig-fl { color: var(--accent-ink); }
+.fig-tile:focus-visible { opacity: 1; outline: none; box-shadow: inset 0 0 0 2px var(--accent); }
+.fig-tile:active { opacity: 1; }
+/* Cycle step: the mini settles in as one layer. A visitor's hover or focus: its dots assemble (per-dot, short-lived). */
+.fig-tile.on .fig-mini { animation: fig-mini-in 700ms var(--ease-out) both; }
+.fig-tile.on.held .fig-d { animation: fig-asm 1.2s var(--ease-out) both; }
+.fig-tick { transition: background-color var(--dur-2) ease; }
+@media (hover: hover) and (pointer: fine) {
+  .fig-tile:hover { opacity: 1; background: var(--sunk); }
+}
+
+/* Press feedback shared by the page's buttons. */
+.fig-press { transition: transform var(--dur-1) var(--ease-out), background-color var(--dur-1) ease, border-color var(--dur-1) ease, color var(--dur-1) ease; }
+.fig-press:active { transform: scale(0.97); }
+
+/* Figure cards. */
+/* fx-card owns ::after and fx-hairline-gradient owns ::before, so the jump ring is its own span. */
+.fig-flash {
+  position: absolute; inset: -7px; border: 2px solid var(--accent); border-radius: 12px;
+  opacity: 0; pointer-events: none;
+}
+.fig-card[data-flash='on'] .fig-flash { animation: fig-flash 900ms var(--ease-out) both; }
+/* Rest: the plain 1px card border. Hover or focus inside: the cobalt-centred hairline fades in over it. */
+.fig-card.fx-card.fx-hairline-gradient { border-color: var(--line); transition: transform var(--dur-2) var(--ease-out), border-color var(--dur-2) ease; }
+.fig-card.fx-hairline-gradient::before { opacity: 0; transition: opacity var(--dur-2) var(--ease-out); }
+.fig-card.fx-card.fx-hairline-gradient:focus-within { border-color: transparent; }
+.fig-card.fx-hairline-gradient:focus-within::before { opacity: 1; }
+.fig-act { transition: background-color var(--dur-1) ease, color var(--dur-1) ease; }
+.fig-title { transition: color var(--dur-1) ease; }
+.fig-sheet { transition: border-color var(--dur-1) ease, transform var(--dur-1) var(--ease-out); }
+.fig-sheet:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.fig-sheet:active { transform: scale(0.995); }
+.fig-open-hint { transition: color var(--dur-1) ease; }
+.fig-nudge { transition: transform var(--dur-1) var(--ease-out); }
+@media (hover: hover) and (pointer: fine) {
+  .fig-act:hover { background: var(--sunk); }
+  .fig-title:hover { color: var(--accent-ink); }
+  .fig-card:hover .fig-sheet { border-color: var(--line-strong); }
+  .fig-card.fx-card.fx-hairline-gradient:hover { border-color: transparent; }
+  .fig-card.fx-hairline-gradient:hover::before { opacity: 1; }
+  .fig-card:hover .fig-open-hint { color: var(--accent-ink); }
+  .fig-card:hover .fig-open-hint .fig-nudge { transform: translate(2px, -2px); }
+  .fig-link:hover .fig-nudge { transform: translateX(2px); }
+}
+.fig-caret { display: inline-flex; transition: transform var(--dur-2) var(--ease-out); }
+.fig-caret[data-open] { transform: rotate(180deg); }
+.fig-skel { background: linear-gradient(90deg, var(--sunk) 0%, var(--chip-active) 50%, var(--sunk) 100%); background-size: 400px 100%; animation: shimmer 1.4s linear infinite; }
+
+/* Viewer: CSS entrance when opened without a View Transition. */
+.fig-lb-fade { animation: fig-fade var(--dur-2) var(--ease-out) both; }
+.fig-lb-rise { animation: fig-lb-rise 240ms var(--ease-out) both; }
+
+/* Card image <-> viewer image morph (Figures.tsx -> morph.ts). The page column stays still behind it, and the
+ * viewer gets its own group so it paints above the page group during the transition. */
+html.fig-vt .fig-viewer { view-transition-name: fig-viewer; }
+html.fig-vt::view-transition-old(page) { display: none; }
+html.fig-vt::view-transition-new(page) { animation: none; }
+html.fig-vt::view-transition-group(fig-active) { animation-duration: 380ms; animation-timing-function: var(--ease-out); }
+html.fig-vt::view-transition-old(fig-active), html.fig-vt::view-transition-new(fig-active) { animation-duration: 380ms; height: 100%; object-fit: contain; }
+html.fig-vt::view-transition-old(fig-viewer), html.fig-vt::view-transition-new(fig-viewer) { animation-duration: var(--dur-2); }
+
+@media (prefers-reduced-motion: reduce) {
+  .fig-tile .fig-d, .fig-tile.on.held .fig-d, .fig-tile.on .fig-mini, .fig-drift-a, .fig-drift-b, .fig-ring, .fig-lb-fade, .fig-lb-rise, .fig-skel { animation: none !important; }
+  .fig-caret, .fig-sheet, .fig-act, .fig-tile, .fig-press, .fig-nudge { transition: none; }
+  .fig-card:hover .fig-sheet, .fig-press:active, .fig-sheet:active { transform: none; }
+  .fig-card[data-flash='on'] .fig-flash { animation: fig-fade 120ms linear both reverse; animation-delay: 700ms; opacity: 1; }
+}

@@ -32,4 +32,4 @@ toy:
 	rcb create-toy-data
 
 figures:
-	python scripts/generate_figures.py --pipeline --track-design --method-audit --output-dir data/results/figures
+	python scripts/generate_figures.py --output-dir data/results/figures/phase12

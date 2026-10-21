@@ -20,7 +20,7 @@ from pathlib import Path
 import pandas as pd
 
 SNAPSHOT_DIR = Path("data/results/snapshots/paper_v1")
-REVISION_DIR = Path("data/results/revision")
+REVISION_DIR = Path("data/results")
 
 
 def _load_snapshots() -> dict[str, pd.DataFrame]:
