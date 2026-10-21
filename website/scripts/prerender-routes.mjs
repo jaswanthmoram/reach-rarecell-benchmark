@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(ROOT, 'dist');
 /** Public address of the deployed site (keep in step with `base` in vite.config.ts). */
-const SITE_URL = (process.env.SITE_URL ?? 'https://jaswanthmoram.github.io/reach-rarecell-benchmark/').replace(/\/?$/, '/');
+const SITE_URL = (process.env.SITE_URL ?? 'https://jaswanthmoram.me/reach-rarecell-benchmark/').replace(/\/?$/, '/');
 const SITE_NAME = 'REACH Benchmark';
 
 /** One short description per route; anything missing falls back to the home description in index.html. */
