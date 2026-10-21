@@ -1,16 +1,44 @@
+<div align="center">
+
+<img src="website/public/favicon.svg" alt="REACH mark" width="72" height="72">
+
 # REACH Benchmark
 
-**Rare-cell Evaluation Across Cancer Heterogeneity**: a reproducible benchmark for detecting rare malignant cells in single-cell RNA sequencing (scRNA-seq) data.
+**Rare-cell Evaluation Across Cancer Heterogeneity**<br>
+A reproducible benchmark for detecting rare malignant cells in single-cell RNA sequencing
 
-[![CI](https://github.com/jaswanthmoram/reach-rarecell-benchmark/actions/workflows/ci.yml/badge.svg)](https://github.com/jaswanthmoram/reach-rarecell-benchmark/actions/workflows/ci.yml)
-[![Website](https://github.com/jaswanthmoram/reach-rarecell-benchmark/actions/workflows/deploy-website.yml/badge.svg)](https://jaswanthmoram.github.io/reach-rarecell-benchmark/)
 [![Article DOI](https://img.shields.io/badge/Article-10.3389%2Ffbinf.2026.1878538-0b7285.svg)](https://doi.org/10.3389/fbinf.2026.1878538)
 [![Zenodo DOI](https://img.shields.io/badge/Zenodo-10.5281%2Fzenodo.19847108-blue.svg)](https://doi.org/10.5281/zenodo.19847108)
+[![Website](https://github.com/jaswanthmoram/reach-rarecell-benchmark/actions/workflows/deploy-website.yml/badge.svg)](https://jaswanthmoram.github.io/reach-rarecell-benchmark/)
+[![CI](https://github.com/jaswanthmoram/reach-rarecell-benchmark/actions/workflows/ci.yml/badge.svg)](https://github.com/jaswanthmoram/reach-rarecell-benchmark/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Docker](https://img.shields.io/badge/docker-ghcr.io-blue)](https://ghcr.io/jaswanthmoram/reach-rarecell-benchmark)
+
+**[Website](https://jaswanthmoram.github.io/reach-rarecell-benchmark/)** · **[Article](https://www.frontiersin.org/journals/bioinformatics/articles/10.3389/fbinf.2026.1878538/full)** · **[PDF](https://jaswanthmoram.github.io/reach-rarecell-benchmark/manuscript/reach-fbinf-2026-1878538.pdf)** · **[Zenodo](https://doi.org/10.5281/zenodo.19847108)** · **[Reproduce](#reproduce-locally)** · **[Cite](#cite)** · **[Videos](#videos)**
+
+<img src="website/public/images/home-hero-v3-light.webp" alt="UMAP-style field of single cells with one rare malignant cell ringed" width="100%">
+
+</div>
 
 REACH asks a narrow question: given a tumour or blood sample profiled by scRNA-seq, how well do published methods rank the few malignant cells above the many non-malignant ones? It assembles 10 public cancer cohorts (359,739 cells), labels malignant and background cells with a four-arm evidence rule (source annotation, inferred CNV, marker signature and kNN consistency), builds 1,125 benchmark units across six tracks, and runs 10 method wrappers on every unit, giving 11,250 method-unit evaluations scored by average precision. Code, configs, frozen result snapshots and the paper's tables and figures are in this repository; the large data archives are on Zenodo.
+
+**Contents:** [At a glance](#at-a-glance) · [Article](#article) · [Website](#live-website) · [Layout](#repository-layout) · [Reproduce](#reproduce-locally) · [Data](#data-archives) · [Methods](#methods) · [Cite](#cite) · [Videos](#videos) · [Licence](#licence)
+
+## At a glance
+
+| | |
+|---|---|
+| Cohorts | 10 scRNA-seq cohorts: 8 solid tumours, 2 blood malignancies |
+| Cells | 359,739 |
+| Tracks | 6 (A real spike-ins, B synthetic stress, C null controls, D natural prevalence, E supervised label-noise diagnostic, F intra-lineage) |
+| Methods | 10 wrappers: 6 ranked published detectors, 2 naive baselines, 1 supervised ceiling, 1 exploratory |
+| Benchmark units | 1,125 |
+| Method-unit evaluations | 11,250 |
+| Primary metric | Average precision (AP, area under the precision-recall curve), P_HC vs B_HC |
+
+**Headline results (Track A, 160 units).** Among the six ranked published detectors, FiRE has the highest median AP (0.313). It is not significantly different from the naive `expr_threshold` baseline (median AP 0.317; Wilcoxon p = 0.836, BH-FDR = 0.836). The supervised `hvg_logreg` reference reaches a median AP of 1.000; it uses the labels, so it is reported as a ceiling and is not ranked. Full tables: [`data/results/tables/phase11/leaderboard.csv`](data/results/tables/phase11/leaderboard.csv) and the [Leaderboard](https://jaswanthmoram.github.io/reach-rarecell-benchmark/leaderboard/) page.
+
+![Mean AP by method and dataset, regenerated from the frozen snapshot](data/results/figures/phase12/Fig0_Phase11_Summary_Heatmap.png)
 
 ## Article
 
@@ -40,34 +68,6 @@ Published in *Frontiers in Bioinformatics* on 19 October 2026 (open access, CC B
 | [Use cases](https://jaswanthmoram.github.io/reach-rarecell-benchmark/use-cases/) | Five reader routes through REACH and the edge cases that change the answer |
 
 Older `/#/` links (for example `/#/leaderboard`) redirect to the clean URLs above. The github.io address forwards to the account's custom domain, so the site is also served at [jaswanthmoram.me/reach-rarecell-benchmark](https://jaswanthmoram.me/reach-rarecell-benchmark/).
-
-## Videos
-
-<!-- Maintainers: for inline playback on GitHub, open this README in the github.com editor and drag each MP4 (website/public/video/) into it; GitHub uploads it and inserts a user-attachments URL that plays in place. -->
-
-**REACH in 78 seconds**: a short overview film (78 s). Also on the website's Overview page.
-
-<a href="https://jaswanthmoram.github.io/reach-rarecell-benchmark/video/reach-overview.mp4"><img src="docs/assets/reach-overview-poster.jpg" alt="REACH in 78 seconds: play the overview film" width="720"></a>
-
-**Anatomy of a benchmark: engineering REACH for scRNA-seq**: how the benchmark was built, phase by phase (about 8 minutes).
-
-<a href="https://jaswanthmoram.github.io/reach-rarecell-benchmark/video/reach-anatomy.mp4"><img src="docs/assets/reach-anatomy-poster.jpg" alt="Anatomy of a benchmark: play the 8-minute film" width="720"></a>
-
-## At a glance
-
-| | |
-|---|---|
-| Cohorts | 10 scRNA-seq cohorts: 8 solid tumours, 2 blood malignancies |
-| Cells | 359,739 |
-| Tracks | 6 (A real spike-ins, B synthetic stress, C null controls, D natural prevalence, E supervised label-noise diagnostic, F intra-lineage) |
-| Methods | 10 wrappers: 6 ranked published detectors, 2 naive baselines, 1 supervised ceiling, 1 exploratory |
-| Benchmark units | 1,125 |
-| Method-unit evaluations | 11,250 |
-| Primary metric | Average precision (AP, area under the precision-recall curve), P_HC vs B_HC |
-
-**Headline results (Track A, 160 units).** Among the six ranked published detectors, FiRE has the highest median AP (0.313). It is not significantly different from the naive `expr_threshold` baseline (median AP 0.317; Wilcoxon p = 0.836, BH-FDR = 0.836). The supervised `hvg_logreg` reference reaches a median AP of 1.000; it uses the labels, so it is reported as a ceiling and is not ranked. Full tables: [`data/results/tables/phase11/leaderboard.csv`](data/results/tables/phase11/leaderboard.csv) and the [Leaderboard](https://jaswanthmoram.github.io/reach-rarecell-benchmark/leaderboard/) page.
-
-![Mean AP by method and dataset, regenerated from the frozen snapshot](data/results/figures/phase12/Fig0_Phase11_Summary_Heatmap.png)
 
 ## Repository layout
 
@@ -240,10 +240,6 @@ Track E is a label-noise diagnostic: it measures robustness only for `hvg_logreg
 
 [Architecture](docs/architecture.md) · [Fairness and leakage controls](docs/fairness.md) · [Results interpretation](docs/results_interpretation.md) · [Datasets](docs/DATASETS.md) · [Installation](docs/installation.md) · [Troubleshooting](docs/troubleshooting.md) · [Manuscript source](paper.md)
 
-## Revision history
-
-The Frontiers in Bioinformatics revision answered all 15 reviewer points. It added Track F (intra-lineage, 15 units from crc_lee, all 10 methods), validated the infercnvpy CNV arm against published annotations (overall AUROC 0.782 across 9 datasets), added a CNV circularity check, effect sizes and threshold-sensitivity analyses, and filtered degenerate CaSee units. Details: [`CHANGELOG.md`](CHANGELOG.md), [`data/results/REVISION_RESULTS_INDEX.md`](data/results/REVISION_RESULTS_INDEX.md) and [`data/results/VERIFICATION_ISSUES.md`](data/results/VERIFICATION_ISSUES.md).
-
 ## Cite
 
 Please cite the article for any result, figure or design choice, and the Zenodo archive for the code or data you used (name the release you ran). Machine-readable software metadata is in [`CITATION.cff`](CITATION.cff).
@@ -271,6 +267,27 @@ Please cite the article for any result, figure or design choice, and the Zenodo 
 ```
 
 The data archives have their own DOIs (see [Data archives](#data-archives)); please also cite the source study of each cohort you use.
+
+## Videos
+
+<!-- Maintainers: for inline playback on GitHub, open this README in the github.com editor and drag each MP4 (website/public/video/) into it; GitHub uploads it and inserts a user-attachments URL that plays in place. -->
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="https://jaswanthmoram.github.io/reach-rarecell-benchmark/video/reach-overview.mp4"><img src="docs/assets/reach-overview-poster.jpg" alt="REACH in 78 seconds: play the overview film" width="100%"></a>
+      <br><b>REACH in 78 seconds</b><br>A short overview film. Also on the website's Overview page.
+    </td>
+    <td width="50%" valign="top">
+      <a href="https://jaswanthmoram.github.io/reach-rarecell-benchmark/video/reach-anatomy.mp4"><img src="docs/assets/reach-anatomy-poster.jpg" alt="Anatomy of a benchmark: play the 8-minute film" width="100%"></a>
+      <br><b>Anatomy of a benchmark</b><br>Engineering REACH for scRNA-seq, phase by phase (about 8 minutes).
+    </td>
+  </tr>
+</table>
+
+## Revision history
+
+The Frontiers in Bioinformatics revision answered all 15 reviewer points. It added Track F (intra-lineage, 15 units from crc_lee, all 10 methods), validated the infercnvpy CNV arm against published annotations (overall AUROC 0.782 across 9 datasets), added a CNV circularity check, effect sizes and threshold-sensitivity analyses, and filtered degenerate CaSee units. Details: [`CHANGELOG.md`](CHANGELOG.md), [`data/results/REVISION_RESULTS_INDEX.md`](data/results/REVISION_RESULTS_INDEX.md) and [`data/results/VERIFICATION_ISSUES.md`](data/results/VERIFICATION_ISSUES.md).
 
 ## Licence
 
