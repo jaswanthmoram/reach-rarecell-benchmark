@@ -39,7 +39,7 @@ Published in *Frontiers in Bioinformatics* on 19 October 2026 (open access, CC B
 | [Cite](https://jaswanthmoram.github.io/reach-rarecell-benchmark/cite/) | How to cite the article, code, data and predictions, with DOIs, BibTeX and licences |
 | [Use cases](https://jaswanthmoram.github.io/reach-rarecell-benchmark/use-cases/) | Five reader routes through REACH and the edge cases that change the answer |
 
-Older `/#/` links (for example `/#/leaderboard`) redirect to the clean URLs above.
+Older `/#/` links (for example `/#/leaderboard`) redirect to the clean URLs above. The github.io address forwards to the account's custom domain, so the site is also served at [jaswanthmoram.me/reach-rarecell-benchmark](https://jaswanthmoram.me/reach-rarecell-benchmark/).
 
 ## Videos
 
